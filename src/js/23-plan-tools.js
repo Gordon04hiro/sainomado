@@ -1,5 +1,5 @@
 /* ---------- 目標から逆算・シナリオ・予算と実績 ---------- */
-const RTABS=[['overview','概要','貯蓄の推移と見どころ','M3 17l5-5 4 4 8-8M14 8h6v6'],['bs','家計の決算書','財産と1年のもうけ（BS・PL）','M4 4h16v16H4zM12 4v16M4 12h16'],['goal','目標から逆算','目標に届く積立・働き方','M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zm0-5a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'],['scen','シナリオ','景気が良い・悪いと確率','M4 18c4-10 8 4 16-12M4 6c4 8 10 6 16 12'],['yj','予算と実績','計画と実際を比べて見直す','M5 20V10M12 20V4M19 20v-7'],['cf','キャッシュフロー表','毎年の収入・支出の一覧','M4 5h16M4 10h16M4 15h16M4 20h16']];
+const RTABS=[['overview','概要','貯蓄の推移と見どころ','M3 17l5-5 4 4 8-8M14 8h6v6'],['bs','家計の決算書','財産と1年のもうけ（BS・PL）','M4 4h16v16H4zM12 4v16M4 12h16'],['goal','目標から逆算','目標に届く積立・働き方','M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zm0-5a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'],['scen','シナリオ','景気が良い・悪いと確率','M4 18c4-10 8 4 16-12M4 6c4 8 10 6 16 12'],['month','月ごとに見る','決断の前後2年の預貯金の動き','M4 6h16M4 6v14h16V6M8 3v6M16 3v6M4 11h16'],['yj','予算と実績','計画と実際を比べて見直す','M5 20V10M12 20V4M19 20v-7'],['cf','キャッシュフロー表','毎年の収入・支出の一覧','M4 5h16M4 10h16M4 15h16M4 20h16']];
 function search(lo,hi,ok,step,iters){ // ok(x) が true になる最小の x（単調な前提）
   if(!ok(hi)) return null; if(ok(lo)) return lo;
   for(let k=0;k<(iters||30);k++){const m=(lo+hi)/2;if(ok(m))hi=m;else lo=m}
@@ -181,3 +181,42 @@ function reflect(key,y){
   toast(`${y}年の実績で引き直しました（95歳時点 ${fmt(b95)} → ${fmt(a95)}万円）`);
 }
 
+
+/* ---------- 月ごとに見る：決断の前後2年（24か月）の預貯金の動き ----------
+   年の計算結果を12か月に分けて、毎月の収入・支出は均等に、一時的なお金（住宅の頭金・諸費用、車、予定、退職金など）は選んだ月に置く。
+   運用益と、足りないときの投資の取り崩しは含めない（その分、年の表とは少しずれる） */
+function monthRows(S,r,startIdx,lumpMon){
+  const out=[];let cash=startIdx>0?r[startIdx-1].cash:n(S.assets.cash.bal);
+  for(let k=startIdx;k<Math.min(r.length,startIdx+2);k++){
+    const x=r[k];
+    const inReg=(x.iSelf+x.iSp+x.iPen+x.iAl+x.iProp)/12, outReg=(x.eLive+x.eHouse+x.eEdu+x.eIns+x.eProp+x.eSave)/12;
+    const inLump=x.iOne+x.iAsset+x.iSale, outLump=x.eCar+x.eOne;
+    for(let m=1;m<=12;m++){
+      const li=m===lumpMon?inLump:0, lo=m===lumpMon?outLump:0;
+      cash+=inReg+li-outReg-lo;
+      out.push({y:x.y,m,a:x.a,inc:inReg+li,exp:outReg+lo,lump:m===lumpMon&&(li||lo)?(x.ev||[]).join('・'):'',cash});
+    }
+  }
+  return out;
+}
+function monthTab(cur){
+  const S=cur.S,r=cur.r;
+  const auto=()=>{const i=r.findIndex((x,i)=>i<20&&(x.eOne>0.5||x.iOne>0.5||x.iAsset>0.5||x.eCar>0.5));return i<0?0:Math.max(0,i-1)};
+  if(U.mstart==null||U.mstart>=r.length-1) U.mstart=auto();
+  const lm=U.mmon||4, rows=monthRows(S,r,U.mstart,lm);
+  let min=rows[0];rows.forEach(x=>{if(x.cash<min.cash)min=x});
+  const opts=r.slice(0,Math.min(r.length-1,40)).map((x,i)=>`<option value="${i}"${i===U.mstart?' selected':''}>${x.y}年（${x.a}歳）から</option>`).join('');
+  const mopts=Array.from({length:12},(_,i)=>`<option value="${i+1}"${i+1===lm?' selected':''}>${i+1}月</option>`).join('');
+  const f1=v=>(Math.round(v*10)/10).toLocaleString('ja-JP');
+  return `<section class="chartcard"><h3 style="font-size:16px;margin-bottom:4px">月ごとに見る（パターン${cur.key}）</h3>
+   <p class="unit" style="margin:0 0 10px">家を買う年、子どもが生まれる年、仕事を辞める年など、大きな決断の前後2年を、月ごとの預貯金の動きで確かめます。1年の合計では大丈夫でも、途中の月に預貯金が足りなくならないかを見られます。</p>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <label class="fld" style="min-width:180px"><span class="lab">見る期間</span><select id="mstart">${opts}</select></label>
+    <label class="fld" style="min-width:180px"><span class="lab">大きなお金が動く月</span><select id="mmon">${mopts}</select></label></div>
+   <div class="kpis"><div class="kpi ${min.cash<0?'bad':''}"><span>預貯金がいちばん少ない月</span><b>${f1(min.cash)}<small>万円</small></b><em>${min.y}年${min.m}月（${min.a}歳）</em></div></div>
+   ${min.cash<0?`<p class="unit" style="color:var(--bad)">この月に、預貯金が${f1(-min.cash)}万円足りなくなる計算です。年の表では投資の取り崩しで埋めていますが、すぐに現金にできるお金を、前もって確かめておきましょう。</p>`:''}
+   <div class="cfwrap"><table class="cf"><thead><tr><th>年月</th><th>入るお金</th><th>出るお金</th><th>月末の預貯金</th></tr></thead><tbody>
+   ${rows.map(x=>`<tr${x.lump?' class="tot"':''}><th>${x.y}年${x.m}月<small style="display:block;font-weight:400">${x.a}歳${x.lump?'・'+esc(x.lump):''}</small></th><td>${f1(x.inc)}</td><td>${f1(x.exp)}</td><td class="${x.cash<0?'neg':''}">${f1(x.cash)}</td></tr>`).join('')}
+   </tbody></table></div>
+   <p class="unit" style="margin-top:8px">毎月の収入・支出は、1年分を12で割った額です。住宅の頭金・諸費用、車の買い替え、退職金、予定に入れた出費などは、選んだ月にまとめて計算しています。運用益と投資の取り崩しは含みません（単位：万円）。</p></section>`;
+}

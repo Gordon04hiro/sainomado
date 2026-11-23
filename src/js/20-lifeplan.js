@@ -77,6 +77,7 @@ function renderResult(){
   else if(tab==='goal') body=goalTab(cur);
   else if(tab==='scen') body=scenTab(cur);
   else if(tab==='yj') body=yjTab(cur);
+  else if(tab==='month') body=monthTab(cur);
   else body=`<div class="cfhead"><h3>キャッシュフロー表</h3><div style="display:flex;gap:8px;flex-wrap:wrap">
    ${ks.length>1?`<div class="seg">${ks.map(k=>`<button data-act="cf" data-p="${k}" aria-pressed="${U.cf===k}"><span class="dot ${k.toLowerCase()}"></span>${k}</button>`).join('')}</div>`:''}
    <div class="seg"><button data-act="step" data-s="5" aria-pressed="${U.step===5}">5年ごと</button><button data-act="step" data-s="1" aria-pressed="${U.step===1}">毎年</button></div></div></div>
@@ -88,12 +89,13 @@ function renderResult(){
    <p class="unit">結果が大きく動くのは、①手取りの収入　②毎月の生活費　③住まいの予算　④子どもの進路（教育費）の4つです。まずはこの4つから変えてみてください。</p>
    <div class="acts"><button class="btn small primary" data-act="mode2" data-m="guide">質問に答えて入力する</button><button class="btn small" data-act="clear">空にして自分で入力する</button></div></section>`:''}
   <div class="panels">${ks.map(panel).join('')}</div>
-  <div class="rtabs-h"><b>結果をくわしく見る</b><span class="unit">6つの見方で、わが家のお金を確かめられます</span></div>
+  <div class="rtabs-h"><b>結果をくわしく見る</b><span class="unit">7つの見方で、わが家のお金を確かめられます</span></div>
   <nav class="rtabs" aria-label="結果の表示">${RTABS.map(([k,l,d,p])=>`<button data-act="rtab" data-t="${k}" aria-pressed="${tab===k}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${p}"/></svg><span><b>${l}</b><small>${d}</small></span></button>`).join('')}</nav>
   <div class="rbody">${body}</div>
   <p class="unit">手取りベースの簡易試算です。税金・社会保険料・住宅ローン控除は含みません。教育費は文部科学省「子供の学習費調査」（令和5年度）・日本政策金融公庫「教育費負担の実態調査」（令和3年度）の平均値、児童手当は2024年10月以降の制度で計算しています。住宅購入時は物件価格の7%を諸費用として計上。▲はマイナス。</p>
   <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['sell','loan','vs'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
   if(tab==='bs'){BSR={r:cur.r,S:cur.S,key}; renderBS();}
+  if(tab==='month'){const a=document.getElementById('mstart'),b=document.getElementById('mmon');if(a)a.onchange=()=>{U.mstart=+a.value;renderResult()};if(b)b.onchange=()=>{U.mmon=+b.value;renderResult()}}
   if(tab==='overview'){
   const ro=()=>{const a=r0[U.hi];document.getElementById('ro').innerHTML=`<span><b>${a.a}歳</b>（${a.y}年）</span>${ks.map(k=>{const x=R[k].r[U.hi];return`<span>${k} 残高 <b class="${x&&x.bal<0?'neg':''}">${x?fmt(x.bal):'–'}</b></span>`}).join('')}${NI&&NI.r[U.hi]?`<span>運用なし <b class="${NI.r[U.hi].bal<0?'neg':''}">${fmt(NI.r[U.hi].bal)}</b></span>`:''}${a.ev.length?`<span>${esc(a.ev.join('・'))}</span>`:''}`};
   ro();
