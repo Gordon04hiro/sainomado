@@ -407,6 +407,8 @@ footer.ft nav a{color:var(--muted)}
 .pre button:hover{border-color:var(--brand)}
 .pre button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
 .pre button[aria-pressed="true"] small{color:#fff;opacity:.85}
+.usepick{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;background:var(--surface)}
+.usepick .pre button{font-size:13px;padding:6px 12px}
 .pcalc summary,.svcalc summary{cursor:pointer;list-style:revert}
 .pcres{display:flex;flex-direction:column;gap:2px;background:var(--sand);border-radius:var(--r-card);padding:12px 14px;margin:12px 0 8px}
 .pcres b{font-size:22px;color:var(--ink)} .pcres b small{font-size:12px;font-weight:500;margin-left:3px}
