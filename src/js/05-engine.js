@@ -252,10 +252,10 @@ const GROUPS=[
   {id:'ins',l:'保険料',u:'万円/月',h:'生命保険・医療保険・がん保険など。積立型の保険も含めた、払っている額',show:S=>!insOn(S)},
   {id:'insEnd',l:'保険料を払い終える年齢',u:'歳',show:S=>!insOn(S)}],insl:1},
  {t:'車',adv:1,f:[
-  {id:'car',l:'1台あたりの購入費用',u:'万円',h:'持たない場合は0'},
-  {id:'carEvery',l:'買い替えの間隔',u:'年'},
-  {id:'carNext',l:'次の買い替えまで',u:'年後'},
-  {id:'carLast',l:'最後に買う年齢',u:'歳'}]},
+  {id:'car',l:'1台あたりの購入費用',u:'万円',show:S=>carOn(S)},
+  {id:'carEvery',l:'買い替えの間隔',u:'年',show:S=>carOn(S)},
+  {id:'carNext',l:'次の買い替えまで',u:'年後',show:S=>carOn(S)},
+  {id:'carLast',l:'最後に買う年齢',u:'歳',show:S=>carOn(S)}],carsel:1},
  {t:'今の資産と積立',s:'今の貯蓄・投資と、毎月の積立',f:[
   {id:'infl',l:'物価上昇率',u:'%/年',st:.1,h:'生活費・教育費に反映',pre:'infl',rec:2}],assets:true},
  {t:'不動産投資',adv:1,s:'貸している物件がある場合',props:true},
@@ -343,6 +343,29 @@ const ACC=[
 /* 配偶者名義の NISA・iDeCo・小規模企業共済（ご本人の口座と同じ項目。年齢は配偶者の年齢） */
 const SPACC={snisa:'nisa',sideco:'ideco',skyosai:'kyosai'}, SELFACC=['nisa','ideco','kyosai'];
 Object.entries(SPACC).forEach(([sk,k])=>{const b=ACC.find(x=>x.k===k);ACC.splice(ACC.findIndex(x=>x.k==='save'),0,{k:sk,sp:1,t:b.t,d:'配偶者の名義の分。年齢は配偶者の年齢で入れてください。',f:b.f.map(f=>{const g=f.slice();if(g[2]==='歳')g[1]=g[1].replace(/（.*）$/,'')+'（配偶者の年齢）';return g})})});
+/* 使っているものだけ選んで出す（預貯金はみんな入力。NISA・iDeCo・共済・車などは選んだときだけ入力欄を出す）
+   S.use[k] が未設定なら、金額が入っているかどうかで判断。オフにすると金額を0にして計算から外す（同じ画面のうちはオンに戻すと元の値に戻る） */
+const USEK=[['nisa','NISA'],['tax','株・投資信託（NISA以外）'],['ideco','iDeCo'],['kyosai','小規模企業共済'],['save','貯蓄型の保険'],['others','金・外貨・暗号資産など']];
+const USTASH={};
+function useOn(S,k){
+  if(S.use&&S.use[k]===true) return true;
+  const A=S.assets,sp=S.spouse==='yes',v=x=>x&&(n(x.bal)>0||n(x.mon)>0);
+  if(k==='others') return A.others.length>0;
+  if(k==='save') return n(A.save.amt)>0;
+  if(k==='tax') return n(A.tax.bal)>0;
+  return v(A[k])||(sp&&v(A['s'+k]));
+}
+function setUse(S,k,on){
+  S.use=S.use||{};if(on)S.use[k]=true;else delete S.use[k];const A=S.assets,ks=k==='others'||k==='save'||k==='tax'?[k]:[k,'s'+k];
+  if(!on){USTASH[k]=clone(k==='others'?A.others:ks.map(x=>A[x]));
+    if(k==='others')A.others=[];else ks.forEach(x=>{['bal','mon','basis','amt'].forEach(f=>{if(f in A[x])A[x][f]=0})});}
+  else if(USTASH[k]){if(k==='others')A.others=USTASH[k];else ks.forEach((x,i)=>A[x]=USTASH[k][i]);delete USTASH[k]}
+  else if(k==='others'&&!A.others.length)A.others.push(newOther('gold'));
+}
+const carOn=S=>S.carUse===true||n(S.car)>0;
+function setCar(S,on){if(on)S.carUse=true;else delete S.carUse;if(!on){if(n(S.car)>0)USTASH.car=S.car;S.car=0}else if(!(n(S.car)>0))S.car=USTASH.car||250}
+function carSelHTML(S){const on=carOn(S);return `<div class="fields" style="margin-bottom:10px"><div class="fld"><span class="lab">車</span><span class="seg" role="group" aria-label="車"><button type="button" data-act="caruse" data-v="1" aria-pressed="${on}">持っている・買う予定</button><button type="button" data-act="caruse" data-v="0" aria-pressed="${!on}">持たない</button></span></div></div>`}
+function usePickHTML(S){return `<div class="usepick" data-adv><p class="wzq" style="margin:0 0 6px">使っているもの・持っているものを選んでください</p><p class="unit" style="margin:0 0 8px">選んだものだけ入力欄が出ます。預貯金はどなたも入力してください。</p><div class="pre" role="group" aria-label="使っているもの">${USEK.map(([k,l])=>`<button type="button" data-act="use" data-k="${k}" aria-pressed="${useOn(S,k)}">${useOn(S,k)?'✓ ':'＋ '}${l}</button>`).join('')}</div></div>`}
 const EASYF={}; // かんたん入力では口座ごとではなく、下の3項目（預貯金・投資・毎月の積立）だけを出す
 /* かんたん入力の資産：投資と積立は、くわしく入力の口座（NISA・課税口座・iDeCo・共済・その他）の合計として扱う */
 const INVK0=['nisa','tax','ideco','kyosai'];
@@ -391,10 +414,10 @@ function assetBar(S){
 }
 function assetsHTML(S){
   normPlan(S);
-  return `${easyAssetsHTML(S)}<div id="asum" data-adv>${assetBar(S)}</div><div class="sublist" style="margin-top:12px">${ACC.map(ac=>{const o=S.assets[ac.k];return `<div class="sub" data-acc="${ac.k}"${EASYF[ac.k]?'':' data-adv'}${ac.sp?` data-spacc${S.spouse==='yes'?'':' hidden'}`:''}><div class="subhead"><span><span class="dot" style="background:${ACCOL[ac.k]||'var(--muted)'};margin-right:6px"></span>${ac.t}${SELFACC.includes(ac.k)?`<span class="whoS chip muted" style="margin-left:6px"${S.spouse==='yes'?'':' hidden'}>ご本人</span>`:''}${ac.sp?'<span class="chip warn" style="margin-left:6px">配偶者</span>':''}</span></div><span class="unit" style="margin-top:-4px">${esc(ac.d)}</span>
+  return `${easyAssetsHTML(S)}<div id="asum" data-adv>${assetBar(S)}</div>${usePickHTML(S)}<div class="sublist" style="margin-top:12px">${ACC.map(ac=>{const o=S.assets[ac.k];const bk=SPACC[ac.k]||ac.k;if(bk!=='cash'&&!useOn(S,bk))return '';return `<div class="sub" data-acc="${ac.k}"${EASYF[ac.k]?'':' data-adv'}${ac.sp?` data-spacc${S.spouse==='yes'?'':' hidden'}`:''}><div class="subhead"><span><span class="dot" style="background:${ACCOL[ac.k]||'var(--muted)'};margin-right:6px"></span>${ac.t}${SELFACC.includes(ac.k)?`<span class="whoS chip muted" style="margin-left:6px"${S.spouse==='yes'?'':' hidden'}>ご本人</span>`:''}${ac.sp?'<span class="chip warn" style="margin-left:6px">配偶者</span>':''}</span></div><span class="unit" style="margin-top:-4px">${esc(ac.d)}</span>
    <div class="fields">${ac.f.map(f=>{const [k,l,u,st,h,show,pk]=f;const hid=(show&&!show(o)?' hidden':'')+(EASYF[ac.k]&&!EASYF[ac.k].includes(k)?' data-adv':'');const hint=h?`<span class="hint">${esc(h)}</span>`:'';
      if(u==='sel') return `<label class="fld"${hid} data-af="${ac.k}_${k}"><span class="lab">${l}</span><select id="a_${ac.k}_${k}" data-a="${ac.k}" data-ak="${k}">${st.map(x=>`<option value="${x[0]}"${o[k]===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select></label>`;
-     return `<label class="fld"${hid} data-af="${ac.k}_${k}"><span class="lab">${l}</span><span class="inp"><input id="a_${ac.k}_${k}" data-a="${ac.k}" data-ak="${k}" type="number" inputmode="decimal" step="${st||1}" value="${esc(o[k])}"><span class="u">${u}</span></span>${pk?preHTML(pk,`a_${ac.k}_${k}`,o[k]):''}${hint}</label>`}).join('')}</div></div>`}).join('')}${othersHTML(S)}</div>`;
+     return `<label class="fld"${hid} data-af="${ac.k}_${k}"><span class="lab">${l}</span><span class="inp"><input id="a_${ac.k}_${k}" data-a="${ac.k}" data-ak="${k}" type="number" inputmode="decimal" step="${st||1}" value="${esc(o[k])}"><span class="u">${u}</span></span>${pk?preHTML(pk,`a_${ac.k}_${k}`,o[k]):''}${hint}</label>`}).join('')}</div></div>`}).join('')}${useOn(S,'others')?othersHTML(S):''}</div>`;
 }
 /* ---------- その他の資産（金・外貨・個別株・暗号資産など） ---------- */
 const OTYPE={

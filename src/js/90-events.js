@@ -22,6 +22,8 @@ document.addEventListener('click',e=>{
   else if(a==='addprop'){S.props.push(newProp(S));changed();vLife(document.getElementById('view'))}
   else if(a==='delprop'){S.props.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
   else if(a==='addev'){S.events.push({name:'',age:Math.round(n(S.age))+5,amt:100,kind:'out'});changed();vLife(document.getElementById('view'))}
+  else if(a==='use'){setUse(S,b.dataset.k,!useOn(S,b.dataset.k));changed();vLife(document.getElementById('view'))}
+  else if(a==='caruse'){setCar(S,b.dataset.v==='1');changed();vLife(document.getElementById('view'))}
   else if(a==='addoth'){S.assets.others.push(newOther('gold'));changed();vLife(document.getElementById('view'))}
   else if(a==='deloth'){S.assets.others.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
   else if(a==='pcset'){const v=penEst();const k=U.pc.who==='sp'?'spen':'pen';const el=document.getElementById('f_'+k);if(el){el.value=v.take;el.dispatchEvent(new Event('input',{bubbles:true}))}toast((U.pc.who==='sp'?'配偶者':'ご本人')+'の年金に月'+v.take+'万円を入れました')}

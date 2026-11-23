@@ -81,7 +81,17 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('その他の資産が足りない年に取り崩される（NISAより先）',o.used&&o.nisaAfter);
    check('その他の資産が金融資産に入る',o.oth0>500&&o.fin);
    click(w,'[data-act="mode2"][data-m="detail"]');await wait(300);
-   click(w,'[data-act="addoth"]');await wait(300);
+   check('使っていない小規模企業共済は入力欄を出さない',!d.getElementById('a_kyosai_bal')&&!!d.querySelector('[data-act="use"][data-k="kyosai"]'));
+   check('使っているNISAは入力欄が出る',!!d.getElementById('a_nisa_bal'));
+   click(w,'[data-act="use"][data-k="kyosai"]');await wait(300);
+   check('小規模企業共済を選ぶと入力欄が出る',!!d.getElementById('a_kyosai_bal'));
+   click(w,'[data-act="use"][data-k="kyosai"]');await wait(300);
+   check('もう一度押すと消える',!d.getElementById('a_kyosai_bal'));
+   {const b0=T(d,'.panel .kv b')[0];click(w,'[data-act="caruse"][data-v="0"]');await wait(300);
+    check('車「持たない」で入力欄が消えて結果が変わる',d.querySelector('[data-f="car"]').hidden&&T(d,'.panel .kv b')[0]!==b0);
+    click(w,'[data-act="caruse"][data-v="1"]');await wait(300);
+    check('車「持っている」で元の金額に戻る',!d.querySelector('[data-f="car"]').hidden&&d.getElementById('f_car').value==='250');}
+   click(w,'[data-act="use"][data-k="others"]');await wait(300);
    const ty=d.getElementById('o0_type');check('「その他の資産」を追加できる',!!ty);
    if(ty){ty.value='crypto';ty.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(300);
      check('暗号資産を選ぶと利回り0%・値動き60%になる',d.getElementById('o0_rate').value==='0'&&d.getElementById('o0_vol').value==='60')}
