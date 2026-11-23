@@ -84,7 +84,7 @@ function vHome(v){
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
    <div><div class="k">住まいとお金の無料シミュレーション</div>
     <h1>大きな決断の前に、<br><em>お金の未来</em>を見てみよう。</h1>
-    <p>子育て、住まい、老後。人生の大きな決断で、わが家の家計が95歳までどう変わるのかを、数字で確かめられる無料ツールをそろえています。</p>
+    <p>子育て、住まい、老後。人生の大きな決断の前に、わが家の家計が95歳までどう変わるのかを自分の数字で確かめる、<b>家計のセカンドオピニオン</b>です。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
     <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div></div>
    <div class="hero-art"><div class="heroicon"><img src="${window.BASE||''}assets/icon.svg" width="220" height="220" alt="サイのまどのロゴ（家の中のサイの貯金箱）"></div>
