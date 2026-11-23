@@ -51,6 +51,8 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   console.log('\n■ ライフプランの計算');
   {const w=await open('lifeplan.html');const d=w.document;
    check('入力例が「不足なし」',T(d,'.panel .chip')[0]==='不足なし',T(d,'.panel .chip')[0]);
+   check('入力例のままなら「入力例の家族の結果です」と表示',!!d.querySelector('#result .exnote'));
+   {const ws=await open('sell.html');check('売却の結果に「ライフプラン診断で比べる」ボタン',!!ws.document.querySelector('[data-act="sell2lp"]'));ws.close();const wl=await open('loan.html');check('住宅ローンの結果に「ライフプラン診断で比べる」ボタン',!!wl.document.querySelector('[data-act="loan2lp"]'));wl.close();const wa=await open('akiya.html');check('空き家の結果に「ライフプラン診断で比べる」ボタン',!!wa.document.querySelector('[data-act="akiya2lp"]'));wa.close();}
    const r=w.eval('(()=>{const S=basePlan();S.house="own";S.hval=2800;S.loanPay=8;S.loanEnd=65;S.assets.tax={bal:500,basis:300,rate:3};S.props=[{name:"A",val:1500,vdep:-1,rent:7,vac:10,cost:15,loan:4,loanEnd:60,rate:2,sell:70,price:1200}];return sim(S)})()');
    const mx=Math.max(...r.map(x=>Math.abs(x.pl.chk)));
    check('PLの収支＝純資産の増減（誤差0）',mx<0.001,'最大の誤差 '+mx);

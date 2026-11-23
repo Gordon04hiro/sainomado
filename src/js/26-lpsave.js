@@ -59,3 +59,13 @@ document.addEventListener('click',e=>{
   else if(a==='lpdel')lpDel(+b.dataset.i);
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='lpsname'){e.preventDefault();lpSaveNow()}});
+
+/* ---------- ほかのツールの結果を、ライフプラン診断の「比べるパターン」として入れる ---------- */
+function lpAddPattern(name,mut){
+  const k=PK.find(x=>!LP.plans[x])||'C';
+  const T=clone(LP.plans.A); mut(T);
+  LP.plans[k]=T; LP.names[k]=name;
+  try{localStorage.setItem(LKEY,JSON.stringify(LP));sessionStorage.setItem('sainomado-lp-open',k)}catch(e){}
+  location.href=pageURL('lifeplan');
+}
+function bridgeHTML(title,text,act){return `<section class="lpbridge"><b>${title}</b><p>${text}</p><button class="btn small primary" data-act="${act}">ライフプラン診断で比べる</button><span class="unit">今のライフプランの入力（パターンA）に、この結果を足した「比べるパターン」を作ります。パターンがすでに3つあるときは、Cを置き換えます。</span></section>`}

@@ -83,20 +83,11 @@ function vHome(v){
   const S=LP.plans.A,r=sim(S),s=summarize(r,S);
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
    <div><div class="k">住まいとお金の無料シミュレーション</div>
-    <h1>家のことを決める前に、<br><em>お金の未来</em>を見てみよう。</h1>
-    <p>家を買う、売る、相続する。大きな決断の前に、95歳までのお金の流れを数字で確かめられる無料ツールをそろえています。</p>
+    <h1>大きな決断の前に、<br><em>お金の未来</em>を見てみよう。</h1>
+    <p>子育て、住まい、老後。人生の大きな決断で、わが家の家計が95歳までどう変わるのかを、数字で確かめられる無料ツールをそろえています。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
     <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div></div>
-   <div class="hero-art"><svg class="town" viewBox="0 0 440 230" role="img" aria-label="家が並ぶ街のイラスト">
-  <circle cx="372" cy="52" r="24" fill="#f6c879"/>
-  <path d="M0 196 Q110 176 220 190 T440 182 V230 H0Z" fill="#cfe5dc"/>
-  <g><rect x="40" y="118" width="96" height="78" rx="4" fill="#ffffff" stroke="#24302e" stroke-width="2.5"/><path d="M30 122 L88 76 L146 122" fill="#e0873a" stroke="#24302e" stroke-width="2.5" stroke-linejoin="round"/><rect x="58" y="138" width="22" height="20" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="96" y="150" width="24" height="46" rx="2" fill="#f3e6cf" stroke="#24302e" stroke-width="2"/></g>
-  <g><rect x="166" y="96" width="112" height="100" rx="4" fill="#ffffff" stroke="#24302e" stroke-width="2.5"/><path d="M156 100 L222 48 L288 100" fill="#16706a" stroke="#24302e" stroke-width="2.5" stroke-linejoin="round"/><rect x="184" y="118" width="24" height="22" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="236" y="118" width="24" height="22" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="208" y="150" width="28" height="46" rx="2" fill="#fcefe0" stroke="#24302e" stroke-width="2"/><circle cx="231" cy="174" r="2" fill="#24302e"/></g>
-  <g><rect x="310" y="132" width="82" height="64" rx="4" fill="#ffffff" stroke="#24302e" stroke-width="2.5"/><path d="M302 136 L351 98 L400 136" fill="#f3e6cf" stroke="#24302e" stroke-width="2.5" stroke-linejoin="round"/><rect x="326" y="150" width="20" height="18" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="358" y="158" width="20" height="38" rx="2" fill="#e5f1ec" stroke="#24302e" stroke-width="2"/></g>
-  <g><rect x="146" y="164" width="5" height="30" fill="#8b6a43"/><circle cx="148" cy="156" r="16" fill="#7fb59d" stroke="#24302e" stroke-width="2"/></g>
-  <g><rect x="292" y="168" width="5" height="26" fill="#8b6a43"/><circle cx="294" cy="160" r="13" fill="#9cc7a9" stroke="#24302e" stroke-width="2"/></g>
-  <circle cx="404" cy="118" r="11" fill="#e0873a" stroke="#24302e" stroke-width="2"/><path d="M400 114 l4 5 4 -5 M404 119 v6 M400.5 121 h7" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-</svg>
+   <div class="hero-art"><div class="heroicon"><img src="${window.BASE||''}assets/icon.svg" width="220" height="220" alt="サイのまどのロゴ（家の中のサイの貯金箱）"></div>
    <div class="peek" aria-label="ライフプラン診断の画面例"><div class="t"><span>入力例：35歳・夫婦と子ども2人・家を購入</span><span class="chip ${s.st.c}">${s.st.t}</span></div>
     <div class="t" style="margin-top:6px"><span>95歳時点の金融資産</span></div><div class="v">${fmt(s.last.bal)}<span class="unit"> 万円</span></div>
     ${chartSVG([{rows:r,color:'var(--accent)'}],null,'peekc')}</div></div>

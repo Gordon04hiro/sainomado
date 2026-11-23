@@ -96,7 +96,7 @@ const LOANDEF={id:'loan',title:'住宅ローン・購入予算診断',example:'�
      <li>無理なく返せる借入額は約${fmt(R.ok)}万円、頭金と諸費用を考えた物件価格の目安は約${fmt(R.priceOk)}万円です。</li>
      <li>審査では約${fmt(R.max)}万円まで借りられる可能性がありますが、「借りられる額」と「返せる額」は違います。差は${fmt(R.max-R.ok)}万円です。</li>
      ${R.term<n(V.term)?`<li>完済時80歳までとすると、返済期間は${R.term}年になります。</li>`:''}
-     <li>変動金利の場合、金利が1%上がると毎月の返済は約${(Math.round((R.scen[1].m-R.scen[0].m)*10)/10).toLocaleString('ja-JP')}万円増えます（下の表）。</li></ul></section>${ctaHTML()}
+     <li>変動金利の場合、金利が1%上がると毎月の返済は約${(Math.round((R.scen[1].m-R.scen[0].m)*10)/10).toLocaleString('ja-JP')}万円増えます（下の表）。</li></ul></section>${bridgeHTML('この予算で買うと、家計はどうなる？',`物件価格の目安（約${fmt(R.priceOk)}万円）で家を買うパターンを、ライフプラン診断に入れて、教育費や老後まで続けて確かめられます。`,'loan2lp')}${ctaHTML()}
     <div class="cfhead"><h3>金利が上がった場合の毎月の返済（無理のない借入額の場合）</h3></div>
     <div class="cfwrap"><table class="cf"><tbody><tr class="hd"><th>金利</th><td>毎月の返済</td><td>年間の返済</td><td>返済負担率</td></tr>
      ${R.scen.map(s=>`<tr${s.d===0?' class="tot"':''}><th>${(n(V.rate)+s.d).toFixed(2)}%${s.d?'（＋'+s.d+'%）':'（今の金利）'}</th><td>${(Math.round(s.m*10)/10).toLocaleString('ja-JP')}万円</td><td>${fmt(s.m*12)}万円</td><td>${n(V.income)?((s.m*12+n(V.other)*12)/n(V.income)*100).toFixed(1):'–'}%</td></tr>`).join('')}
@@ -150,7 +150,7 @@ const AKIYADEF={id:'akiya',title:'相続した家・空き家の診断',example:
      <li>${R.N}年間の数字だけで比べると、いちばん多く残るのは「${best.l}」（${fmt(best.v)}万円）です。</li>
      <li>空き家のまま持つと、${R.N}年間で約${fmt(-R.hold)}万円の持ち出しになる計算です。その間に建物は傷み、売れる価格も下がっていくことが多いです。</li>
      <li>貸す場合、家賃の手取りは年約${fmt(R.rentIn)}万円です。リフォーム費を回収できるまでの年数や、借り手が見つかるかも確かめておきましょう。</li>
-     <li>解体すると土地は売りやすくなりますが、更地のまま持ち続けると固定資産税が上がることがあります。売るまでの期間を考えて決めるのが安心です。</li></ul></section>${ctaHTML()}
+     <li>解体すると土地は売りやすくなりますが、更地のまま持ち続けると固定資産税が上がることがあります。売るまでの期間を考えて決めるのが安心です。</li></ul></section>${bridgeHTML('売った手取りを、老後の家計に入れると？',`建物つきで売った場合の手取り（約${fmt(R.sellNet)}万円）を、ライフプラン診断の老後資金に足して、95歳まで比べられます。`,'akiya2lp')}${ctaHTML()}
     <details class="grp" style="margin-top:14px" open><summary>知っておきたい制度<small>一般的な説明です</small></summary><div class="body reqs">
      <p><b>相続登記の義務化</b>：2024年4月から、相続で家や土地を取得したことを知った日から3年以内に相続登記をすることが義務になりました。正当な理由なく怠ると、10万円以下の過料の対象になります。それ以前の相続も対象です。</p>
      <p><b>管理が不十分な空き家</b>：2023年の法改正で、放置すると「特定空家」になるおそれがある空き家も「管理不全空家」として指導・勧告の対象になりました。勧告を受けると、土地の固定資産税を下げる住宅用地の特例が外れます。</p>
