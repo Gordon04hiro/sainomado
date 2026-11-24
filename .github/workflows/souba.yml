@@ -1,0 +1,35 @@
+# 売却相場の目安：国土交通省「不動産情報ライブラリ」から取引価格を取り込み、集計ファイルを作る
+# 手動（Actions の画面の「Run workflow」）か、四半期ごとに自動で実行。結果は souba-data ブランチに保存し、確認してから main に取り込む
+name: 相場データの更新
+on:
+  workflow_dispatch:
+    inputs:
+      prefs:
+        description: 都道府県コード（空欄なら全国。例：22 13）
+        required: false
+        default: ""
+  schedule:
+    - cron: "17 2 10 1,4,7,10 *"
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 取り込みと集計
+        env:
+          REINFOLIB_KEY: ${{ secrets.REINFOLIB_KEY }}
+        run: node scripts/souba.js ${{ github.event.inputs.prefs }}
+      - name: souba-data ブランチに保存
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git checkout -B souba-data
+          git add content/souba
+          git commit -m "相場データの更新（$(date +%Y-%m-%d)）" || echo "変更なし"
+          git push -f origin souba-data

@@ -251,6 +251,17 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const w=await open('index.html');stub(w);w.document.querySelector('.hero [data-lpguide]').addEventListener('click',e=>e.preventDefault());click(w,'.hero [data-lpguide]');check('トップの「はじめる」で印が付く',w.sessionStorage.getItem('sainomado-lp-guide')==='1');
    const w2=await open('lifeplan.html');stub(w2);w2.sessionStorage.setItem('sainomado-lp-guide','1');click(w2,'[data-act="mode2"][data-m="easy"]');await wait(300);
    check('入力例のままなら「質問に答えて入力」の1問目から始まる',!!w2.document.getElementById('wz')&&/質問 1 \//.test(w2.document.getElementById('wz').textContent));}
+  console.log('\n■ 相場データの集計');
+  {const SB=require('./souba.js');
+   check('築年の読み取り（西暦・和暦）',SB.builtYear('1995年')===1995&&SB.builtYear('平成7年')===1995&&SB.builtYear('昭和元年')===1926&&isNaN(SB.builtYear('戦前')));
+   check('関係者間の取引や面積不明は除く',!SB.clean({Type:'中古マンション等',TradePrice:'20000000',Area:'60',BuildingYear:'2000年',Period:'2025年第1四半期',Remarks:'関係者間取引'})&&!SB.clean({Type:'宅地(土地)',TradePrice:'20000000',Area:'2000㎡以上',Period:'2025年第1四半期'}));
+   let seed=1;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;const raw=[];
+   for(let i=0;i<600;i++){const age=Math.floor(rnd()*45),y=2021+Math.floor(rnd()*5),city=i%3?'22131':'22132',area=50+Math.floor(rnd()*40),u=(city==='22131'?400000:250000)*(1-age*0.015)*(1+0.03*(y-2021))*(0.85+rnd()*0.3);
+     raw.push({Type:'中古マンション等',MunicipalityCode:city,Municipality:city==='22131'?'浜松市中央区':'浜松市東区',TradePrice:String(Math.round(u*area)),Area:String(area),BuildingYear:(y-age)+'年',Period:y+'年第'+(1+Math.floor(rnd()*4))+'四半期',Remarks:''})}
+   const A=SB.aggregate('22',raw.map(SB.clean).filter(Boolean));
+   check('都道府県・市区町村ごとの単価の幅ができる',A&&A.name==='静岡県'&&A.C['22131'].m.q[1]>A.C['22132'].m.q[1]&&A.C['22131'].m.q[0]<A.C['22131'].m.q[2]);
+   check('築年数が古いほど補正が小さい',A.curve.m[0]>A.curve.m[6]&&A.curve.m.every((v,i,a)=>!i||v<=a[i-1]));
+   const est=A.C['22131'].m.q[1]*A.curve.m[SB.band(10)]*70/1e4;check('浜松市中央区・築10年・70㎡のめやすが妥当な範囲',est>1500&&est<3000,Math.round(est)+'万円');}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
