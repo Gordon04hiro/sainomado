@@ -86,7 +86,7 @@ function exampleHTML(S0){
   return `<section class="wrap sect"><h2>診断でわかること</h2><p class="lead">入力例の家族（35歳・夫婦と子ども2人・手取り年収 夫${fmt(S0.inc)}万円／妻${fmt(S0.sinc)}万円）で、家の価格だけを変えて比べた結果です。同じ収入でも、選び方で老後のお金が大きく変わります。</p>
    <div class="exwrap"><div class="excards">${card(P[0],'A')}${card(P[1],'B')}</div>
    <div class="exchart">${chartSVG([{rows:P[0].r,color:P[0].col},{rows:P[1].r,color:P[1].col}],null,'exc')}<p class="unit" style="margin:4px 0 0">金融資産（預貯金・投資など）の推移。万円</p></div></div>
-   <div class="acts" style="margin-top:14px"><a class="btn primary" href="#lifeplan">わが家の場合を確かめる</a></div></section>`;
+   <div class="acts" style="margin-top:14px"><a class="btn primary" href="#lifeplan" data-lpguide="1">わが家の場合を確かめる</a></div></section>`;
 }
 function vHome(v){
   const S=LP.plans.A,r=sim(S),s=summarize(r,S);
@@ -94,7 +94,7 @@ function vHome(v){
    <div><div class="k">住まいとお金の無料シミュレーション</div>
     <h1>大きな決断の前に、<br><em>お金の未来</em>を見てみよう。</h1>
     <p>子育て、住まい、老後。人生の大きな決断の前に、わが家の家計が95歳までどう変わるのかを自分の数字で確かめる、<b>家計のセカンドオピニオン</b>です。</p>
-    <div class="acts"><a class="btn primary big" href="#lifeplan">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
+    <div class="acts"><a class="btn primary big" href="#lifeplan" data-lpguide="1">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
     <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div></div>
    <div class="hero-art"><div class="heroicon"><img src="${window.BASE||''}assets/icon.svg" width="220" height="220" alt="サイのまどのロゴ（家の中のサイの貯金箱）"></div>
    <div class="peek" aria-label="ライフプラン診断の画面例"><div class="t"><span>入力例：35歳・夫婦と子ども2人・家を購入</span><span class="chip ${s.st.c}">${s.st.t}</span></div>

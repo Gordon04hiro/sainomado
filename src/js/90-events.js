@@ -58,3 +58,5 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act="pre"]
 document.addEventListener('input',e=>{const t=e.target;if(!t.id)return;document.querySelectorAll(`[data-act="pre"][data-for="${t.id}"]`).forEach(b=>b.setAttribute('aria-pressed',String(t.value!==''&&+t.value===+b.dataset.v)))});
 go();loadShared().then(ok=>{if(ok){go();toast('共有された結果を表示しています')}});
 
+
+document.addEventListener('click',e=>{if(e.target.closest('[data-lpguide]'))try{sessionStorage.setItem('sainomado-lp-guide','1')}catch(x){}},true);
