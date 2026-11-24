@@ -247,6 +247,10 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const h=fs.readFileSync(path.join(DIST,'articles/sell-cost.html'),'utf8');
    check('記事の途中にツールへの案内がある',/class="toolcta"/.test(h));
    check('記事からテーマのまとめへのリンクがある',/class="hublink"/.test(h));}
+  {const stub=w=>{const m={};Object.defineProperty(w,'sessionStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})};
+   const w=await open('index.html');stub(w);w.document.querySelector('.hero [data-lpguide]').addEventListener('click',e=>e.preventDefault());click(w,'.hero [data-lpguide]');check('トップの「はじめる」で印が付く',w.sessionStorage.getItem('sainomado-lp-guide')==='1');
+   const w2=await open('lifeplan.html');stub(w2);w2.sessionStorage.setItem('sainomado-lp-guide','1');click(w2,'[data-act="mode2"][data-m="easy"]');await wait(300);
+   check('入力例のままなら「質問に答えて入力」の1問目から始まる',!!w2.document.getElementById('wz')&&/質問 1 \//.test(w2.document.getElementById('wz').textContent));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
