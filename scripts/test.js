@@ -9,10 +9,10 @@ const DIST=path.join(__dirname,'..','dist');
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 let ok=0,ng=0;
 const check=(name,cond,info='')=>{if(cond){ok++;console.log('  ✔ '+name)}else{ng++;console.log('  ✖ '+name+(info?'（'+info+'）':''))}};
-async function open(file,hash=''){
+async function open(file,hash='',init=null){
   const errs=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/fonts\.googleapis|googletagmanager|googlesyndication/.test(e.message))errs.push(e.message)});
   const dom=await JSDOM.fromFile(path.join(DIST,file),{runScripts:'dangerously',resources:loader,url:'file://'+path.join(DIST,file)+hash,pretendToBeVisual:true,virtualConsole:vc,
-    beforeParse(w){w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.print=()=>{w.__printed=true}}});
+    beforeParse(w){w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.print=()=>{w.__printed=true};if(init)init(w)}});
   await wait(600);const w=dom.window;w.__errs=errs;return w;
 }
 const T=(d,s)=>[...d.querySelectorAll(s)].map(x=>x.textContent.replace(/\s+/g,' ').trim());
@@ -267,6 +267,14 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const est=A.C['22131'].m.q[1]*A.curve.m[SB.band(10)]*70/1e4;check('浜松市中央区・築10年・70㎡のめやすが妥当な範囲',est>1500&&est<3000,Math.round(est)+'万円');}
   {const w=await open('index.html');const html=w.document.querySelector('.exwrap').textContent;
    check('トップの結果の例は、保存した入力ではなく入力例で計算する',/3,000万円の家/.test(html)&&/4,500万円の家/.test(html));}
+  console.log('\n■ 住宅ローン診断 × ライフプラン');
+  {const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));w0.close();
+   const mem=(lp)=>w=>{const m={'sainomado-lifeplan-v1':JSON.stringify(lp)};const st={getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}};Object.defineProperty(w,'localStorage',{configurable:true,value:st});Object.defineProperty(w,'sessionStorage',{configurable:true,value:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}}})};
+   let w=await open('loan.html');check('ライフプラン未入力なら、入力を案内する',/ライフプラン診断に家族・収入・生活費を入れると/.test(w.document.getElementById('gresult').textContent)&&!w.document.querySelector('.recbox'));w.close();
+   const rich=Object.assign({},bp,{inc:900,sinc:400});w=await open('loan.html','',mem({plans:{A:rich},names:{A:'今のまま'},example:false}));
+   const t=w.document.querySelector('.recbox');check('ライフプランの入力があると「おすすめの予算」が出る',!!t&&/約[\d,]+万円まで/.test(t.textContent),t&&t.textContent);
+   const poor=Object.assign({},bp,{inc:300,sinc:0,spouse:'yes'});const w2=await open('loan.html','',mem({plans:{A:poor},names:{A:'今のまま'},example:false}));
+   const t2=w2.document.querySelector('.recbox');check('家計に余裕がないと、家計全体で見た上限がおすすめになる',!!t2&&/家計全体で見た上限/.test(t2.textContent),t2&&t2.textContent);}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));

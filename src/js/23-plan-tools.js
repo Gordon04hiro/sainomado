@@ -14,14 +14,27 @@ const LEVERS={
  live:{t:'生活費を見直す',u:'万円/月',apply:(S,x)=>{S.live=Math.max(0,n(S.live)-x)},lo:0,hi:null,step:0.1,
   say:x=>`生活費を毎月${x.toFixed(1)}万円下げる`},
  yld:{t:'運用の利回りを上げる',u:'%',apply:(S,x)=>{normPlan(S);['nisa','tax','ideco','snisa','sideco'].forEach(k=>S.assets[k].rate=n(S.assets[k].rate)+x)},lo:0,hi:6,step:0.1,
-  say:x=>`投資の利回りの見込みを${x.toFixed(1)}%上げる`}
+  say:x=>`投資の利回りの見込みを${x.toFixed(1)}%上げる`},
+ price:{t:'家の価格を下げる',u:'万円',when:S=>S.house==='buy'&&n(S.buyAge)>=Math.round(n(S.age)),apply:(S,x)=>{S.price=Math.max(0,n(S.price)-x)},lo:0,hi:null,step:10,
+  say:(x,S)=>`物件価格を${fmt(x)}万円下げる（${fmt(Math.max(0,n(S.price)-x))}万円の家にする）`}
 };
+/* 家計全体で見た物件価格の上限：S の住まいを「buyAge 歳でこの条件で買う」に置き換えて、95歳までお金が足りなくならない最大の価格（10万円単位）。
+   価格0でも足りない場合は null。住宅ローン診断とライフプラン診断をつなぐ計算 */
+function lpMaxPrice(S0,o){
+  const base=clone(S0);normPlan(base);base.house='buy';base.buyAge=Math.max(Math.round(n(base.age)),Math.round(n(o.buyAge)||0));base.down=n(o.down);base.rate=n(o.rate);base.term=n(o.term)||35;
+  if(!(n(base.rent)>0))base.rent=8;if(!(n(base.hcost)>0))base.hcost=12;
+  const ok=p=>{const T=clone(base);T.price=p;T.down=Math.min(n(base.down),p);const r=sim(T);return !summarize(r,T).neg};
+  if(!ok(0))return null;let lo=0,hi=30000;if(ok(hi))return hi;
+  for(let k=0;k<22;k++){const m=(lo+hi)/2;if(ok(m))lo=m;else hi=m}
+  return Math.floor(lo/10)*10;
+}
 function goalCalc(S,g){
   const out={};
   const base=goalOK(S,g);
   Object.entries(LEVERS).forEach(([k,L])=>{
+    if(L.when&&!L.when(S))return;
     if(base){out[k]={x:0,ok:true};return}
-    const lo=k==='work'?n(S.workEnd):L.lo, hi=k==='live'?n(S.live):L.hi;
+    const lo=k==='work'?n(S.workEnd):L.lo, hi=k==='live'?n(S.live):k==='price'?n(S.price):L.hi;
     const x=search(lo,hi,v=>{const T=clone(S);L.apply(T,v);return goalOK(T,g)},L.step,k==='work'?12:24);
     out[k]={x,ok:x!=null};
   });
@@ -30,9 +43,9 @@ function goalCalc(S,g){
 function goalTab(cur){
   const g=LP.goal||(LP.goal={type:'fin95',target:1000});
   const G=goalCalc(cur.S,g);
-  const cards=Object.entries(LEVERS).map(([k,L])=>{const o=G.out[k];
-    const v=G.base?'<span class="chip good" style="font-size:13px">達成</span>':k==='work'?(o.ok?Math.round(o.x)+'<small>歳まで</small>':'—'):(o.ok?(k==='yld'?'+':'')+(Math.round(o.x*10)/10).toLocaleString('ja-JP')+'<small>'+L.u+'</small>':'—');
-    return `<div class="lever"><span>${L.t}</span><b>${v}</b><em>${G.base?'今のままで達成できます':o.ok?esc(L.say(o.x)):'この方法だけでは届きません'}</em>${!G.base&&o.ok&&keys().length<3?`<button class="btn small" data-act="lever" data-k="${k}" data-x="${o.x}">このやり方でパターンを作る</button>`:''}</div>`}).join('');
+  const cards=Object.entries(LEVERS).filter(([k])=>G.out[k]).map(([k,L])=>{const o=G.out[k];
+    const v=G.base?'<span class="chip good" style="font-size:13px">達成</span>':k==='work'?(o.ok?Math.round(o.x)+'<small>歳まで</small>':'—'):(o.ok?(k==='yld'?'+':'')+(k==='price'?fmt(o.x):(Math.round(o.x*10)/10).toLocaleString('ja-JP'))+'<small>'+L.u+'</small>':'—');
+    return `<div class="lever"><span>${L.t}</span><b>${v}</b><em>${G.base?'今のままで達成できます':o.ok?esc(L.say(o.x,cur.S)):'この方法だけでは届きません'}</em>${!G.base&&o.ok&&keys().length<3?`<button class="btn small" data-act="lever" data-k="${k}" data-x="${o.x}">このやり方でパターンを作る</button>`:''}</div>`}).join('');
   return `<section class="chartcard"><h3 style="font-size:16px;margin-bottom:4px">目標から逆算する（パターン${cur.key}）</h3>
    <p class="unit" style="margin:0 0 10px">目標を決めると、それを達成するために「何を・どれだけ」変えればいいかを、1つずつ計算します。会社でいう目標利益からの逆算です。</p>
    <div class="fields" style="margin-bottom:12px"><label class="fld"><span class="lab">目標</span><select id="g_type" data-goal="type"><option value="fin95"${g.type==='fin95'?' selected':''}>95歳時点で金融資産を残す</option><option value="noshort"${g.type==='noshort'?' selected':''}>最後までお金が足りなくならない</option></select></label>

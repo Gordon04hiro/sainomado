@@ -85,27 +85,44 @@ const LOANDEF={id:'loan',title:'住宅ローン・購入予算診断',example:'�
   },
   result(V,R){
     return `<h2>診断結果</h2><p class="unit">入力するたびに自動で更新されます（単位：万円）。</p>
-    <div class="panels">
+    <div class="panels p3">
      <section class="panel"><div class="ph"><span class="nm">無理なく返せる目安</span><span class="chip good">返済負担率${n(V.target)}%</span></div>
       <div class="kv">${kvRow('借入額',man(R.ok))}${kvRow('物件価格の目安',man(R.priceOk))}${kvRow('毎月の返済',(Math.round(R.mOk*10)/10).toLocaleString('ja-JP')+'<small>万円</small>')}</div></section>
      <section class="panel"><div class="ph"><span class="nm">審査で借りられる上限の目安</span><span class="chip warn">返済負担率${R.lim}%</span></div>
       <div class="kv">${kvRow('借入額',man(R.max))}${kvRow('物件価格の目安',man(R.priceMax))}${kvRow('審査金利',n(V.screen)+'<small>%</small>')}</div></section>
+     ${loanLpPanel(V,R)}
     </div>
+    ${loanRecHTML(V,R)}
     <section class="advice"><h3>入力した条件で計算すると</h3><ul>
      ${V.rtype==='hendo'?'<li><b>変動金利</b>は、借りたあとに金利が上がると返済額が増えます。下の「金利が上がった場合」の返済額も確かめておきましょう。</li>':V.rtype==='kotei10'?'<li><b>10年固定</b>は、11年目以降の金利がそのときの水準で決め直されます。ここでは完済まで同じ金利で計算しています。</li>':V.rtype==='flat'?'<li><b>全期間固定</b>は、完済まで金利が変わらないので、返済額が増える心配はありません。そのぶん、変動金利より金利が高めです。</li>':''}
      <li>無理なく返せる借入額は約${fmt(R.ok)}万円、頭金と諸費用を考えた物件価格の目安は約${fmt(R.priceOk)}万円です。</li>
      <li>審査では約${fmt(R.max)}万円まで借りられる可能性がありますが、「借りられる額」と「返せる額」は違います。差は${fmt(R.max-R.ok)}万円です。</li>
      ${R.term<n(V.term)?`<li>完済時80歳までとすると、返済期間は${R.term}年になります。</li>`:''}
-     <li>変動金利の場合、金利が1%上がると毎月の返済は約${(Math.round((R.scen[1].m-R.scen[0].m)*10)/10).toLocaleString('ja-JP')}万円増えます（下の表）。</li></ul></section>${bridgeHTML('この予算で買うと、家計はどうなる？',`物件価格の目安（約${fmt(R.priceOk)}万円）で家を買うパターンを、ライフプラン診断に入れて、教育費や老後まで続けて確かめられます。`,'loan2lp')}${ctaHTML()}
+     <li>変動金利の場合、金利が1%上がると毎月の返済は約${(Math.round((R.scen[1].m-R.scen[0].m)*10)/10).toLocaleString('ja-JP')}万円増えます（下の表）。</li></ul></section>${LP.example?bridgeHTML('この予算で買うと、家計はどうなる？',`物件価格の目安（約${fmt(R.priceOk)}万円）で家を買うパターンを、ライフプラン診断に入れて、教育費や老後まで続けて確かめられます。`,'loan2lp'):bridgeHTML('おすすめの予算で買うと、家計はどうなる？',`おすすめの予算（約${fmt(loanRec(V,R).price)}万円）で家を買うパターンを、ライフプラン診断に追加して、毎年の収支まで確かめられます。`,'loan2lp')}${ctaHTML()}
     <div class="cfhead"><h3>金利が上がった場合の毎月の返済（無理のない借入額の場合）</h3></div>
     <div class="cfwrap"><table class="cf"><tbody><tr class="hd"><th>金利</th><td>毎月の返済</td><td>年間の返済</td><td>返済負担率</td></tr>
      ${R.scen.map(s=>`<tr${s.d===0?' class="tot"':''}><th>${(n(V.rate)+s.d).toFixed(2)}%${s.d?'（＋'+s.d+'%）':'（今の金利）'}</th><td>${(Math.round(s.m*10)/10).toLocaleString('ja-JP')}万円</td><td>${fmt(s.m*12)}万円</td><td>${n(V.income)?((s.m*12+n(V.other)*12)/n(V.income)*100).toFixed(1):'–'}%</td></tr>`).join('')}
     </tbody></table></div>
     <p class="unit">元利均等返済、ボーナス返済なしで計算しています。金利上昇は借りた時点から上がった場合の比較で、実際の変動金利には5年ルール・125%ルールなどがある商品もあります。返済負担率は年収（額面）に対する年間返済額の割合で、審査基準は金融機関によって異なります。</p>`;
   },
-  dock:(V,R)=>['無理のない物件価格',fmt(R.priceOk)+' 万円'],
+  dock:(V,R)=>{const C=loanRec(V,R);return C.L.has?['おすすめの予算',fmt(C.price)+' 万円']:['無理のない物件価格',fmt(R.priceOk)+' 万円']},
   related:['lifeplan','vs']
 };
+
+/* 住宅ローン診断 × ライフプラン診断：ライフプランに入力があれば、その家計で95歳までお金が足りなくならない物件価格の上限を出し、
+   「無理なく返せる」「審査の上限」と並べて、いちばん小さい額をおすすめの予算として出す */
+function loanLp(V,R){if(LP.example||!LP.plans||!LP.plans.A)return{has:false};
+  const k=LP.plans.A?'A':Object.keys(LP.plans)[0];return{has:true,key:k,name:(LP.names&&LP.names[k])||'',max:lpMaxPrice(LP.plans[k],{buyAge:n(V.age),down:n(V.down),rate:n(V.rate),term:R.term||n(V.term)})}}
+function loanRec(V,R){const L=loanLp(V,R);const c=[[R.priceOk,'無理なく返せる目安'],[R.priceMax,'審査の上限']];if(L.has&&L.max!=null)c.push([L.max,'家計全体で見た上限']);
+  const m=c.reduce((a,b)=>b[0]<a[0]?b:a);return{price:Math.max(0,Math.round(m[0])),why:m[1],L}}
+function loanLpPanel(V,R){const L=loanLp(V,R);
+  if(!L.has)return `<section class="panel"><div class="ph"><span class="nm">家計全体で見た上限</span><span class="chip muted">ライフプラン</span></div>
+   <p style="margin:6px 0 10px;font-size:13.5px;line-height:1.7">ライフプラン診断に家族・収入・生活費を入れると、教育費や老後まで含めて、95歳までお金が足りなくならない物件価格の上限がここに出ます。</p><a class="btn small primary" href="#lifeplan" data-lpguide="1">ライフプラン診断に入力する</a></section>`;
+  return `<section class="panel"><div class="ph"><span class="nm">家計全体で見た上限</span><span class="chip ${L.max==null?'bad':'good'}">ライフプラン</span></div>
+   <div class="kv">${L.max==null?kvRow('物件価格の上限','—'):kvRow('物件価格の上限',L.max>=30000?'3億<small>円以上</small>':man(L.max))}</div>
+   <p class="unit" style="margin:6px 0 0">${L.max==null?'家を買わなくても、95歳までのどこかでお金が足りなくなる計算です。まずライフプラン診断で家計を見直してみてください。':`ライフプラン診断のパターン${L.key}${L.name?'（'+esc(L.name)+'）':''}の入力で、住まいを「${Math.max(Math.round(n(LP.plans[L.key].age)),Math.round(n(V.age)))}歳でこの条件で買う」に置き換えて、95歳までお金が足りなくならない価格です。`}</p></section>`}
+function loanRecHTML(V,R){const C=loanRec(V,R);if(!C.L.has)return '';
+  return `<section class="recbox"><p class="rt">おすすめの予算</p><p class="rv"><b>約${fmt(C.price)}</b><small>万円まで</small></p><p class="rd">「無理なく返せる目安」「審査の上限」「家計全体で見た上限」のうち、いちばん小さい<b>${C.why}</b>です。${C.why==='家計全体で見た上限'?'返済はできても、教育費や老後のお金まで考えると、この額までにしておくのが安心です。':C.why==='無理なく返せる目安'?'家計全体ではもう少し余裕がありますが、毎月の返済の負担を考えるとこの額が目安です。':''}</p></section>`}
 
 /* ---------- 相続した家・空き家の診断 ---------- */
 const AKIYADEF={id:'akiya',title:'相続した家・空き家の診断',example:'築45年の木造住宅・今売ると900万円',
