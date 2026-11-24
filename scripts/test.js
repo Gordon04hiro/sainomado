@@ -247,6 +247,15 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const h=fs.readFileSync(path.join(DIST,'articles/sell-cost.html'),'utf8');
    check('記事の途中にツールへの案内がある',/class="toolcta"/.test(h));
    check('記事からテーマのまとめへのリンクがある',/class="hublink"/.test(h));}
+  console.log('\n■ 計測');
+  {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
+   const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
+   const e=ev.find(x=>x[0]==='article_tool_click');check('記事のツール案内を押すと article_tool_click（ツール名・記事名つき）',e&&e[1].tool==='sell'&&e[1].page==='sell-cost'&&e[1].place==='cta',JSON.stringify(ev));
+   const w2=await open('lifeplan.html');const ev2=[];w2.gtag=(t,n,p)=>{if(t==='event')ev2.push([n,p])};
+   click(w2,'[data-act="mode2"][data-m="detail"]');await wait(300);click(w2,'[data-act="addplan"]');await wait(300);
+   check('比べるパターンを追加すると lp_add_pattern',ev2.some(x=>x[0]==='lp_add_pattern'&&x[1].method==='manual'));
+   click(w2,'[data-act="pre"][data-for="f_sev"][data-v="0"]');await wait(300);
+   check('退職金「なし」で0になる',w2.document.getElementById('f_sev').value==='0'&&w2.document.querySelector('[data-act="pre"][data-for="f_sev"]').getAttribute('aria-pressed')==='true');}
 
   console.log('\n■ 広告');
   {const bad=pages.filter(f=>/広告枠（/.test(fs.readFileSync(path.join(DIST,f),'utf8')));

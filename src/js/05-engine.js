@@ -220,8 +220,8 @@ const GROUPS=[
   {id:'sraise',l:'配偶者の昇給率',u:'%/年',st:.1,show:spOn,pre:'raise',rec:0.5},
   {id:'ret',l:'定年の年齢',u:'歳',pr:'sret',pl:'定年の年齢',ph:'パート・自営などで定年がなければ、完全に辞める年齢と同じに'},
   {id:'sret',l:'配偶者の定年の年齢',u:'歳',show:spOn},
-  {id:'sev',l:'退職金（手取り）',u:'万円',pr:'ssev',pl:'退職金（手取り）',ph:'額面しかわからないときは、下の「退職金の手取りを計算する」で。なければ0'},
-  {id:'ssev',l:'配偶者の退職金（手取り）',u:'万円',show:spOn},
+  {id:'sev',l:'退職金（手取り）',u:'万円',pr:'ssev',pl:'退職金（手取り）',ph:'額面しかわからないときは、下の「退職金の手取りを計算する」で。自営業などで退職金がなければ「なし」を',none:'なし'},
+  {id:'ssev',l:'配偶者の退職金（手取り）',u:'万円',show:spOn,none:'なし'},
   {id:'reinc',l:'定年後の手取り年収',u:'万円/年',pr:'sreinc',pl:'定年後の手取り年収',ph:'再雇用・パートなど。働かないなら0'},
   {id:'sreinc',l:'配偶者の定年後の手取り年収',u:'万円/年',show:spOn},
   {id:'workEnd',l:'完全に仕事を辞める年齢',u:'歳',pr:'sworkEnd',pl:'完全に仕事を辞める年齢'},
@@ -291,7 +291,7 @@ function fieldHTML(f,S,who){
   const hint=f.h&&!who?`<span class="hint">${esc(f.h)}</span>`:'';
   const lab=who?`<span class="lab who">${who}</span>`:`<span class="lab">${esc(f.l)}</span>`;
   if(f.type==='sel') return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}><span class="lab">${esc(f.l)}</span><select id="f_${f.id}" data-k="${f.id}">${f.o.map(o=>`<option value="${o[0]}"${S[f.id]===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select>${hint}</label>`;
-  return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}${who?` aria-label="${esc(f.l)}"`:''}>${lab}<span class="inp"><input id="f_${f.id}" data-k="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(S[f.id])}"><span class="u">${f.u}</span></span>${f.pre?preHTML(f.pre,'f_'+f.id,S[f.id],f.rec):''}${hint}</label>`;
+  return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}${who?` aria-label="${esc(f.l)}"`:''}>${lab}<span class="inp"><input id="f_${f.id}" data-k="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(S[f.id])}"><span class="u">${f.u}</span></span>${f.pre?preHTML(f.pre,'f_'+f.id,S[f.id],f.rec):''}${f.none?`<span class="pre none" role="group"><button type="button" data-act="pre" data-for="f_${f.id}" data-v="0" aria-pressed="${S[f.id]!==''&&S[f.id]!=null&&+S[f.id]===0}">${f.none}</button></span>`:''}${hint}</label>`;
 }
 function kidsHTML(S){
   const sel=(i,k,opts,v)=>`<select id="k${i}_${k}" data-kid="${i}" data-kk="${k}">${opts.map(o=>`<option value="${o[0]}"${v===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select>`;

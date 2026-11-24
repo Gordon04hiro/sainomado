@@ -73,15 +73,21 @@ function ctaHTML(){
 
 /* ---------- アクセス解析のイベント（どのツールが使われ、どの広告が押されたか） ---------- */
 function track(ev,p){try{if(window.gtag)window.gtag('event',ev,p||{})}catch(e){}}
+/* 記事の中のリンクがツールへのものなら、そのツール名を返す（../lifeplan.html・#lifeplan など） */
+function articleToolOf(h){const m=/(?:^|\/|#)([a-z0-9]+)(?:\.html)?(?:[?#].*)?$/.exec(h||'');return m&&TOOL_INFO[m[1]]?m[1]:''}
 let __started=false;
 document.addEventListener('input',e=>{if(__started)return;const r=window.PAGE||route();if(!TOOL_INFO[r]||!e.target.closest('#view'))return;__started=true;track('tool_start',{tool:r})},true);
 document.addEventListener('click',e=>{
   const r=window.PAGE||route();
   const pr=e.target.closest('.pr-box a');if(pr){const b=pr.closest('.pr-box');track('affiliate_click',{name:b&&b.dataset.aff||'',page:r})}
+  if(r==='article'){const l=e.target.closest('#view a[href]');if(l){const t=articleToolOf(l.getAttribute('href'));if(t)track('article_tool_click',{tool:t,page:window.SLUG||'',place:l.closest('.toolcta')?'cta':'body'})}}
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   if(a==='toaff'){track('cta_click',{name:b.dataset.aff,tool:r});const t=document.getElementById('adtail');if(t&&!t.hidden)t.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(a==='share') track('share',{tool:r});
   else if(a==='pdf') track('export_pdf',{tool:r});
   else if(a==='xlsx') track('export_excel',{tool:r});
   else if(a==='mode2') track('lifeplan_mode',{mode:b.dataset.m});
+  else if(/2lp$/.test(a)) track('lp_compare',{tool:a.replace(/2lp$/,'')});
+  else if(a==='addplan') track('lp_add_pattern',{tool:'lifeplan',method:'manual'});
+  else if(a==='lever') track('lp_add_pattern',{tool:'lifeplan',method:'lever_'+b.dataset.k});
 });
