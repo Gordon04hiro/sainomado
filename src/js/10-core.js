@@ -89,7 +89,7 @@ function exampleHTML(S0){
    <div class="acts" style="margin-top:14px"><a class="btn primary" href="#lifeplan" data-lpguide="1">わが家の場合を確かめる</a></div></section>`;
 }
 function vHome(v){
-  const S=LP.plans.A,r=sim(S),s=summarize(r,S);
+  const S=basePlan(),r=sim(S),s=summarize(r,S);
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
    <div><div class="k">住まいとお金の無料シミュレーション</div>
     <h1>大きな決断の前に、<br><em>お金の未来</em>を見てみよう。</h1>
