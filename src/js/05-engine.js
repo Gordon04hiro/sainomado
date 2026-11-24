@@ -216,8 +216,8 @@ const GROUPS=[
  {t:'お仕事の収入',s:'手取り額（額面のおよそ75〜85%）。配偶者の分も忘れずに',f:[
   {id:'inc',easy:1,l:'ご本人の手取り年収',u:'万円/年',pr:'sinc',pl:'手取り年収',ph:'源泉徴収票の「支払金額」から、税金・社会保険料を引いた額。わからなければ額面の約8割'},
   {id:'sinc',easy:1,l:'配偶者の手取り年収',u:'万円/年',show:spOn},
-  {id:'raise',l:'昇給率',u:'%/年',st:.1,pre:'raise',rec:1,pr:'sraise',pl:'昇給率'},
-  {id:'sraise',l:'配偶者の昇給率',u:'%/年',st:.1,show:spOn,pre:'raise',rec:0.5},
+  {id:'raise',l:'昇給率',u:'%/年',st:.1,pre:'raise',rec:1,recNote:'パート・アルバイトなら「ほぼ上がらない」〜「少し」',pr:'sraise',pl:'昇給率'},
+  {id:'sraise',l:'配偶者の昇給率',u:'%/年',st:.1,show:spOn,pre:'raise',rec:1,recNote:'パート・アルバイトなら「ほぼ上がらない」〜「少し」'},
   {id:'ret',l:'定年の年齢',u:'歳',pr:'sret',pl:'定年の年齢',ph:'パート・自営などで定年がなければ、完全に辞める年齢と同じに'},
   {id:'sret',l:'配偶者の定年の年齢',u:'歳',show:spOn},
   {id:'sev',l:'退職金（手取り）',u:'万円',pr:'ssev',pl:'退職金（手取り）',ph:'額面しかわからないときは、下の「退職金の手取りを計算する」で。自営業などで退職金がなければ「なし」を',none:'なし'},
@@ -272,9 +272,9 @@ const PRESETS={
  cash:[[0.1,'低め'],[0.3,'普通'],[0.5,'定期預金中心']],
  inv:[[0.1,'預金中心'],[1.5,'債券中心'],[3,'バランス型'],[4,'株式中心']]
 };
-function preHTML(key,id,cur,rec){
+function preHTML(key,id,cur,rec,note){
   const P=PRESETS[key];if(!P)return '';
-  return `<span class="pre" role="group" aria-label="目安から選ぶ">${P.map(([v,l])=>`<button type="button" data-act="pre" data-for="${id}" data-v="${v}" aria-pressed="${cur!==''&&cur!=null&&+cur===v}">${l}<small>${v}</small></button>`).join('')}</span>${rec!=null?`<span class="hint">迷ったら「${P.find(p=>p[0]===rec)[1]}」</span>`:''}`;
+  return `<span class="pre" role="group" aria-label="目安から選ぶ">${P.map(([v,l])=>`<button type="button" data-act="pre" data-for="${id}" data-v="${v}" aria-pressed="${cur!==''&&cur!=null&&+cur===v}">${l}<small>${v}</small></button>`).join('')}</span>${rec!=null?`<span class="hint">迷ったら「${P.find(p=>p[0]===rec)[1]}」${note?'。'+note:''}</span>`:''}`;
 }
 
 /* 夫婦で対になる項目（pr）は「ご本人｜配偶者」の2列で並べる */
@@ -291,7 +291,7 @@ function fieldHTML(f,S,who){
   const hint=f.h&&!who?`<span class="hint">${esc(f.h)}</span>`:'';
   const lab=who?`<span class="lab who">${who}</span>`:`<span class="lab">${esc(f.l)}</span>`;
   if(f.type==='sel') return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}><span class="lab">${esc(f.l)}</span><select id="f_${f.id}" data-k="${f.id}">${f.o.map(o=>`<option value="${o[0]}"${S[f.id]===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select>${hint}</label>`;
-  return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}${who?` aria-label="${esc(f.l)}"`:''}>${lab}<span class="inp"><input id="f_${f.id}" data-k="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(S[f.id])}"><span class="u">${f.u}</span></span>${f.pre?preHTML(f.pre,'f_'+f.id,S[f.id],f.rec):''}${f.none?`<span class="pre none" role="group"><button type="button" data-act="pre" data-for="f_${f.id}" data-v="0" aria-pressed="${S[f.id]!==''&&S[f.id]!=null&&+S[f.id]===0}">${f.none}</button></span>`:''}${hint}</label>`;
+  return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}${who?` aria-label="${esc(f.l)}"`:''}>${lab}<span class="inp"><input id="f_${f.id}" data-k="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(S[f.id])}"><span class="u">${f.u}</span></span>${f.pre?preHTML(f.pre,'f_'+f.id,S[f.id],f.rec,f.recNote):''}${f.none?`<span class="pre none" role="group"><button type="button" data-act="pre" data-for="f_${f.id}" data-v="0" aria-pressed="${S[f.id]!==''&&S[f.id]!=null&&+S[f.id]===0}">${f.none}</button></span>`:''}${hint}</label>`;
 }
 function kidsHTML(S){
   const sel=(i,k,opts,v)=>`<select id="k${i}_${k}" data-kid="${i}" data-kk="${k}">${opts.map(o=>`<option value="${o[0]}"${v===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select>`;
