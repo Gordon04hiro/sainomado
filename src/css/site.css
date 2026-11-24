@@ -648,3 +648,11 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .excard .chip{justify-self:start}
 .exchart{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:12px}
 @media (max-width:760px){.exwrap{grid-template-columns:1fr}}
+
+/* 住宅ローン診断：おすすめの予算 */
+.recbox{margin:14px 0;padding:14px 18px;border:2px solid var(--brand);border-radius:var(--r-card);background:var(--surface);display:grid;gap:4px}
+.recbox .rt{margin:0;font-weight:700;color:var(--brand);font-size:14px}
+.recbox .rv{margin:0}.recbox .rv b{font-size:28px}.recbox .rv small{font-size:13px;color:var(--muted);margin-left:4px}
+.recbox .rd{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink)}
+.panels.p3{grid-template-columns:repeat(2,minmax(0,1fr))}.panels.p3>.panel:nth-child(3){grid-column:1/-1}
+@media (max-width:640px){.panels.p3{grid-template-columns:1fr}}
