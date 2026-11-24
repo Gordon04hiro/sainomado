@@ -262,6 +262,8 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('都道府県・市区町村ごとの単価の幅ができる',A&&A.name==='静岡県'&&A.C['22131'].m.q[1]>A.C['22132'].m.q[1]&&A.C['22131'].m.q[0]<A.C['22131'].m.q[2]);
    check('築年数が古いほど補正が小さい',A.curve.m[0]>A.curve.m[6]&&A.curve.m.every((v,i,a)=>!i||v<=a[i-1]));
    const est=A.C['22131'].m.q[1]*A.curve.m[SB.band(10)]*70/1e4;check('浜松市中央区・築10年・70㎡のめやすが妥当な範囲',est>1500&&est<3000,Math.round(est)+'万円');}
+  {const w=await open('index.html');const html=w.document.querySelector('.exwrap').textContent;
+   check('トップの結果の例は、保存した入力ではなく入力例で計算する',/3,000万円の家/.test(html)&&/4,500万円の家/.test(html));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
