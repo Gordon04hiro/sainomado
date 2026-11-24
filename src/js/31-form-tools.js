@@ -3,7 +3,10 @@ const GT={};
 function gtState(def){
   if(GT[def.id]) return GT[def.id];
   let v=null;try{const s=localStorage.getItem('sainomado-'+def.id+'-v1');if(s)v=JSON.parse(s)}catch(e){}
-  if(!v) v=Object.assign(def.base(),{example:true});
+  let fresh=false;try{if(sessionStorage.getItem('sainomado-lp-fresh')===def.id){sessionStorage.removeItem('sainomado-lp-fresh');fresh=true}}catch(e){}
+  if(!v||fresh) v=Object.assign(def.base(),{example:true});
+  /* ライフプラン診断に自分の入力があれば、まだ何も入れていないツールにはその値を最初から入れる */
+  if(v.example&&!v.noLp&&def.fromLP&&typeof lpSrc==='function'){const S=lpSrc();if(S){def.fromLP(v,clone(S));v.example=false;v.fromLp=true}}
   if(def.fix) def.fix(v);
   GT[def.id]=v;return v;
 }
@@ -20,7 +23,7 @@ function vGen(def,v){
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › ${esc(def.title)}</div>
   <div class="thead"><h1>${esc(def.title)}</h1><p>${def.lead}</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
-   <p class="unit exnote" style="margin-top:8px"${V.example?'':' hidden'}>いまは入力例（${def.example}）が入っています。ご自分の数字に書き換えてください。</p><p class="resetrow" style="margin:8px 0 0"${V.example?' hidden':''}><button class="btn small ghost" data-act="gtreset" data-id="${def.id}">入力例に戻す</button></p></div>
+   <p class="unit lpnote2" style="margin-top:8px"${V.fromLp?'':' hidden'}>✓ ライフプラン診断の入力（年齢・年収など）を引き継いでいます。違うところは書き換えてください。</p><p class="unit exnote" style="margin-top:8px"${V.example?'':' hidden'}>いまは入力例（${def.example}）が入っています。ご自分の数字に書き換えてください。</p><p class="resetrow" style="margin:8px 0 0"${V.example?' hidden':''}><button class="btn small ghost" data-act="gtreset" data-id="${def.id}">入力例に戻す</button></p></div>
   <div class="formgrid">${def.groups.map(g=>`<details class="grp" open><summary>${g.g}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body"><div class="fields">${g.f.map(f=>gtField(def,f,V)).join('')}</div></div></details>`).join('')}</div>
   <section class="result" id="gresult"></section></div>`;
   gtVis(def); gtRender(def);
@@ -28,17 +31,17 @@ function vGen(def,v){
 function gtRender(def){
   const box=document.getElementById('gresult'); if(!box) return;
   const V=gtState(def), R=def.calc(V);
-  box.innerHTML=`<div class="exportbar" style="justify-content:flex-end">${shareBtn()}</div>`+def.result(V,R)+`<div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${def.related.map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
+  box.innerHTML=`<div class="exportbar" style="justify-content:flex-end">${shareBtn()}</div>`+def.result(V,R)+(def.toLP?gtBridge(def,V,R):'')+`<div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${def.related.map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
   const d=document.getElementById('dockin'); if(d&&def.dock){const k=def.dock(V,R);d.innerHTML=`<div class="v"><span>${k[0]}<b class="${k[2]?'neg':''}">${k[1]}</b></span></div><button class="btn primary" data-act="togresult">結果を見る</button>`}
 }
 let gT=0;
 document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.gt)return;const def=GDEF[t.dataset.gt];const V=gtState(def);const f=def.groups.flatMap(g=>g.f).find(x=>x.id===t.dataset.gk);
-  V[t.dataset.gk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));V.example=false;if(def.onChange)def.onChange(V,t.dataset.gk);if(def.id==='loan'&&t.dataset.gk==='rate'&&V.rtype!=='custom'){V.rtype='custom';const sl=document.getElementById('g_loan_rtype');if(sl)sl.value='custom'}exShown(false);gtVis(def);gtSave(def);clearTimeout(gT);gT=setTimeout(()=>gtRender(def),250)});
+  V[t.dataset.gk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));V.example=false;if(V.fromLp){V.fromLp=false;const ln=document.querySelector('.lpnote2');if(ln)ln.hidden=true}if(def.onChange)def.onChange(V,t.dataset.gk);if(def.id==='loan'&&t.dataset.gk==='rate'&&V.rtype!=='custom'){V.rtype='custom';const sl=document.getElementById('g_loan_rtype');if(sl)sl.value='custom'}exShown(false);gtVis(def);gtSave(def);clearTimeout(gT);gT=setTimeout(()=>gtRender(def),250)});
 /* 入力例に戻す（直前の入力は「元に戻す」で戻せる） */
 let gtPrev=null;
 function exShown(ex){const a=document.querySelector('.exnote'),b=document.querySelector('.resetrow');if(a)a.hidden=!ex;if(b)b.hidden=ex}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,v=document.getElementById('view');
-  if(a==='gtreset'){const def=GDEF[b.dataset.id];if(!def)return;gtPrev={id:def.id,V:clone(gtState(def))};GT[def.id]=Object.assign(def.base(),{example:true});gtSave(def);vGen(def,v);toastAct('入力例に戻しました','元に戻す','gtundo')}
+  if(a==='gtreset'){const def=GDEF[b.dataset.id];if(!def)return;gtPrev={id:def.id,V:clone(gtState(def))};GT[def.id]=Object.assign(def.base(),{example:true,noLp:true});gtSave(def);vGen(def,v);toastAct('入力例に戻しました','元に戻す','gtundo')}
   else if(a==='gtundo'&&gtPrev){const def=GDEF[gtPrev.id];GT[def.id]=gtPrev.V;gtPrev=null;gtSave(def);document.getElementById('toast').hidden=true;vGen(def,v);toast('元の入力に戻しました')}
   else if(a==='svreset'){svPrev=clone(SV);SV=sellBase();saveSV();vSell(v);toastAct('入力例に戻しました','元に戻す','svundo')}
   else if(a==='svundo'&&svPrev){SV=svPrev;svPrev=null;saveSV();document.getElementById('toast').hidden=true;vSell(v);toast('元の入力に戻しました')}

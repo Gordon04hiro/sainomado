@@ -87,7 +87,7 @@ document.addEventListener('click',e=>{
   else if(a==='pdf') track('export_pdf',{tool:r});
   else if(a==='xlsx') track('export_excel',{tool:r});
   else if(a==='mode2') track('lifeplan_mode',{mode:b.dataset.m});
-  else if(/2lp$/.test(a)) track('lp_compare',{tool:a.replace(/2lp$/,'')});
+  else if(/2lp$/.test(a)) track('lp_compare',{tool:b.dataset.id||a.replace(/2lp$/,'')});
   else if(a==='addplan') track('lp_add_pattern',{tool:'lifeplan',method:'manual'});
   else if(a==='lever') track('lp_add_pattern',{tool:'lifeplan',method:'lever_'+b.dataset.k});
 });
