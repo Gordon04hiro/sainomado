@@ -79,6 +79,15 @@ function purposeHTML(){
   ${PURPOSE.map(p=>`<div class="pgroup" id="${p.id}"><div class="pghead"><h3>${p.t}</h3>${HUBS.find(h=>h.slug===p.hub)?`<a href="#g-${p.hub}">順番にまとめたガイド →</a>`:''}</div><div class="tools">${p.tools.map(card).join('')}</div></div>`).join('')}`;
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(!b)return;const el=document.getElementById(b.dataset.jump);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+/* トップの「診断結果の例」：入力例の家族で、物件価格だけを変えた2つのパターンを実際に計算して並べる */
+function exampleHTML(S0){
+  const P=[[S0.price,'の家を買う'],[Math.round(n(S0.price)*1.5/100)*100,'の家を買う']].map(([price,l],i)=>{const T=clone(S0);T.price=price;const r=sim(T),s=summarize(r,T);return{T,r,s,l:fmt(price)+'万円'+l,col:i?'var(--coin)':'var(--accent)'}});
+  const card=(p,k)=>`<div class="excard"><div class="ext"><span class="dot" style="background:${p.col}"></span>パターン${k}：${p.l}</div><div class="exv"><span>95歳時点の金融資産</span><b>${fmt(p.s.last.bal)}<small> 万円</small></b></div><span class="chip ${p.s.st.c}">${p.s.st.t}</span><span class="unit" style="margin:0">${p.s.neg?`${p.s.neg.a}歳で、預貯金などすぐに使えるお金が底をつきます（iDeCoなど引き出せる年齢が決まっているお金を除く）`:'95歳まで、すぐに使えるお金が足りなくなることはありません'}</span></div>`;
+  return `<section class="wrap sect"><h2>診断でわかること</h2><p class="lead">入力例の家族（35歳・夫婦と子ども2人・手取り年収 夫${fmt(S0.inc)}万円／妻${fmt(S0.sinc)}万円）で、家の価格だけを変えて比べた結果です。同じ収入でも、選び方で老後のお金が大きく変わります。</p>
+   <div class="exwrap"><div class="excards">${card(P[0],'A')}${card(P[1],'B')}</div>
+   <div class="exchart">${chartSVG([{rows:P[0].r,color:P[0].col},{rows:P[1].r,color:P[1].col}],null,'exc')}<p class="unit" style="margin:4px 0 0">金融資産（預貯金・投資など）の推移。万円</p></div></div>
+   <div class="acts" style="margin-top:14px"><a class="btn primary" href="#lifeplan">わが家の場合を確かめる</a></div></section>`;
+}
 function vHome(v){
   const S=LP.plans.A,r=sim(S),s=summarize(r,S);
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
@@ -98,6 +107,7 @@ function vHome(v){
    <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/></svg></span><span><b>宅地建物取引士が作成</b>売買・相続の現場の目線で</span></div>
    <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg></span><span><b>データの出典を公開</b><a href="#data">使っているデータ</a>で確認できます</span></div>
   </section>
+  ${exampleHTML(S)}
   <section class="wrap sect" id="tools"><h2>ツール</h2><p class="lead">どれも無料・登録不要。計算はお使いの端末の中だけで行います。まず家計全体を見るなら、ライフプラン診断から。</p>
    <div class="tools">
     <a class="tool feat" href="#lifeplan"><span class="ic">${IC.plan}</span><span><h3>ライフプラン診断</h3><p>家族・収入・住まいを入れると、毎年の収支と貯蓄の推移がわかります。住宅購入あり・なしなど、3パターンまで比べられます。</p></span><span class="go">はじめる →</span></a>
