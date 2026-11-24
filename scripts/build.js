@@ -42,12 +42,12 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
     const code=String(ad['コード']||'').trim();if(!code)return '';pr=true;
     return `\n\n<aside class="pr-box" data-aff="${k}"><span class="pr-label">PR</span><b>${ad['見出し']||''}</b>${ad['説明']?`<p>${ad['説明']}</p>`:''}<div class="pr-code">${code}</div></aside>\n\n`});
   // 囲み（:::ポイント 〜 :::）と数字のカード（:::数字）
-  const BOX={'ポイント':'point','注意':'warn','まとめ':'sum','例':'ex','数字':'num'};
+  const BOX={'ポイント':'point','注意':'warn','まとめ':'sum','例':'ex','数字':'num','現場メモ':'memo'};
   body=body.replace(/^:::(\S+)[ \t]*(.*)\n([\s\S]*?)\n:::[ \t]*$/gm,(_,t,ttl,inner)=>{
     const c=BOX[t];if(!c)fail(`記事 ${f} の「:::${t}」は使えません（使えるのは ${Object.keys(BOX).join('・')}）`);
     let html;
     if(c==='num') html=`<div class="numcards">${inner.split('\n').filter(l=>l.trim()).map(l=>{const [v,d]=l.replace(/^[-*]\s*/,'').split('|');return `<div class="numcard"><b>${marked.parseInline((v||'').trim())}</b><span>${marked.parseInline((d||'').trim())}</span></div>`}).join('')}</div>`;
-    else html=`<div class="box box-${c}"><p class="box-t">${ttl.trim()||({point:'この記事のポイント',warn:'気をつけたいこと',sum:'まとめ',ex:'計算例'})[c]}</p>${marked.parse(inner)}</div>`;
+    else html=`<div class="box box-${c}"><p class="box-t">${ttl.trim()||({point:'この記事のポイント',warn:'気をつけたいこと',sum:'まとめ',ex:'計算例',memo:'現場メモ（不動産の実務から）'})[c]}</p>${marked.parse(inner)}</div>`;
     return '\n\n'+html.replace(/\n+/g,' ')+'\n\n'});
   const tool=fm['関連ツール']?TOOLMAP[fm['関連ツール']]:'';
   if(fm['関連ツール']&&!tool) fail(`記事 ${f} の関連ツール「${fm['関連ツール']}」が見つかりません`);

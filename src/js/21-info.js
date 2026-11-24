@@ -6,6 +6,12 @@ function profileHTML(){
   return `<div class="prof"><div class="prof-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><circle cx="12" cy="15" r="2.5"/></svg></div><div><p class="prof-n">${esc(P['名前']||'サイのまど運営者')}</p><ul>${items}</ul>
    <p>不動産の売買や相続の相談を日々受けている立場から、現場でよく聞かれる疑問や、決める前に知っておきたい数字をまとめています。記事とツールは、公的な統計や制度の資料を確認したうえで作成し、出典は「<a href="#data">使っているデータ</a>」で公開しています。</p></div></div>`;
 }
+/* 記事の最後の「この記事を書いた人」 */
+function authorBoxHTML(){const P=SITE_CFG.prof||{};const Q=[].concat(P['資格']||[]).filter(Boolean),yrs=String(P['実務年数']||'').trim(),cy=String(P['会社の年数']||'').trim();
+  return `<aside class="authorbox" aria-label="この記事を書いた人"><div class="prof-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><circle cx="12" cy="15" r="2.5"/></svg></div><div>
+   <p class="at">この記事を書いた人</p><p><b class="an">${esc(P['名前']||'サイのまど運営者')}</b>${Q[0]?'（'+esc(Q[0])+'）':''}</p>
+   <p>${cy?`業歴${esc(cy)}の不動産会社で、`:''}不動産の売買の仲介・管理${yrs?`（実務${esc(yrs)}）`:''}${P['相続の相談']?'や、相続した家の相談':''}に携わっています。記事は公的な資料を確認して作成し、制度が変わったときに見直しています。</p>
+   <p style="margin:0"><a href="#about">運営者とサイトについて →</a></p></div></aside>`}
 function bylineHTML(){const P=SITE_CFG.prof||{};return `<p class="byline">執筆・監修：<a href="#about">${esc(P['名前']||'サイのまど運営者')}</a>${[].concat(P['資格']||[])[0]?'（'+esc([].concat(P['資格'])[0])+'）':''}</p>`}
 /* 無料のFPツール（「FPツール 無料」「ライフプラン シミュレーション」などで探している一般の方向け） */
 function vFpTool(v){

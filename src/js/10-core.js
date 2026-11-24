@@ -75,10 +75,15 @@ const PURPOSE=[
 ];
 function purposeHTML(){
   const card=id=>{const t=TOOLS.find(x=>x.href==='#'+id);return t?toolCard(t):''};
-  return `<nav class="purpose" aria-label="目的から選ぶ">${PURPOSE.map(p=>`<button type="button" data-jump="${p.id}"><b>${p.t}</b><small>${p.d}</small></button>`).join('')}</nav>
-  ${PURPOSE.map(p=>`<div class="pgroup" id="${p.id}"><div class="pghead"><h3>${p.t}</h3>${HUBS.find(h=>h.slug===p.hub)?`<a href="#g-${p.hub}">順番にまとめたガイド →</a>`:''}</div><div class="tools">${p.tools.map(card).join('')}</div></div>`).join('')}`;
+  let cur=PURPOSE[0].id;try{const x=sessionStorage.getItem('sainomado-purpose');if(PURPOSE.some(p=>p.id===x))cur=x}catch(e){}
+  return `<nav class="purpose" role="tablist" aria-label="目的から選ぶ">${PURPOSE.map(p=>`<button type="button" role="tab" data-ptab="${p.id}" aria-controls="${p.id}" aria-selected="${p.id===cur}"><b>${p.t}</b><small>${p.d}</small></button>`).join('')}</nav>
+  ${PURPOSE.map(p=>`<div class="pgroup" role="tabpanel" id="${p.id}"${p.id===cur?'':' hidden'}><div class="pghead"><h3>${p.t}</h3>${HUBS.find(h=>h.slug===p.hub)?`<a href="#g-${p.hub}">順番にまとめたガイド →</a>`:''}</div><div class="tools">${p.tools.map(card).join('')}</div></div>`).join('')}`;
 }
-document.addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(!b)return;const el=document.getElementById(b.dataset.jump);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+/* 目的のタブ：押したグループだけを表示（ほかは隠す）。選んだタブは同じ画面のうちは覚えておく */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-ptab]');if(!b)return;const id=b.dataset.ptab;
+  document.querySelectorAll('[data-ptab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+  PURPOSE.forEach(p=>{const el=document.getElementById(p.id);if(el)el.hidden=p.id!==id});
+  try{sessionStorage.setItem('sainomado-purpose',id)}catch(x){}});
 /* トップの「診断結果の例」：入力例の家族で、物件価格だけを変えた2つのパターンを実際に計算して並べる */
 function exampleHTML(S0){
   const P=[[S0.price,'の家を買う'],[Math.round(n(S0.price)*1.5/100)*100,'の家を買う']].map(([price,l],i)=>{const T=clone(S0);T.price=price;const r=sim(T),s=summarize(r,T);return{T,r,s,l:fmt(price)+'万円'+l,col:i?'var(--coin)':'var(--accent)'}});
