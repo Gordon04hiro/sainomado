@@ -599,6 +599,13 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 @media (min-width:760px){.purpose{grid-template-columns:repeat(4,1fr)}}
 .purpose button{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--brand-soft);border:1.5px solid transparent;border-radius:var(--r-card);padding:12px;font:inherit;color:var(--ink);cursor:pointer}
 .purpose button:hover{border-color:var(--brand)}
+.purpose button[aria-selected="true"]{background:var(--surface);border-color:var(--brand);box-shadow:0 2px 0 var(--brand)}
+.pgroup[hidden]{display:none}
+.authorbox{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;margin-top:22px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface)}
+.authorbox .prof-ic{width:44px;height:44px}
+.authorbox p{margin:0 0 4px;font-size:13.5px;line-height:1.7}.authorbox .at{font-size:12px;color:var(--muted);margin:0}
+.authorbox b.an{font-size:15px}
+.box-memo{border-color:#5b7fa6;background:#f2f6fb}.box-memo .box-t{color:#3f6286}.box-memo .box-t::before{content:"✎";background:#5b7fa6}
 .purpose b{font-size:15px;color:var(--brand-ink)}.purpose small{font-size:12px;color:var(--muted);line-height:1.5}
 .pgroup{margin-top:22px;scroll-margin-top:76px}
 .pghead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;border-bottom:2px solid var(--line);padding-bottom:6px}

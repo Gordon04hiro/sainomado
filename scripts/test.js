@@ -142,7 +142,9 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('質問の途中は結果を出さない',d.getElementById('result').hidden===true);
    w.close();}
 
-  {const w=await open('index.html'),d=w.document;check('トップに「目的から選ぶ」入口が4つある',d.querySelectorAll('.purpose [data-jump]').length===4&&d.querySelectorAll('.pgroup').length===4);
+  {const w=await open('index.html'),d=w.document;check('トップに「目的から選ぶ」タブが4つある',d.querySelectorAll('.purpose [data-ptab]').length===4&&d.querySelectorAll('.pgroup').length===4);
+   check('最初は1つ目のグループだけ表示',!d.getElementById('p-buy').hidden&&d.getElementById('p-sell').hidden&&d.getElementById('p-life').hidden);
+   click(w,'[data-ptab="p-inherit"]');check('タブを押すとそのグループだけ表示',!d.getElementById('p-inherit').hidden&&d.getElementById('p-buy').hidden&&d.querySelector('[data-ptab="p-inherit"]').getAttribute('aria-selected')==='true');
    check('同じアイコンのツールがない（賃貸vs持ち家と中古住宅チェック）',d.querySelector('#p-buy a[href$="chuko.html"] .ic')?.innerHTML!==d.querySelector('#p-buy a[href$="vs.html"] .ic')?.innerHTML);w.close();}
   {const w=await open('lifeplan.html'),d=w.document;
    check('ライフプラン：運用しなかった場合の点線と「運用で増える分」が出る',!!d.querySelector('.nibox')&&/運用で増える分の目安/.test(d.querySelector('.nibox').textContent)&&d.querySelectorAll('#ch1 polyline').length>=2);
@@ -246,7 +248,8 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('404ページはサイトマップに載らない',!/404/.test(sm));
    const h=fs.readFileSync(path.join(DIST,'articles/sell-cost.html'),'utf8');
    check('記事の途中にツールへの案内がある',/class="toolcta"/.test(h));
-   check('記事からテーマのまとめへのリンクがある',/class="hublink"/.test(h));}
+   check('記事からテーマのまとめへのリンクがある',/class="hublink"/.test(h));
+   check('記事の最後に「この記事を書いた人」がある',/class="authorbox"/.test(h)&&/この記事を書いた人/.test(h));}
   {const stub=w=>{const m={};Object.defineProperty(w,'sessionStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})};
    const w=await open('index.html');stub(w);w.document.querySelector('.hero [data-lpguide]').addEventListener('click',e=>e.preventDefault());click(w,'.hero [data-lpguide]');check('トップの「はじめる」で印が付く',w.sessionStorage.getItem('sainomado-lp-guide')==='1');
    const w2=await open('lifeplan.html');stub(w2);w2.sessionStorage.setItem('sainomado-lp-guide','1');click(w2,'[data-act="mode2"][data-m="easy"]');await wait(300);
