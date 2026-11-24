@@ -275,6 +275,17 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const t=w.document.querySelector('.recbox');check('ライフプランの入力があると「おすすめの予算」が出る',!!t&&/約[\d,]+万円まで/.test(t.textContent),t&&t.textContent);
    const poor=Object.assign({},bp,{inc:300,sinc:0,spouse:'yes'});const w2=await open('loan.html','',mem({plans:{A:poor},names:{A:'今のまま'},example:false}));
    const t2=w2.document.querySelector('.recbox');check('家計に余裕がないと、家計全体で見た上限がおすすめになる',!!t2&&/家計全体で見た上限/.test(t2.textContent),t2&&t2.textContent);}
+  console.log('\n■ ツールのつながり');
+  {const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));
+   check('ライフプランの結果に「次に確かめること」（家を買う計画なら住宅ローン診断）',!!w0.document.querySelector('.nextbox a[href$="loan.html"],.nextbox a[href="#loan"]'),T(w0.document,'.nextbox h3').join('/'));w0.close();
+   const mem=(lp)=>w=>{const m={'sainomado-lifeplan-v1':JSON.stringify(lp)};Object.defineProperty(w,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}});Object.defineProperty(w,'sessionStorage',{configurable:true,value:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}}})};
+   const P=Object.assign({},bp,{inc:600});const lp={plans:{A:P},names:{A:'今のまま'},example:false};
+   let w=await open('loan.html','',mem(lp));const d=w.document;
+   check('住宅ローン診断にライフプランの年収・年齢を引き継ぐ',!d.querySelector('.lpnote2').hidden&&d.getElementById('g_loan_income').value==='770'&&d.getElementById('g_loan_age').value==='35',d.getElementById('g_loan_income').value);w.close();
+   w=await open('furusato.html','',mem(lp));check('ふるさと納税に額面の年収（手取りから逆算）を引き継ぐ',w.document.getElementById('g_furusato_gross').value==='770');w.close();
+   w=await open('prepay.html');check('繰上げ返済の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="prepay"]'));w.close();
+   w=await open('zoyo.html');check('贈与税の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="zoyo"]'));w.close();
+   w=await open('loan.html');check('ライフプラン未入力なら引き継ぎの表示は出ない',w.document.querySelector('.lpnote2').hidden);w.close();}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
