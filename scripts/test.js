@@ -401,6 +401,15 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     click(w4,'#mtnudge [data-act="mtnclose"]');check('閉じると覚えておく',!w4.document.getElementById('mtnudge')&&m4['sainomado-mtnudge-v1']==='2');w4.close();
     w4=await open('loan.html','',mk(m4));await wait(1600);check('閉じたあとは、ツールが増えるまで出さない',!w4.document.getElementById('mtnudge'));w4.close();
     w4=await open('loan.html');await wait(1600);check('何も使っていない人には出さない',!w4.document.getElementById('mtnudge')&&w4.document.querySelector('.mtlink').hidden);w4.close()}
+   {const m5={};let w5=await open('iryou.html','',mk(m5));const tx=()=>w5.document.getElementById('gresult').textContent;
+    check('病気・けがの備え診断：4つの場面',w5.document.querySelectorAll('#gresult .panel').length===4&&/2週間の入院/.test(tx())&&/がんなどで1年の治療/.test(tx()));
+    check('高額療養費（2026年8月から・ウ区分）の上限と年間上限',/85,800円＋（医療費−286,000円）×1%/.test(tx())&&/1年の上限は53万円/.test(tx()));
+    check('2週間の入院：医療費の自己負担 約9.9万円（入院70万円→89,940円＋通院）',/医療費の自己負担9\.9万円/.test(tx().replace(/\s/g,'')));
+    check('1年の治療は年間上限53万円で止まる',/医療費の自己負担53万円/.test(tx().replace(/\s/g,'')));
+    const setv=(id,v)=>{const el=w5.document.getElementById(id);el.value=v;el.dispatchEvent(new w5.Event('input',{bubbles:true}));el.dispatchEvent(new w5.Event('change',{bubbles:true}))};
+    setv('g_iryou_job','self');await wait(500);
+    check('自営業は収入の減少がそのまま（1年で390万円）・足りない分を月あたりで',/収入の減少390万円/.test(tx().replace(/\s/g,''))&&/働けない間の収入を補う/.test(tx()));
+    w5.close();w5=await open('matome.html','',mk(m5));check('わが家のまとめに病気・けがの備え',/病気・けがの備え診断/.test(w5.document.getElementById('view').textContent));w5.close()}
    check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
    w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}
   console.log('\n■ 計測');

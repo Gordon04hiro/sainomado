@@ -92,9 +92,9 @@ money:
       ツール: [lifeplan]
       記事: [lifeplan-tsukaikata, kakei-kessansho, rougo-shikin]
     - 見出し: もしものときに備える
-      説明: 家計の柱が亡くなったとき、遺族年金と貯蓄でどこまでまかなえるか。足りない分が、保険で備える額の目安です。
-      ツール: [hoshou]
-      記事: [hitsuyou-hoshou, izoku-nenkin]
+      説明: 家計の柱が亡くなったとき、病気やけがで働けなくなったとき。公的な制度と貯蓄でどこまでまかなえるかを確かめると、保険で備える額の目安がわかります。
+      ツール: [hoshou, iryou]
+      記事: [hitsuyou-hoshou, izoku-nenkin, iryou-hoken]
     - 見出し: 教育費に備える
       説明: 進路によって教育費は大きく変わります。使う時期が決まっているお金なので、早めの準備が安心です。
       ツール: []
