@@ -68,7 +68,7 @@ function printReport(){
   const ret=cur.r.find(x=>x.a===Math.round(n(cur.S.workEnd)))||cur.r[cur.r.length-1];
   const el=document.getElementById('printArea');
   el.innerHTML=`<header class="pr-h"><div><b>サイのまど</b> 住まいとお金の無料シミュレーション</div><div>${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 作成</div></header>
-   <h1>ライフプラン診断レポート</h1>
+   <h1>ライフプラン診断レポート</h1>${LP.example?'<p class="pr-lg">※ 入力例の家族（35歳・夫婦と子ども2人）で計算した結果です。自分の数字を入れると、わが家の結果になります。</p>':''}
    <h2>結果のまとめ</h2><table class="cf"><tbody><tr class="hd"><th>パターン</th><td>判定</td><td>95歳時点の金融資産</td><td>仕事を辞める時</td><td>いちばん少ない時</td><td>95歳時点の純資産</td></tr>
     ${ks.map(k=>{const s=R[k].s;return `<tr><th>${k}：${esc(LP.names[k]||'')}</th><td>${s.st.t}</td><td>${fmt(s.last.bal)}万円</td><td>${fmt(s.retire.bal)}万円</td><td>${s.min.a}歳 ${fmt(s.min.bal)}万円</td><td>${fmt(s.last.bs.nw)}万円</td></tr>`}).join('')}</tbody></table>
    <h2>金融資産の推移</h2>${chartSVG(ks.map(k=>({rows:R[k].r,color:PCOL[k],dash:PDASH[k]})),null,'pr1')}
@@ -79,8 +79,12 @@ function printReport(){
    <h2 class="pr-break">キャッシュフロー表（パターン${key}・5年ごと／万円）</h2>${cfTable(cur.r,cur.S,5)}
    <h2>前提条件</h2><table class="cf"><tbody>${premiseRows(key).map(x=>`<tr><th>${esc(x[0])}</th><td style="text-align:left">${esc(x[1])}</td></tr>`).join('')}</tbody></table>
    <p class="pr-note">手取りベースの簡易試算です。税金・社会保険料・住宅ローン控除は含みません。教育費は文部科学省「子供の学習費調査」（令和5年度）・日本政策金融公庫「教育費負担の実態調査」（令和3年度）の平均値を使用しています。結果は入力された条件にもとづく目安で、将来の結果を保証するものではありません。</p>`;
-  try{window.print()}catch(e){}
+  prPrint();
   if(PREVIEW) toast('プレビュー画面では印刷できません。公開したサイトでは、印刷画面で「PDFに保存」を選べます');
 }
 
 
+
+/* PDF用の印刷（#printArea だけを出す）。ふつうにブラウザで印刷したときは、ページそのものを印刷する */
+function prPrint(){document.body.classList.add('printing');try{window.print()}catch(e){}}
+window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));

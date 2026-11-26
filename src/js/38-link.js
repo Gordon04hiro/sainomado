@@ -22,14 +22,14 @@ const FROMLP={
 Object.entries(FROMLP).forEach(([k,f])=>{if(GDEF[k])GDEF[k].fromLP=f});
 
 const TOLP={
-  prepay:{t:'繰上げ返済すると、家計はどうなる？',d:(V,R)=>`${fmt(R.A)}万円を今繰上げ返済（期間短縮型）するパターンを、ライフプラン診断に追加して、手元のお金の動きまで確かめられます。`,
+  prepay:{t:'繰上げ返済したあとの家計を確かめる',d:(V,R)=>`${fmt(R.A)}万円を今繰上げ返済（期間短縮型）するパターンを、ライフプラン診断に追加して、手元のお金の動きまで確かめられます。`,
     name:'繰上げ返済する',apply(T,V,R){const age=Math.round(n(T.age));T.events=(T.events||[]).concat([{name:'繰上げ返済（繰上げ返済シミュレーターより）',age,amt:Math.round(R.A),kind:'out'}]);
       if(T.house==='own'&&n(T.loanEnd)>age)T.loanEnd=Math.max(age,Math.round(n(T.loanEnd)-R.short.months/12))}},
-  vs:{t:'この条件で買うと、家計はどうなる？',d:V=>`${fmt(n(V.price))}万円の家を買うパターンを、ライフプラン診断に追加して、教育費や老後まで続けて確かめられます。`,
+  vs:{t:'この条件で買ったあとの家計を確かめる',d:V=>`${fmt(n(V.price))}万円の家を買うパターンを、ライフプラン診断に追加して、教育費や老後まで続けて確かめられます。`,
     name:'この条件で家を買う',apply(T,V){T.house='buy';T.buyAge=Math.max(Math.round(n(T.age)),Math.round(n(V.age)));T.price=n(V.price);T.down=n(V.down);T.rate=n(V.rate);T.term=n(V.term);if(!(n(T.rent)>0))T.rent=n(V.rent)||8}},
-  rent2buy:{t:'この家を買うと、家計はどうなる？',d:(V,R)=>`今の家賃と同じ負担で買える家（約${fmt(R.price)}万円）を買うパターンを、ライフプラン診断に追加して確かめられます。`,
+  rent2buy:{t:'この家を買ったあとの家計を確かめる',d:(V,R)=>`今の家賃と同じ負担で買える家（約${fmt(R.price)}万円）を買うパターンを、ライフプラン診断に追加して確かめられます。`,
     name:'家賃と同じ負担で買う',apply(T,V,R){T.house='buy';T.buyAge=Math.max(Math.round(n(T.age)),Math.round(n(V.age)));T.price=Math.round(R.price);T.down=n(V.down);T.rate=n(V.rate);T.term=R.term||n(V.term);if(!(n(T.rent)>0))T.rent=n(V.rent)||8}},
-  zoyo:{t:'援助を受けると、家計はどうなる？',d:(V,R)=>`親などから${fmt(n(V.amount))}万円の援助を受けるパターンを、ライフプラン診断に追加して確かめられます（贈与税の目安を引いた額で入れます）。`,
+  zoyo:{t:'援助を受けたあとの家計を確かめる',d:(V,R)=>`親などから${fmt(n(V.amount))}万円の援助を受けるパターンを、ライフプラン診断に追加して確かめられます（贈与税の目安を引いた額で入れます）。`,
     name:'親から援助を受ける',apply(T,V,R){const tax=R.canHouse?Math.min(R.A,R.B,R.C):R.A;const age=planBuy(T)?Math.round(n(T.buyAge)):Math.round(n(T.age));
       T.events=(T.events||[]).concat([{name:'住宅資金などの贈与（贈与税の目安より）',age,amt:Math.max(0,Math.round(n(V.amount)-n(tax))),kind:'in'}])}}
 };

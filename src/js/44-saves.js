@@ -24,8 +24,10 @@ function svMatch(t){const R=svReg()[t];if(!R)return null;const cur=mtLoad(R.key)
 
 const SVHINT={sell:'物件ごとに保存しておけば、何軒あっても、わが家のまとめで並べて見られます。',souba:'物件ごとに保存しておけば、持っている家や実家の相場をまとめて見られます。',akiya:'相続した家・実家ごとに保存できます。',chuko:'内見した家ごとに保存して、見比べられます。',souzoku:'お父さん・お母さんなど、人ごとに分けて保存できます。',souzoku2:'相続ごとに分けて保存できます。'};
 const SVPH={sell:'例：自宅マンション',souba:'例：実家（静岡市）',akiya:'例：実家',chuko:'例：候補A 〇〇町の戸建て',souzoku:'例：父の分',souzoku2:'例：父の相続'};
+let SVOPEN=false; // まだ何も保存していないときは、1行だけの小さな表示にしておく
 function svBarHTML(t){
   const L=svList(t),cur=svCur(t),c=L.find(s=>s.id===cur);
+  if(!L.length&&!SVOPEN)return `<section class="svbar mini noprint" data-svtool="${t}"><button type="button" class="svopen" data-act="svopenbar"><b>＋ 名前を付けて保存</b><span>${t==='chuko'?'内見した家ごとに残せます':/^(sell|souba|akiya)$/.test(t)?'物件ごとに残せます':'条件を変えた案を残せます'}</span></button></section>`;
   return `<section class="svbar noprint" data-svtool="${t}"><div class="svhead"><b>名前を付けて保存</b><span class="unit">${esc(SVHINT[t]||'条件を変えた計算を、名前を付けて残しておけます。')}わが家のまとめ・PDFにも1件ずつ入ります（この端末にだけ保存）。</span></div>
    ${L.length?`<div class="svlist">${L.map(s=>`<span class="svchip${s.id===cur?' cur':''}"><button type="button" data-act="svload" data-id="${s.id}" title="この入力を呼び出す">${esc(s.name)}</button><button type="button" class="svdel" data-act="svdel" data-id="${s.id}" aria-label="${esc(s.name)}を削除">×</button></span>`).join('')}</div><p class="unit svnote">名前を押すと、その入力を呼び出します（今の入力は置き換わるので、残したいときは先に保存してください）。</p>`:''}
    <div class="svnew"><input class="txt" id="sv_name" maxlength="30" placeholder="${esc(SVPH[t]||'例：頭金を増やした場合')}" aria-label="保存する名前"><button type="button" class="btn small primary" data-act="svsave">今の入力を保存</button>${c?`<button type="button" class="btn small" data-act="svover" data-id="${c.id}">「${esc(c.name)}」に上書き</button>`:''}</div>
@@ -37,6 +39,7 @@ function svSnap(t){const R=svReg()[t],d=R.get();if(svEmpty(d))return null;const 
 const svNow=()=>{const d=new Date();return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()};
 document.addEventListener('click',e=>{const b=e.target.closest('.svbar [data-act]');if(!b)return;const t=b.closest('.svbar').dataset.svtool,a=b.dataset.act,L=svList(t);
   const nmEl=document.getElementById('sv_name'),nm=(nmEl&&nmEl.value||'').trim().slice(0,30);
+  if(a==='svopenbar'){SVOPEN=true;svRedraw(t);const i=document.getElementById('sv_name');if(i)i.focus();return}
   if(a==='svsave'){const d=svSnap(t);if(!d)return svRedraw(t,'まだ入力がありません。自分の数字を入れてから保存してください。');
     if(L.length>=SVMAX)return svRedraw(t,'保存できるのは'+SVMAX+'件までです。いらないものを×で消してから保存してください。');
     const id='s'+Date.now().toString(36),name=nm||('保存'+(L.length+1));L.push({id,name,at:svNow(),d});svPut(t,L);svSetCur(t,id);track('save_slot',{tool:t,n:L.length});svRedraw(t,'「'+name+'」として保存しました。');return}

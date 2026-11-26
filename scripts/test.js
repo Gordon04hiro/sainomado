@@ -371,6 +371,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     click(w,'[data-act="mtprint"]');const pc=w.document.getElementById('printArea').textContent;check('PDFにチェックシートのまだの項目と期限',/中古住宅チェックシート/.test(pc)&&/まだの手続き/.test(pc)&&/2027年/.test(pc));w.close()}
    {const m2={};let w2=await open('loan.html','',mk(m2));const sv=w2.document.querySelector('.svbar');check('ツールに「名前を付けて保存」',!!sv&&sv.dataset.svtool==='loan');
     const setv=(id,v)=>{const el=w2.document.getElementById(id);el.value=v;el.dispatchEvent(new w2.Event('input',{bubbles:true}))};
+    check('保存がないときは1行だけの表示',!!w2.document.querySelector('.svbar.mini')&&!w2.document.getElementById('sv_name'));click(w2,'[data-act="svopenbar"]');
     click(w2,'[data-act="svsave"]');check('何も入れていなければ保存しない',!m2['sainomado-saves-v1']&&/まだ入力がありません/.test(w2.document.querySelector('.svmsg').textContent));
     setv('g_loan_income','600');setv('sv_name','A案');click(w2,'[data-act="svsave"]');setv('g_loan_income','800');setv('sv_name','B案');click(w2,'[data-act="svsave"]');
     const S2=JSON.parse(m2['sainomado-saves-v1']||'{}');check('名前を付けて2件保存できる',S2.loan&&S2.loan.length===2&&S2.loan[0].name==='A案'&&S2.loan[0].d.income==600&&S2.loan[1].d.income==800);
