@@ -53,12 +53,13 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
   if(fm['関連ツール']&&!tool) fail(`記事 ${f} の関連ツール「${fm['関連ツール']}」が見つかりません`);
   // 本文の途中にツールへの案内（{{ツール}} と書いた場所。なければ3つ目の見出しの前に自動で入れる）
   if(tool){const tn=TOOLNAME[fm['関連ツール']];
-    const cta=`\n\n<aside class="toolcta"><b>ご自分の場合は？</b><span>${tn}で計算できます（無料・登録不要・入力は送信されません）</span><a class="btn small primary" href="${tool}">計算してみる</a></aside>\n\n`;
+    const ck=/チェックシート/.test(tn);
+    const cta=`\n\n<aside class="toolcta"><b>${ck?'自分の場合を確かめる':'自分の数字で計算する'}</b><span>${tn}で${ck?'順番に確かめられます':fm['関連ツール']==='souba'?'町名ごとに調べられます':'計算できます'}（無料・登録不要・入力は送信されません）</span><a class="btn small primary" href="${tool}">${ck?'チェックしてみる':fm['関連ツール']==='souba'?'相場を調べる':'計算してみる'}</a></aside>\n\n`;
     if(/\{\{ツール\}\}/.test(body)) body=body.replace(/\{\{ツール\}\}/g,cta);
     else{let k=0;body=body.replace(/^## /gm,m=>{k++;return k===3?cta+m:m})}}
   // 参考にした資料
   const refs=(fm['参考']||[]).map(x=>Array.isArray(x)?{t:x[0],u:x[1]}:{t:x['名前'],u:x['URL']}).filter(x=>x.t&&/^https:\/\//.test(x.u||''));
-  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,sub:fm['まとめ先']||'',pr,tool,lead:fm['リード'],stitle:fm['検索タイトル']||'',refs,il:fm['イラスト']||'',...(()=>{let k=0;const toc=[];const html=marked.parse(body).replace(/<h2>([\s\S]*?)<\/h2>/g,(_,t)=>{k++;toc.push(t.replace(/<[^>]+>/g,''));return `<h2 id="s${k}"><span class="hn">${k}</span><span>${t}</span></h2>`});return {body:html,toc,mins:Math.max(1,Math.round(body.replace(/<[^>]+>|[\s#*>|:-]/g,'').length/500))}})()};
+  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,sub:fm['まとめ先']||'',pr,tool,lead:fm['リード'],stitle:fm['検索タイトル']||'',refs,il:fm['イラスト']||'',...(()=>{let k=0;const toc=[];const html=marked.parse(body).replace(/<h2>([\s\S]*?)<\/h2>/g,(_,t)=>{k++;toc.push(t.replace(/<[^>]+>/g,''));return `<h2 id="s${k}"><span class="hn">${k}</span><span>${t}</span></h2>`}).replace(/<table>([\s\S]*?)<\/table>/g,(m,inner)=>{const cols=((inner.match(/<tr>[\s\S]*?<\/tr>/)||[''])[0].match(/<t[hd][ >]/g)||[]).length;return `<div class="tscroll${cols>=5?' wide':''}"><table>${inner}</table></div>`});return {body:html,toc,mins:Math.max(1,Math.round(body.replace(/<[^>]+>|[\s#*>|:-]/g,'').length/500))}})()};
 }).sort((a,b)=>b.date.localeCompare(a.date));
 // ---- 一次情報リンク集（content/links.yml）
 const LINKS=(fs.existsSync(R('content/links.yml'))?(Y('content/links.yml')||[]):[]).map((l,i)=>{

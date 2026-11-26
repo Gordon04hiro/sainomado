@@ -64,8 +64,10 @@ function mtSlots(){const R=typeof svReg==='function'?svReg():{},out=[];
 function mtWith(ov,fn){MTOV=ov;try{return fn()}finally{MTOV=null}}
 function mtItems(){
   const base=mtItemsBase(),sl=mtSlots(),out=[];
-  base.forEach(x=>{const own=sl.filter(o=>o.t===x.k);const m=own.find(o=>o.same);out.push(m?Object.assign({},x,{t:x.t+'：'+m.s.name,svopen:x.k+'|'+m.s.id}):x);
-    own.filter(o=>!o.same).forEach(o=>mtWith({[o.key]:o.s.d},()=>mtItemsBase(true)).filter(y=>y.k===o.t).forEach(y=>out.push(Object.assign(y,{k:o.t+'@'+o.s.id,t:y.t+'：'+o.s.name,svopen:o.t+'|'+o.s.id}))))});
+  // 保存したものは保存した順に並べる（今の入力が保存したものと同じなら、その位置に。違えば先頭に「今の入力」として）
+  base.forEach(x=>{const own=sl.filter(o=>o.t===x.k);if(!own.some(o=>o.same))out.push(x);
+    own.forEach(o=>{if(o.same)return out.push(Object.assign({},x,{t:x.t+'：'+o.s.name,svopen:x.k+'|'+o.s.id}));
+      mtWith({[o.key]:o.s.d},()=>mtItemsBase(true)).filter(y=>y.k===o.t).forEach(y=>out.push(Object.assign(y,{k:o.t+'@'+o.s.id,t:y.t+'：'+o.s.name,svopen:o.t+'|'+o.s.id})))})});
   // 今の入力はないが、保存したものだけあるツール
   const have=new Set(base.map(x=>x.k));
   sl.filter(o=>!have.has(o.t)).forEach(o=>mtWith({[o.key]:o.s.d},()=>mtItemsBase(true)).filter(y=>y.k===o.t).forEach(y=>out.push(Object.assign(y,{k:o.t+'@'+o.s.id,t:y.t+'：'+o.s.name,svopen:o.t+'|'+o.s.id}))));
@@ -101,7 +103,7 @@ function vMatome(v){
   v.innerHTML=`<div class="wrap matome"><div class="crumb noprint"><a href="#home">サイのまど</a> › わが家のまとめ</div>
    <div class="thead"><h1>わが家のまとめ</h1><p>サイのまどのツールで計算した結果を、1枚にまとめました。家族で話し合うときや、不動産会社・銀行・FPなどに相談するときに、印刷やPDFにして使えます。</p>
     <div class="safe noprint">✓ この端末に保存されている入力から、その場で計算し直しています。どこにも送信されません</div></div>
-   <div class="acts noprint"><button class="btn primary" data-act="mtprint">印刷・PDFにする</button><a class="btn" href="#tools">ほかのツールも使う</a></div>
+   <div class="acts noprint">${it.length?'<button class="btn primary" data-act="mtprint">印刷・PDFにする</button>':''}<a class="btn" href="#tools">ほかのツールも使う</a></div>
    ${it.length?`<div class="mtselbar noprint"><span id="mtcount"></span><button type="button" class="btn small" data-act="mtall" data-v="1">すべて入れる</button><button type="button" class="btn small" data-act="mtall" data-v="0">すべて外す</button><span class="unit">左のチェックを外すと、そのツールはPDFに入りません。PDFには、ツールごとの「主な条件」と「結果」がくわしく入ります。</span></div>`:''}
    <p class="mtdate">作成日：${ds}（サイのまど）</p>
    ${it.length?G.map(g=>{const a=it.filter(x=>x.g===g);if(!a.length)return '';return `<section class="mtsec"><h2>${{家計:'家計の見通し',買う:'家を買う・借りる',売る:'家を売る・住み替える',相続:'相続・実家'}[g]}</h2>${a.map(x=>`<div class="mtrow"><label class="mtck noprint" title="PDFに入れる"><input type="checkbox" data-mtsel="${x.k}"${off[x.k]?'':' checked'} aria-label="${esc(x.t)}をPDFに入れる"></label><div class="mtb"><p class="mtt">${esc(x.t)}</p><p class="mtv">${esc(x.v)}</p>${x.s?`<p class="mts">${x.c?`<span class="chip ${x.c}">${esc(x.s)}</span>`:esc(x.s)}</p>`:''}</div><a class="noprint" href="#${x.h}"${x.svopen?` data-svopen="${esc(x.svopen)}"`:''}>開く →</a></div>`).join('')}</section>`}).join(''):
@@ -116,7 +118,8 @@ document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.datase
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="mtall"]');if(!b)return;const on=b.dataset.v==='1',off={};if(!on)document.querySelectorAll('[data-mtsel]').forEach(x=>off[x.dataset.mtsel]=true);mtSaveSt({off});document.querySelectorAll('[data-mtsel]').forEach(x=>x.checked=on);mtCount()});
 function mtCount(){const c=document.getElementById('mtcount');if(!c)return;const ks=[...new Set([...document.querySelectorAll('[data-mtsel]')].map(x=>x.dataset.mtsel))],off=mtOff();c.textContent=ks.filter(k=>!off[k]).length+' / '+ks.length+' 件をPDFに入れます'}
 document.addEventListener('click',e=>{if(!e.target.closest('[data-act="mtprint"]'))return;track('export_pdf',{tool:'matome'});
-  const el=document.getElementById('printArea');if(el)el.innerHTML=mtReportHTML();window.print()});
+  const off=mtOff();if(!mtItems().some(x=>!off[x.k])){toast('PDFに入れる結果が選ばれていません。左のチェックで選んでください');return}
+  const el=document.getElementById('printArea');if(el)el.innerHTML=mtReportHTML();prPrint()});
 
 /* ---------- わが家のまとめ：くわしいPDF（印刷用のレポート） ----------
    画面は1行ずつのまとめ、PDFは「主な条件」と「結果」をツールごとに表で出す。ライフプランは前提・パターン比較・グラフ・5年ごとの収支も */
@@ -127,7 +130,7 @@ const MTOUT={
   loan:(V,R)=>{const C=loanRec(V,R);return[['無理なく返せる物件価格の目安',mman(R.priceOk)],['審査で借りられる上限の目安',mman(R.priceMax)],...(C.L.has&&C.L.max!=null?[['家計全体で見た上限（ライフプラン）',mman(C.L.max)]]:[]),...(C.L.has?[['おすすめの予算',mman(C.price)+'（'+C.why+'）']]:[]),['返済期間',R.term+' 年']]},
   rent2buy:(V,R)=>[['家賃と同じ負担で買える家の目安',mman(R.price)],['借入額',mman(R.borrow)],['毎月の返済',(Math.round(R.m*10)/10).toLocaleString('ja-JP')+' 万円'],['返済期間',R.term+' 年']],
   vs:(V,R)=>[['住居費の合計（賃貸）',mman(R.cr)],['住居費の合計（購入）',mman(R.cb)],['比べる年齢での家の価値',mman(R.value)],['購入の実質の負担（住居費−家の価値）',mman(R.net)]],
-  prepay:(V,R)=>[['繰上げ返済する額',mman(R.A)],['期間短縮型：減る利息',mman(R.short.saved)],['期間短縮型：短くなる期間',Math.floor(R.short.months/12)+'年'+(R.short.months%12)+'か月'],['返済額軽減型：減る利息',mman(R.light.saved)],['返済額軽減型：毎月の返済',(Math.round(R.light.M3*100)/100).toLocaleString('ja-JP')+' 万円']],
+  prepay:(V,R)=>[['繰上げ返済する額',mman(R.A)],['期間短縮型：減る利息',mman(R.short.saved)],['期間短縮型：短くなる期間',(m=>Math.floor(m/12)+'年'+(m%12)+'か月')(Math.round(R.short.months))],['返済額軽減型：減る利息',mman(R.light.saved)],['返済額軽減型：毎月の返済',(Math.round(R.light.M3*100)/100).toLocaleString('ja-JP')+' 万円']],
   koujo:(V,R)=>[[R.years+'年間で戻る額の目安',mman(R.tot)],['1年目に戻る額',(R.rows[0]?(Math.round(R.rows[0].got*10)/10).toLocaleString('ja-JP'):'—')+' 万円'],['控除しきれない額の合計',mman(R.totMax-R.tot)]],
   furusato:(V,R)=>[['ふるさと納税の上限の目安','約'+(Math.floor(R.limit*10)*1000).toLocaleString('ja-JP')+' 円'],['住民税の所得割',mman(R.shotokuwari)],['所得税の税率',R.rate+' %']],
   zoyo:(V,R)=>[['特例を使わない場合（暦年課税）',mman(R.A)],...(R.canHouse?[['住宅取得等資金の非課税を使う場合',mman(R.B)],['非課税＋相続時精算課税を使う場合',mman(R.C)]]:[])],
@@ -140,7 +143,7 @@ function mtToolSec(k){const def=GDEF[k];const v=mtLoad('sainomado-'+k+'-v1');if(
   try{const V=Object.assign(def.base(),v);if(def.fix)def.fix(V);const R=def.calc(V);
     const out=MTOUT[k]?MTOUT[k](V,R):def.dock?[def.dock(V,R).slice(0,2).map(x=>String(x).replace(/<[^>]+>/g,''))]:[];
     return `<section class="pr-sec"><h2>${esc(TITLES[k]||def.title)}</h2><div class="pr-2"><div><h3>主な条件</h3>${mtTbl(mtInputs(def.groups,V))}</div><div><h3>結果</h3>${mtTbl(out)}</div></div></section>`}catch(e){return ''}}
-const mtTbl=rows=>`<table class="cf mt"><tbody>${rows.map(([a,b])=>`<tr><th>${esc(a)}</th><td>${b}</td></tr>`).join('')}</tbody></table>`;
+const mtTbl=(rows,cls)=>`<table class="cf mt${cls?' '+cls:''}"><tbody>${rows.map(([a,b])=>`<tr><th>${esc(a)}</th><td>${b}</td></tr>`).join('')}</tbody></table>`;
 function mtLifeSec(){if(!LP||LP.example||!LP.plans)return '';
   const ks=Object.keys(LP.plans).sort(),R={};ks.forEach(k=>{const S=LP.plans[k],r=sim(clone(S));R[k]={S,r,s:summarize(r,S)}});
   const S=R.A?R.A.S:R[ks[0]].S,kids=(S.kids||[]).map(c=>(Y0-Math.round(n(c.by)))+'歳').join('・');
@@ -169,8 +172,8 @@ function mtReportHTML(){
   const SEC=[['souba',mtSoubaSec],['sell',mtSellSec],...['loan','rent2buy','vs','koujo','zoyo','prepay','chukai','akiya','souzokuzei','souzokubun','furusato'].map(k=>[k,()=>mtToolSec(k)]),['chuko',()=>mtCheckSec('chuko')],['souzoku',()=>mtCheckSec('souzoku')],['souzoku2',()=>mtCheckSec('souzoku2')]];
   const sl=mtSlots(),nm=(h,name)=>h.replace('</h2>','：'+esc(name)+'</h2>');
   const secs=[on('lp')?mtLifeSec():'',...SEC.flatMap(([k,f])=>{const own=sl.filter(o=>o.t===k),m=own.find(o=>o.same),a=[];
-    if(on(k)){const h=f();if(h)a.push(m?nm(h,m.s.name):h)}
-    own.filter(o=>!o.same&&on(k+'@'+o.s.id)).forEach(o=>{const h=mtWith({[o.key]:o.s.d},f);if(h)a.push(nm(h,o.s.name))});return a})].filter(Boolean);
+    if(!m&&on(k)){const h=f();if(h)a.push(h)}
+    own.forEach(o=>{if(o.same){if(on(k)){const h=f();if(h)a.push(nm(h,o.s.name))}return}if(!on(k+'@'+o.s.id))return;const h=mtWith({[o.key]:o.s.d},f);if(h)a.push(nm(h,o.s.name))});return a})].filter(Boolean);
   const it=mtItems().filter(x=>on(x.k));
   return `<header class="pr-h"><div><b>サイのまど</b> 住まいとお金の無料シミュレーション</div><div>${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日 作成</div></header>
    <h1>わが家のまとめ</h1>
@@ -188,5 +191,5 @@ function mtCheckSec(k){
     return `<section class="pr-sec"><h2>${esc(TITLES.souzoku2||'相続の手続きチェックシート')}</h2><p class="pr-lg">完了 ${d} / ${all.length} 項目${st.date?'（基準日 '+esc(st.date)+'）':''}。まだの手続き：</p>${mtTbl(rows.map(([a,b])=>[a,esc(b)]))}</section>`}
   const [key,G,t]=k==='chuko'?[CHUKOKEY,CHUKO,TITLES.chuko||'中古住宅チェックシート']:[CKEY,CHECKS,TITLES.souzoku||'相続の準備チェックシート'];
   const st=mtLoad(key)||{},all=G.flatMap(g=>g.items),d=all.filter(i=>st[i[0]]).length;if(!d)return '';
-  return `<section class="pr-sec"><h2>${esc(t)}</h2><p class="pr-lg">${k==='chuko'?'確認済み':'完了'} ${d} / ${all.length} 項目。まだの項目：</p>${mtTbl(G.flatMap(g=>g.items.filter(i=>!st[i[0]]).map(i=>[g.g,esc(i[1])])))}</section>`;
+  return `<section class="pr-sec"><h2>${esc(t)}</h2><p class="pr-lg">${k==='chuko'?'確認済み':'完了'} ${d} / ${all.length} 項目。まだの項目：</p>${mtTbl(G.flatMap(g=>g.items.filter(i=>!st[i[0]]).map(i=>[g.g,esc(k==='chuko'?chukoTodo(i[1]):i[1])])),'ck')}</section>`;
 }

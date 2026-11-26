@@ -45,7 +45,7 @@ function chRender(){
   sc.innerHTML=`<section class="panel" style="margin-bottom:14px"><div class="ph"><span class="nm">確認の進み具合</span><span class="chip ${st[0]}">${st[1]}</span></div><div class="kv">${kvRow('確かめた項目',done+'<small> / '+all.length+'</small>')}</div><div class="meter" aria-hidden="true"><i style="width:${pct}%"></i></div></section>`;
   const todo=CHUKO.map(g=>({g:g.g,items:g.items.filter(i=>!CHK[i[0]])})).filter(g=>g.items.length);
   document.getElementById('chresult').innerHTML=`<h2>まだ確かめていないこと</h2>${ctaHTML()}
-   ${todo.length?todo.map(g=>`<section class="advice"><h3>${esc(g.g)}</h3><ul>${g.items.map(i=>`<li><b>${esc(i[1].replace(/確かめた$|見た$|検討した$|歩いた$|見積もった$/,''))}</b></li>`).join('')}</ul></section>`).join(''):'<section class="advice"><p style="margin:0">すべての項目を確かめました。気になる点は、契約の前に不動産会社や専門家に確認しましょう。</p></section>'}
+   ${todo.length?todo.map(g=>`<section class="advice"><h3>${esc(g.g)}</h3><ul>${g.items.map(i=>`<li><b>${esc(chukoTodo(i[1]))}</b></li>`).join('')}</ul></section>`).join(''):'<section class="advice"><p style="margin:0">すべての項目を確かめました。気になる点は、契約の前に不動産会社や専門家に確認しましょう。</p></section>'}
    <div class="taxnote">このチェックシートは、一般的な確認の目安です。物件ごとの判断は、重要事項説明書や専門家の調査の内容をもとに行ってください。</div>
    <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['loan','koujo'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
 }
@@ -60,3 +60,6 @@ function vLinks(v){
    ${cats.map(c=>`<section><h2>${esc(c)}</h2><ul class="links">${LINKS.filter(l=>l.c===c).map(l=>`<li><a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.t)}</a>${l.d?`<span>${esc(l.d)}</span>`:''}</li>`).join('')}</ul></section>`).join('')}
    <p class="unit" style="margin-top:18px">リンク先は各機関のサイトです。内容やアドレスが変わることがあります。</p></div>`;
 }
+
+/* 「まだ確かめていないこと」の言い方：「〜を確かめた」→「〜の確認」など */
+function chukoTodo(t){return t.replace(/を確かめた$/,'の確認').replace(/を検討した$/,'の検討').replace(/を見積もった$/,'の見積もり').replace(/を歩いた$/,'を歩く').replace(/(確かめた|見た)$/,'')}
