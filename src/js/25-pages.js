@@ -1,5 +1,5 @@
 /* ---------- 記事・お知らせ・データ ---------- */
-const pubArticles=()=>ARTICLES.slice().sort((a,b)=>b.date.localeCompare(a.date));
+const pubArticles=()=>ARTICLES.filter(a=>!a.sub).sort((a,b)=>b.date.localeCompare(a.date));
 const toolName=h=>{const t=TOOLS.find(x=>x.href===h);return t?t.t:''};
 function artCard(a){return `<a class="tool art" href="#a-${a.slug}">${illust(a,true)}<span class="chip muted" style="justify-self:start">${esc(a.cat)}</span><h3>${esc(a.title)}${a.draft?' <span class="chip warn">下書き</span>':''}</h3><p>${esc(a.lead)}</p><span class="unit">${jd(a.date)}</span></a>`}
 /* ---------- テーマごとのまとめページ（ガイド） ---------- */
@@ -10,7 +10,7 @@ function vHub(v,slug){
   document.title=h.stitle+'｜サイのまど';
   const art=s=>ARTICLES.find(a=>a.slug===s&&!a.draft);
   v.innerHTML=`<div class="wrap doc art-doc hub"><div class="crumb"><a href="#home">サイのまど</a> › ${esc(h.title)}</div>
-   ${illust({title:h.title,cat:h.cat,il:h.il})}<h1>${esc(h.title)}</h1><p class="lead">${esc(h.lead)}</p>
+   ${illust({title:h.title,cat:h.cat,il:h.il})}<h1>${esc(h.title)}</h1><p class="lead">${esc(h.lead)}</p>${h.body.length?`<div class="hubbody">${h.body.map(t=>`<p>${esc(t)}</p>`).join('')}</div>`:''}
    <ol class="hsteps">${h.steps.map((st,i)=>`<li><div class="hs-h"><span class="hn">${i+1}</span><h2>${esc(st.h)}</h2></div><p>${esc(st.d)}</p>
     ${st.tools.length?`<div class="hs-tools">${st.tools.map(t=>`<a class="btn small primary" href="#${t}">${esc(TITLES[t]||t)}で計算する</a>`).join('')}</div>`:''}
     ${st.arts.map(art).filter(Boolean).length?`<ul class="hs-arts">${st.arts.map(art).filter(Boolean).map(a=>`<li><a href="#a-${a.slug}">${esc(a.title)}</a></li>`).join('')}</ul>`:''}</li>`).join('')}</ol>
@@ -48,6 +48,7 @@ function vArticle(v,slug){
   document.title=a.title+'｜サイのまど';
   const rel=pubArticles().filter(x=>x.slug!==a.slug).slice(0,3);
   v.innerHTML=`<div class="wrap doc art-doc"><div class="crumb"><a href="#home">サイのまど</a> › <a href="#articles">記事</a> › ${esc(a.cat)}</div>
+  ${a.sub&&ARTICLES.find(x=>x.slug===a.sub)?`<p class="subnote">一覧で比べたいときは「<a href="#a-${a.sub}">${esc(ARTICLES.find(x=>x.slug===a.sub).title)}</a>」へ。</p>`:''}
   ${a.draft?'<div class="draft">下書きです。内容を確認してから公開してください（articles の draft を false にすると、この表示は消えます）。</div>':''}
   ${illust(a)}
   <span class="chip muted">${esc(a.cat)}</span><h1 style="margin-top:8px">${esc(a.title)}</h1>
