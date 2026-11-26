@@ -50,6 +50,7 @@ function nextHTML(S){
   if(S.house==='own'){L.push(['souba','今の家の相場を調べる','国の取引データから、町名ごとの売却相場の目安と、この10年の推移を確かめられます。']);
     if(n(S.loanPay)>0&&n(S.loanEnd)>n(S.age))L.push(['sell','今の家を売ったら手元にいくら残る','毎月の返済額と完済の年齢から逆算したローンの残りを入れて、売却・住み替えシミュレーターを開きます。'])}
   if(S.house==='rent')L.push(['rent2buy','今の家賃で買える家',`家賃${n(S.rent)}万円と同じ負担で、いくらの家が買えるかを計算します。`]);
+  if(S.spouse==='yes'||(S.kids||[]).length)L.splice(Math.min(L.length,2),0,['hoshou','もしものときに必要な保障額',`${(S.kids||[]).length?'子ども'+(S.kids||[]).length+'人の教育費や':''}今の住まいから、家計を支える人が亡くなった場合に、遺族年金と貯蓄でどこまでまかなえるかを計算します。`]);
   if(n(S.inc)>0)L.push(['furusato','ふるさと納税の上限','年収と家族から、自己負担2,000円ですむ上限の目安を出します。']);
   if(n(S.age)>=40)L.push(['souzoku','親の家・相続の準備','相続が起きる前に確かめておきたいことを、順番にチェックできます。']);
   const cards=L.slice(0,4).map(([id,t,d])=>{const T=TOOLS.find(x=>x.href==='#'+id);if(!T)return '';

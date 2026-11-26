@@ -6,11 +6,11 @@ function navCols(){return PURPOSE.map(p=>{const h=HUBS.find(x=>x.slug===p.hub);
 function navInit(){
   const nav=document.querySelector('.gnav');if(!nav||nav.dataset.done)return;nav.dataset.done='1';
   nav.innerHTML=`<button type="button" class="gmenu" aria-expanded="false" aria-controls="mega"><span class="gm-l">目的から探す</span><span class="gm-s" aria-hidden="true">メニュー</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-   <a href="#tools" data-r="tools" class="hide-md">ツール</a><a href="#articles" data-r="articles" class="hide-sm">記事</a><a href="#about" data-r="about" class="hide-md">サイトについて</a>
+   <a href="#matome" data-r="matome" class="mtlink hide-sm" hidden>わが家のまとめ<span class="mtn"></span></a><a href="#tools" data-r="tools" class="hide-md">ツール</a><a href="#articles" data-r="articles" class="hide-sm">記事</a><a href="#about" data-r="about" class="hide-md">サイトについて</a>
    <a class="btn small primary gcta" href="#lifeplan" data-lpguide="1">ライフプラン診断</a>`;
   const hd=document.querySelector('header.site');
   if(hd&&!document.getElementById('mega')){const m=document.createElement('div');m.id='mega';m.className='mega';m.hidden=true;
-    m.innerHTML=`<div class="wrap"><div class="mcols">${navCols()}</div><div class="mfoot"><a href="#matome"><b>わが家のまとめ</b></a><a href="#tools">すべてのツール</a><a href="#articles">記事</a><a href="#glossary">用語集</a><a href="#about">サイトについて</a></div></div>`;
+    m.innerHTML=`<div class="wrap"><div class="mcols">${navCols()}</div><div class="mfoot"><a href="#matome"><b>わが家のまとめ</b><span class="mtcnt"></span></a><a href="#tools">すべてのツール</a><a href="#articles">記事</a><a href="#glossary">用語集</a><a href="#about">サイトについて</a></div></div>`;
     hd.appendChild(m)}
   const ft=document.querySelector('footer.ft .wrap');
   if(ft&&!ft.dataset.done){ft.dataset.done='1';
