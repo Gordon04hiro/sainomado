@@ -43,6 +43,28 @@ function sbCalc(A,V){
   const base=c||A.P[k];
   return{unit:u,price:u.map(x=>x*area/1e4),n:st.n,local:!!c,town:!!t,area,f,ratio:t?t.q[1]/base.q[1]:null,baseMid:base.q[1]*f*area/1e4};
 }
+/* 年ごとの推移のグラフ（1㎡あたりの中央値。築年数の補正をかけた値）。市区町村と都道府県全体の2本 */
+function sbTrendHTML(A,V){
+  const TR=A.TR;if(!TR)return '';const k=V.k,cs=V.city&&TR.C[V.city]&&TR.C[V.city][k]?TR.C[V.city][k]:null,ps=TR.P[k];if(!ps&&!cs)return '';
+  const partial=!/第4四半期/.test(TR.last||''),lastY=+String(TR.last||'').slice(0,4);
+  const full=a=>(a||[]).filter(r=>!(partial&&r[0]===lastY));
+  const S=[cs?{a:cs,name:A.C[V.city].name,col:'var(--brand)',w:3}:null,ps?{a:ps,name:A.name+'全体',col:'var(--muted)',w:2,dash:'5 4'}:null].filter(Boolean);
+  const ys=S.flatMap(x=>x.a.map(r=>r[0])),y0=Math.min(...ys),y1=Math.max(...ys),vs=S.flatMap(x=>x.a.map(r=>r[1]/1e4)),vmax=Math.max(...vs)*1.1,vmin=0;
+  const W=400,H=230,L=34,R=18,T=12,B=26,X=y=>L+(y-y0)/Math.max(1,y1-y0)*(W-L-R),Y=v=>T+(1-(v-vmin)/(vmax-vmin))*(H-T-B);
+  const step=vmax>40?10:vmax>20?5:vmax>8?2:1,ticks=[];for(let v=0;v<=vmax;v+=step)ticks.push(v);
+  const svg=`<svg viewBox="0 0 ${W} ${H}" class="sbtr" role="img" aria-label="1㎡あたりの価格の年ごとの推移">
+   ${ticks.map(v=>`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="var(--muted)">${v}</text>`).join('')}
+   ${[...new Set(ys)].filter(y=>(y-y0)%4===0||y===y1).map(y=>`<text x="${X(y)}" y="${H-8}" text-anchor="middle" font-size="12" fill="var(--muted)">${y}${partial&&y===lastY?'*':''}</text>`).join('')}
+   ${S.slice().reverse().map(x=>`<polyline fill="none" stroke="${x.col}" stroke-width="${x.w}" ${x.dash?`stroke-dasharray="${x.dash}"`:''} stroke-linejoin="round" points="${x.a.map(r=>X(r[0]).toFixed(1)+','+Y(r[1]/1e4).toFixed(1)).join(' ')}"/>`).join('')}
+  </svg>`;
+  const main=full(S[0].a),chg=(a,b)=>{const r=b[1]/a[1]-1;return (r>=0?'+':'')+Math.round(r*100)+'%'};
+  const pick=n=>{const f=main.find(r=>r[0]>=main[main.length-1][0]-n);return f};
+  const last=main[main.length-1],p10=pick(10),p5=pick(5);
+  return `<section class="chartcard sbtrend"><h3>1㎡あたりの価格の推移（${SBK[k].t}）</h3>
+   <p class="unit" style="margin:0 0 6px">${S.map(x=>`<span class="lg"><i style="border-color:${x.col};${x.dash?'border-top-style:dashed':''}"></i>${esc(x.name)}</span>`).join('')}　単位：万円/㎡</p>${svg}
+   <p class="sbtrs">${esc(S[0].name)}：${p10&&p10!==last?`${p10[0]}年→${last[0]}年で<b>${chg(p10,last)}</b>`:''}${p5&&p5!==last&&p5!==p10?`、${p5[0]}年→${last[0]}年で<b>${chg(p5,last)}</b>`:''}</p>
+   <p class="unit" style="margin:4px 0 0">国の不動産取引価格情報（アンケート調査）の、その年の1㎡あたりの中央値です${k==='l'?'':'（築年数の違いをそろえた値）'}。${partial?`*${lastY}年は${esc(TR.last)}までの途中の値です。`:''}${V.town?'町名ごとは件数が少ないため、推移は市区町村全体で見ています。':''}件数の少ない年は表示していません。</p></section>`;
+}
 function sbFields(A){
   const cities=A?Object.entries(A.C).filter(([c,v])=>v[SB.k]).sort((a,b)=>a[0].localeCompare(b[0])):[];
   return `<div class="fields">
@@ -77,6 +99,7 @@ function sbRender(){
     <p class="sbr">近い条件の取引の半分が、<b>約${fmt(Math.round(R.price[0]/10)*10)}万〜${fmt(Math.round(R.price[2]/10)*10)}万円</b>の間に入ります</p></div>
    <div class="panels"><section class="panel"><div class="ph"><span class="nm">1㎡あたり・1坪あたり</span></div><div class="kv">${kvRow('1㎡あたり（中央値）',(Math.round(R.unit[1]/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}${kvRow('1坪あたり（中央値）',(Math.round(R.unit[1]*3.3058/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}</div></section>
     <section class="panel"><div class="ph"><span class="nm">もとにしたデータ</span></div><div class="kv">${kvRow('取引の件数',fmt(R.n)+'<small>件</small>')}${kvRow('期間',`<small>${esc(A.from)}〜${esc(A.to)}</small>`)}</div>${R.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}の取引だけで計算しています。${esc(A.C[SB.city].name)}全体の中央値（約${fmt(Math.round(R.baseMid/10)*10)}万円）より<b>${R.ratio>=1?'約'+Math.round((R.ratio-1)*100)+'%高め':'約'+Math.round((1-R.ratio)*100)+'%低め'}</b>です。件数が少ないので、ふれ幅が大きくなります。</p>`:SB.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}は${SBK[SB.k].t}の取引が少ないため、${esc(A.C[SB.city].name)}全体で計算しています。</p>`:''}${R.local?'':`<p class="unit" style="margin:6px 0 0">${SB.city?'この市区町村は取引が少ないため、':''}${esc(A.name)}全体の取引で計算しています。</p>`}</section></div>
+   ${sbTrendHTML(A,SB)}
    <section class="advice"><h3>この目安の見方</h3><ul>
     <li>実際の取引価格（不動産取引価格情報）と、不動産会社が登録した成約価格（成約価格情報）をもとにした<b>統計的な目安</b>です。不動産会社の査定ではありません</li>
     <li>${SB.k==='m'?'階数・向き・管理の状態・駅からの距離':SB.k==='h'?'建物の広さや状態・リフォームの有無・道路との関係・駅からの距離':'形・道路との関係・用途地域・駅からの距離'}などで、同じ地域でも価格は大きく変わります。幅の外側になることもめずらしくありません</li>

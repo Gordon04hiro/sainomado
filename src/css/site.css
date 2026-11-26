@@ -707,3 +707,6 @@ footer.ft .fcols a{font-size:12.5px}
 @media (max-width:420px){.gnav{gap:6px}.gcta{padding:6px 9px;font-size:11.5px;margin-left:0}.gmenu{padding:6px 9px;font-size:12.5px}}
 @media (max-width:370px){.gmenu .gm-s{display:none}.gmenu{padding:6px 8px}}
 @media (max-width:350px){.brand{gap:6px}.brand svg{width:30px;height:30px}.brand b{font-size:18px}}
+.sbtrend .sbtr{width:100%;height:auto;display:block}
+.sbtrend .lg{display:inline-flex;align-items:center;gap:5px;margin-right:12px}.sbtrend .lg i{display:inline-block;width:18px;border-top:3px solid}
+.sbtrs{margin:6px 0 0;font-size:14px}
