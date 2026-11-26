@@ -11,6 +11,7 @@ const LEGAL={
 };
 const LEGAL_MAP={
  hoshou:['pen','ins'],
+ iryou:['ins'],
  chuko:['re'],
  souba:['re'], koujo:['tax','fin'], furusato:['tax'], chukai:['re'], zoyo:['tax'], souzokubun:['law','doc','tax'],
  lifeplan:['fin','pen','tax'], loan:['fin'], vs:['fin','re'], rent2buy:['fin'], prepay:['fin','tax'],

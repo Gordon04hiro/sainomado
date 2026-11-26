@@ -4,7 +4,7 @@
    ・呼び出すと、その入力をツールの保存場所に書き戻して開き直す
    ・わが家のまとめ・PDFには、保存したものが1件ずつ別の行で入る */
 const SVKEY='sainomado-saves-v1',SVMAX=10;
-const SVTOOLS=['hoshou','loan','rent2buy','vs','koujo','zoyo','prepay','chukai','akiya','souzokuzei','souzokubun','furusato'];
+const SVTOOLS=['iryou','hoshou','loan','rent2buy','vs','koujo','zoyo','prepay','chukai','akiya','souzokuzei','souzokubun','furusato'];
 function svReg(){
   const cp=d=>JSON.parse(JSON.stringify(d));
   const o={sell:{key:SKEY,get:()=>SV,set:d=>{SV=Object.assign(sellBase(),cp(d))}},souba:{key:SBKEY,get:()=>SB,set:d=>{SB=cp(d)}},chuko:{key:CHUKOKEY,get:()=>CHK,set:d=>{CHK=cp(d)}},souzoku:{key:CKEY,get:()=>CK,set:d=>{CK=cp(d)}},souzoku2:{key:C2KEY,get:()=>C2,set:d=>{C2=cp(d)}}};
