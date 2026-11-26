@@ -100,13 +100,16 @@ function vHome(v){
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
    <div><div class="k">住まいとお金の無料シミュレーション</div>
     <h1>大きな決断の前に、<br><em>お金の未来</em>を見てみよう。</h1>
-    <p>子育て、住まい、老後。人生の大きな決断の前に、わが家の家計が95歳までどう変わるのかを自分の数字で確かめる、<b>家計のセカンドオピニオン</b>です。</p>
+    <p>その家を買っても、教育費と老後のお金は足りるのか。子育て、住まい、老後の決断の前に、わが家の家計が95歳までどう変わるのかを自分の数字で確かめる、<b>家計のセカンドオピニオン</b>です。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan" data-lpguide="1">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
-    <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div></div>
+    <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div>
+    <a class="heroalt" href="#souba"><span class="ic">${IC.map}</span><span><b>売るか迷っている方へ：近所の家が実際にいくらで売れたか</b><small>国の取引データから、町名ごとの売却相場の目安と推移を無料で。電話番号もいりません</small></span><span class="go">→</span></a></div>
    <div class="hero-art"><div class="heroicon"><img src="${window.BASE||''}assets/icon.svg" width="220" height="220" alt="サイのまどのロゴ（家の中のサイの貯金箱）"></div>
-   <div class="peek" aria-label="ライフプラン診断の画面例"><div class="t"><span>入力例：35歳・夫婦と子ども2人・家を購入</span><span class="chip ${s.st.c}">${s.st.t}</span></div>
-    <div class="t" style="margin-top:6px"><span>95歳時点の金融資産</span></div><div class="v">${fmt(s.last.bal)}<span class="unit"> 万円</span></div>
-    ${chartSVG([{rows:r,color:'var(--accent)'}],null,'peekc')}</div></div>
+   ${(()=>{const T=clone(S);T.price=Math.round(n(S.price)*1.5/100)*100;const r2=sim(T),s2=summarize(r2,T);
+     const row=(col,l,ss)=>`<div class="pkrow"><span class="dot" style="background:${col}"></span><span class="pl">${l}</span><span class="chip ${ss.st.c}">${ss.neg?ss.neg.a+'歳で不足':'95歳まで不足なし'}</span></div>`;
+     return `<div class="peek" aria-label="ライフプラン診断の画面例"><div class="t"><span>入力例：同じ家族・同じ収入で、家の価格だけ変えると</span></div>
+      ${row('var(--accent)','A：'+fmt(n(S.price))+'万円の家',s)}${row('var(--coin)','B：'+fmt(T.price)+'万円の家',s2)}
+      ${chartSVG([{rows:r,color:'var(--accent)'},{rows:r2,color:'var(--coin)'}],null,'peekc')}</div>`})()}</div>
   </section></div>
   <section class="wrap trust" aria-label="サイのまどの約束">
    <div><span class="ti">${IC.plan}</span><span><b>登録不要・無料</b>名前もメールも要りません</span></div>

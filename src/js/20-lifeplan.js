@@ -84,7 +84,7 @@ function renderResult(){
    ${ks.length>1?`<div class="seg">${ks.map(k=>`<button data-act="cf" data-p="${k}" aria-pressed="${U.cf===k}"><span class="dot ${k.toLowerCase()}"></span>${k}</button>`).join('')}</div>`:''}
    <div class="seg"><button data-act="step" data-s="5" aria-pressed="${U.step===5}">5年ごと</button><button data-act="step" data-s="1" aria-pressed="${U.step===1}">毎年</button></div></div></div>
   <div class="cfwrap">${cfTable(R[U.cf].r,R[U.cf].S,U.step)}</div>`;
-  if(tab==='overview')body+=nextHTML(cur.S);
+  if(tab==='overview')body=lpFixHTML(cur.S)+body+nextHTML(cur.S);
   box.innerHTML=`<div class="rhead"><div><h2>診断結果</h2><p class="unit">入力するたびに自動で更新されます（単位：万円）。${ks.length>1?`決算書・逆算・シナリオ・予実は、編集中のパターン${key}について表示します。`:''}</p></div>
    <div class="exportbar">${shareBtn()}<button class="btn small" data-act="pdf">PDFで保存</button><button class="btn small" data-act="xlsx">Excelで保存</button></div></div>
   ${LP.example?`<section class="exnote" role="note"><b>いま表示しているのは「入力例の家族」の結果です</b>

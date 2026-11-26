@@ -723,3 +723,12 @@ footer.ft .fcols a{font-size:12.5px}
 .ckl,.ckr{display:grid;gap:2px;align-content:start}.ckr{text-align:right;justify-items:end}
 .ckrow small{color:var(--muted);font-size:11.5px}.ckl span{font-size:13.5px}
 .ckr b{font-size:16px}.ckr b small{margin-left:2px}.ckr .up{color:#c0392b;font-weight:700;font-size:12.5px}.ckr .dn{color:#2c6fb7;font-weight:700;font-size:12.5px}.ckr span{font-size:12.5px}
+
+/* トップ：家の価格だけ変えた2パターン、売却相場の入口 */
+.pkrow{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:14px}
+.pkrow .dot{width:10px;height:10px;border-radius:50%;flex:none}.pkrow .pl{font-weight:700;flex:1}
+.heroalt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);text-decoration:none;color:var(--ink)}
+.heroalt:hover{border-color:var(--brand)}.heroalt .ic{color:var(--brand)}.heroalt b{display:block;font-size:14px;line-height:1.5}.heroalt small{display:block;color:var(--muted);font-size:12.5px;line-height:1.6;margin-top:2px}.heroalt .go{color:var(--brand);font-weight:700}
+/* ライフプラン：不足が出たときの次の一手 */
+.fixbox{margin:0 0 14px;padding:14px 16px;border:2px solid var(--coin);border-radius:var(--r-card);background:var(--surface)}
+.fixbox .ft{margin:0 0 4px;font-weight:700;color:var(--coin)}.fixbox p{margin:0 0 10px;font-size:14px;line-height:1.7}
