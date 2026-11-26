@@ -349,7 +349,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   console.log('\n■ ツールからツールへ・わが家のまとめ');
   {const mk=m=>w=>{Object.defineProperty(w,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})};
    const m={};let w=await open('loan.html','',mk(m));
-   check('住宅ローン診断の結果に「続けて確かめる」（控除・繰上げ返済）',w.document.querySelectorAll('[data-act="handoff"][data-from="loan"]').length===2);
+   check('住宅ローン診断の結果に「続けて確かめる」（控除・繰上げ返済）',w.document.querySelectorAll('[data-act="handoff"][data-from="loan"]').length===3);
    try{click(w,'[data-act="handoff"][data-from="loan"][data-i="0"]')}catch(e){}
    const k=JSON.parse(m['sainomado-koujo-v1']||'null');check('押すと住宅ローン控除に借入額・金利が入る',k&&k.loan>0&&k.fromTool==='住宅ローン・購入予算診断'&&!k.example,JSON.stringify(k).slice(0,120));w.close();
    w=await open('koujo.html','',mk(m));check('受け取ったツールに「○○の結果を入れています」',!w.document.querySelector('.lpnote2').hidden&&/住宅ローン・購入予算診断の結果を入れています/.test(w.document.querySelector('.lpnote2').textContent)&&w.document.getElementById('g_koujo_loan').value===String(k.loan));
@@ -384,6 +384,23 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     check('まとめに保存したものが1件ずつ（今の入力は同じ名前で）',/住宅ローン・購入予算診断：A案/.test(tv)&&/住宅ローン・購入予算診断：B案/.test(tv)&&/売却・住み替えシミュレーター：実家/.test(tv));
     w2.print=()=>{};const ca=w2.document.querySelector('[data-mtsel="loan@'+S2.loan[0].id+'"]');ca.checked=false;ca.dispatchEvent(new w2.Event('change',{bubbles:true}));click(w2,'[data-act="mtprint"]');const pp=w2.document.getElementById('printArea').textContent;
     check('PDFにも1件ずつ入り、外したものは入らない',/住宅ローン・購入予算診断：B案/.test(pp)&&!/：A案/.test(pp)&&/売却・住み替えシミュレーター：実家/.test(pp));w2.close()}
+   {const m3={};let w3=await open('hoshou.html','',mk(m3));const tx=()=>w3.document.getElementById('gresult').textContent;
+    check('必要保障額：本人・配偶者の両方の結果',/ご本人（夫）が亡くなった場合/.test(tx())&&/配偶者（妻）が亡くなった場合/.test(tx())&&/必要保障額の目安/.test(tx()));
+    check('遺族年金：子2人なら基礎年金847,300円＋子の加算243,800円×2と遺族厚生年金（今年184.9万円）',/184\.9万円/.test(tx())&&/遺族基礎年金（子2人分の加算込み）＋遺族厚生年金/.test(tx()));
+    check('2028年4月からは子の加算が一律に（194.6万円）',/194\.6万円/.test(tx()));
+    check('子どもの独立後は中高齢寡婦加算（40〜64歳）',/遺族厚生年金＋中高齢寡婦加算/.test(tx()));
+    check('必要保障額の推移グラフ（2人分）',w3.document.querySelectorAll('#hstr polyline').length===2);
+    const setv=(id,v)=>{const el=w3.document.getElementById(id);el.value=v;el.dispatchEvent(new w3.Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));el.dispatchEvent(new w3.Event('input',{bubbles:true}))};
+    setv('g_hoshou_kid1','');setv('g_hoshou_kid2','');setv('g_hoshou_sage','28');await wait(500);
+    check('子のいない30歳未満の妻は、遺族厚生年金が5年だけ',/2026〜2030年（28〜32歳）/.test(tx())&&!/遺族基礎年金/.test(w3.document.querySelector('.hsd table').textContent));
+    check('入力は保存され、わが家のまとめに入る',JSON.parse(m3['sainomado-hoshou-v1']).example===false);w3.close();
+    w3=await open('matome.html','',mk(m3));check('わが家のまとめに必要保障額',/必要保障額の目安/.test(w3.document.getElementById('view').textContent));w3.close()}
+   {const m4={'sainomado-koujo-v1':JSON.stringify({loan:3000,example:false}),'sainomado-furusato-v1':JSON.stringify({gross:600,example:false})};let w4=await open('loan.html','',mk(m4));await wait(1600);
+    check('2つ以上のツールを使った人に、わが家のまとめのお知らせ',!!w4.document.getElementById('mtnudge')&&/2つのツールの結果/.test(w4.document.getElementById('mtnudge').textContent));
+    check('ヘッダーにわが家のまとめと件数',!w4.document.querySelector('.mtlink').hidden&&w4.document.querySelector('.mtlink .mtn').textContent==='2');
+    click(w4,'#mtnudge [data-act="mtnclose"]');check('閉じると覚えておく',!w4.document.getElementById('mtnudge')&&m4['sainomado-mtnudge-v1']==='2');w4.close();
+    w4=await open('loan.html','',mk(m4));await wait(1600);check('閉じたあとは、ツールが増えるまで出さない',!w4.document.getElementById('mtnudge'));w4.close();
+    w4=await open('loan.html');await wait(1600);check('何も使っていない人には出さない',!w4.document.getElementById('mtnudge')&&w4.document.querySelector('.mtlink').hidden);w4.close()}
    check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
    w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}
   console.log('\n■ 計測');

@@ -44,7 +44,7 @@ adsense: "ca-pub-8266994171904800"                   # AdSenseの審査が通っ
       ガイド: [souzoku]
     lp:
       説明: ライフプラン・資金計画・家づくりのご相談
-      ツール: [lifeplan, prepay, koujo, furusato]
+      ツール: [lifeplan, hoshou, prepay, koujo, furusato]
       記事カテゴリ: [ライフプラン]
       ガイド: [money]
 
