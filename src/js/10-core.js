@@ -5,6 +5,7 @@ const PK=['A','B','C'];
 const PCOL={A:'var(--accent)',B:'var(--planB)',C:'var(--planC)'};
 const PDASH={A:'',B:'6 4',C:'2 3'};
 const IC={
+ map:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>',
  gift:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="9" width="17" height="4" rx="1"/><path d="M5 13v7.5h14V13M12 9v11.5"/><path d="M12 9C10.5 5.5 7 5.5 7 7.5S10 9 12 9zM12 9c1.5-3.5 5-3.5 5-1.5S14 9 12 9z"/></svg>',
  check:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M8.5 12.5l2.2 2.2 4.8-4.8"/></svg>',
  yen:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8l3 3.5L15 8M12 11.5V16M9.5 12.5h5M9.5 14.5h5"/></svg>',
@@ -30,15 +31,15 @@ const keys=()=>PK.filter(k=>LP.plans[k]);
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
 
 /* ---------- routing ---------- */
-const ROUTES=['home','lifeplan','sell','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','koujo','souzokubun','furusato','chukai','zoyo','chuko','links','glossary','articles','news','data','about','privacy','fptool'];
+const ROUTES=['home','lifeplan','sell','souba','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','koujo','souzokubun','furusato','chukai','zoyo','chuko','links','glossary','articles','news','data','about','privacy','fptool'];
 function route(){if(window.PAGE)return window.PAGE;const h=(location.hash||'').replace('#','');return ROUTES.includes(h)?h:(h.startsWith('a-')?'article':h.startsWith('g-')?'hub':'home')}
-const TITLES={fptool:'自分で使える無料のFPツール',furusato:'ふるさと納税の上限の目安',chukai:'仲介手数料の計算',zoyo:'住宅資金の贈与税の目安',chuko:'中古住宅チェックシート',links:'一次情報リンク集',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',glossary:'用語集',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
+const TITLES={souba:'売却相場の目安',fptool:'自分で使える無料のFPツール',furusato:'ふるさと納税の上限の目安',chukai:'仲介手数料の計算',zoyo:'住宅資金の贈与税の目安',chuko:'中古住宅チェックシート',links:'一次情報リンク集',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',glossary:'用語集',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
 function go(){
   const r=route();
   document.querySelectorAll('.gnav a').forEach(a=>{if(a.dataset.r===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   const v=document.getElementById('view');
-  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,fptool:vFpTool,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,fptool:vFpTool,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
-  document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei','koujo','souzokubun','furusato','chukai','zoyo'].includes(r);
+  ({home:vHome,lifeplan:vLife,sell:vSell,souba:vSouba,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,fptool:vFpTool,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souba:vSouba,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,fptool:vFpTool,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
+  document.getElementById('dock').hidden=!['lifeplan','sell','souba','loan','akiya','vs','rent2buy','prepay','souzokuzei','koujo','souzokubun','furusato','chukai','zoyo'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
   toolInfoTail(r);legalTail(r);adTail(r);setTimeout(fillAds,0);
@@ -60,6 +61,7 @@ const TOOLS=[
  {ic:'down',href:'#prepay',t:'繰上げ返済シミュレーター',d:'期間短縮型と返済額軽減型で、減る利息と毎月の返済を比べます。'},
  {ic:'scale',href:'#souzokuzei',t:'相続税がかかるかチェック',d:'財産の合計が基礎控除を超えそうかを確かめます。税額は計算しません。'},
  {ic:'gift',href:'#furusato',t:'ふるさと納税の上限の目安',d:'年収と家族構成から、自己負担2,000円で済む寄附額の上限の目安を出します。'},
+ {ic:'map',href:'#souba',t:'売却相場の目安',d:'国の取引データ（直近5年）から、地域・種類・広さ・築年数が近い物件の価格の幅を出します。'},
  {ic:'yen',href:'#chukai',t:'仲介手数料の計算',d:'物件の価格から、不動産会社に払う仲介手数料の上限額（消費税込み）を計算します。'},
  {ic:'gift',href:'#zoyo',t:'住宅資金の贈与税の目安',d:'親や祖父母から家の購入資金を援助してもらうときの贈与税を、非課税の特例を使う場合と比べます。'},
  {ic:'yen',href:'#koujo',t:'住宅ローン控除の目安',d:'借入額と家の種類から、住宅ローン控除で毎年いくら戻りそうかを計算します。'},
@@ -69,7 +71,7 @@ const TOOLS=[
 /* トップページ：目的から選ぶ入口 */
 const PURPOSE=[
  {id:'p-buy',t:'家を買いたい',d:'予算・住宅ローン・賃貸との比較',hub:'buy',tools:['loan','rent2buy','vs','koujo','zoyo','chukai','chuko','prepay']},
- {id:'p-sell',t:'売りたい・住み替えたい',d:'手元に残るお金と、住み替えの資金計画',hub:'sell',tools:['sell','chukai','akiya','loan']},
+ {id:'p-sell',t:'売りたい・住み替えたい',d:'手元に残るお金と、住み替えの資金計画',hub:'sell',tools:['souba','sell','chukai','akiya','loan']},
  {id:'p-inherit',t:'相続・実家のこと',d:'準備・手続きの期限・相続税・空き家',hub:'souzoku',tools:['souzoku','souzoku2','souzokuzei','souzokubun','zoyo','akiya']},
  {id:'p-life',t:'家計・老後のお金',d:'教育費や老後まで、95歳までの収支',hub:'money',tools:['lifeplan','furusato','prepay','koujo']}
 ];
