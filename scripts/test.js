@@ -360,6 +360,15 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    w=await open('lifeplan.html','',mk(m));check('持ち家なら「次に確かめること」に売却相場と売却シミュレーター',!!w.document.querySelector('.nextbox a[href*="souba"]')&&!!w.document.querySelector('.nextbox [data-act="lp2sell"]'));w.close();
    w=await open('matome.html','',mk(m));const t=w.document.getElementById('view').textContent;
    check('わが家のまとめに、ライフプランと住宅ローン控除の結果',/ライフプラン診断　パターンA/.test(t)&&/住宅ローン控除/.test(t)&&!!w.document.querySelector('[data-act="mtprint"]')&&!!w.document.getElementById('mt_memo'));
+   {w.print=()=>{};click(w,'[data-act="mtprint"]');const pa=w.document.getElementById('printArea').textContent;
+    check('PDFはツールごとに「主な条件」と「結果」、ライフプランは前提・比較・5年ごとの収支',/家計の見通し（ライフプラン診断）/.test(pa)&&/5年ごとの収支/.test(pa)&&/主な条件/.test(pa)&&/住宅ローン控除の目安/.test(pa)&&/借入額/.test(pa));
+    const cb=w.document.querySelector('[data-mtsel="koujo"]');check('まとめの各行にPDFに入れるかのチェック（最初は全部オン）',!!cb&&cb.checked&&!!w.document.querySelector('[data-act="mtall"]'));
+    cb.checked=false;cb.dispatchEvent(new w.Event('change',{bubbles:true}));check('外した選択は保存される',JSON.parse(m['sainomado-matome-v1']).off.koujo===true);
+    click(w,'[data-act="mtprint"]');const pb=w.document.getElementById('printArea').textContent;check('外したツールはPDFに入らない',!/住宅ローン控除の目安/.test(pb)&&/5年ごとの収支/.test(pb));
+    click(w,'[data-act="mtall"][data-v="1"]');check('「すべて入れる」で戻る',!JSON.parse(m['sainomado-matome-v1']).off.koujo&&cb.checked);}
+   m['sainomado-chuko-v1']=JSON.stringify({road:true});m['sainomado-souzoku2-v1']=JSON.stringify({date:'2026-10-01'});
+   w=await open('matome.html','',mk(m));{w.print=()=>{};const v=w.document.getElementById('view').textContent;check('チェックシートの進み具合もまとめに出る',/確認済み 1 \//.test(v)&&/基準日 2026-10-01/.test(v));
+    click(w,'[data-act="mtprint"]');const pc=w.document.getElementById('printArea').textContent;check('PDFにチェックシートのまだの項目と期限',/中古住宅チェックシート/.test(pc)&&/まだの手続き/.test(pc)&&/2027年/.test(pc));w.close()}
    check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
    w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}
   console.log('\n■ 計測');
