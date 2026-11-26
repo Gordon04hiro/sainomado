@@ -90,7 +90,7 @@ function sbChikaHTML(A,V){
    <div class="cklist">${list.slice(0,6).map(row).join('')}</div>
    ${list.length>6?`<details class="sbmore"><summary>ほかの${list.length-6}地点を見る</summary><div class="cklist">${list.slice(6).map(row).join('')}</div></details>`:''}
    <p class="unit" style="margin:8px 0 0"><b>路線価について</b>：相続税や贈与税の計算に使う路線価は、地価公示の価格のおよそ8割を目安に、国税庁が道路ごとに決めています。正確な路線価は、国税庁の<a href="https://www.rosenka.nta.go.jp/" target="_blank" rel="noopener">路線価図・評価倍率表</a>で確かめられます。</p>
-   <p class="unit" style="margin:4px 0 0">地価公示は1月1日時点、地価調査は7月1日時点の価格です。推移は${FROMY}年からの毎年の価格。出典：国土数値情報（地価公示データ・都道府県地価調査データ）（国土交通省）を加工して作成</p></section>`;
+   <p class="unit" style="margin:4px 0 0">地価公示は1月1日時点、地価調査は7月1日時点の価格です。推移は${FROMY}年からの毎年の価格。出典：「国土数値情報（地価公示データ・都道府県地価調査データ）」（国土交通省）（<a href="https://nlftp.mlit.go.jp/ksj/" target="_blank" rel="noopener">https://nlftp.mlit.go.jp/ksj/</a>）を加工して作成</p></section>`;
 }
 const FROMY=2005;
 function sbFields(A){
@@ -136,7 +136,7 @@ function sbRender(){
     <li>平均値ではなく<b>中央値</b>を使っています。平均値は、ごく一部の高い取引（広い土地や高級物件など）に引っぱられて高めに出やすいためです</li>
     <li>年ごとの価格の動きは、いちばん新しい年の水準にそろえています</li></ul></section>
    <section class="lpbridge"><b>この価格で売ると、手元にいくら残る？</b><p>中央値（約${fmt(mid)}万円）を売却シミュレーターに入れて、仲介手数料・税金・ローンの残りを引いた手取りを確かめられます。</p><button class="btn small primary" data-act="sb2sell" data-p="${mid}">売却シミュレーターで計算する</button></section>
-   <p class="unit sbcredit">このサービスは、国土交通省の不動産情報ライブラリのAPI機能を使用していますが、提供情報の最新性、正確性、完全性等が保証されたものではありません。正確な価格は、物件を見たうえでの不動産会社の査定で確かめてください。</p>`;
+   <p class="unit sbcredit">このサービスは、国土交通省の不動産情報ライブラリのAPI機能を使用していますが、提供情報の最新性、正確性、完全性等が保証されたものではありません。正確な価格は、物件を見たうえでの不動産会社の査定で確かめてください。<br>出典：国土交通省 不動産情報ライブラリ（<a href="https://www.reinfolib.mlit.go.jp/" target="_blank" rel="noopener">https://www.reinfolib.mlit.go.jp/</a>）の不動産取引価格情報・成約価格情報をもとに、サイのまどが集計・加工して作成。国が作成した数値ではありません。</p>`;
   const d=document.getElementById('dockin');if(d){d.innerHTML=`<div class="v"><span>相場の目安（中央値）<b>${fmt(mid)} 万円</b></span></div><button class="btn primary" data-act="sbres">結果を見る</button>`}
 }
 document.addEventListener('input',e=>{const t=e.target;if(!t.id||!/^sb_(area|age)$/.test(t.id))return;SB[t.id.slice(3)]=t.value===''?'':parseFloat(t.value);SB.example=false;sbSave();

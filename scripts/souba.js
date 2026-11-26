@@ -98,7 +98,7 @@ async function main(){
       const d=await get({year:y,quarter:q,area:code,language:'ja'},key);
       if(!shown&&d.length){console.log('項目の例：',JSON.stringify(d[0]));shown=true}
       rows=rows.concat(d.map(clean).filter(Boolean));
-      await new Promise(s=>setTimeout(s,250));
+      await new Promise(s=>setTimeout(s,1000)); // 国のサーバーに負担をかけないよう、1秒に1回まで
     }
     const a=aggregate(code,rows);
     if(a){const D=a.D;delete a.D;Object.keys(a.C).forEach(c=>{a.C[c].towns=D[c]?Object.keys(D[c]).length:0});
