@@ -323,6 +323,9 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    tw.value='かみじま';tw.dispatchEvent(new w.Event('input',{bubbles:true}));tw.value='上島';tw.dispatchEvent(new w.Event('input',{bubbles:true}));
    check('入力すると候補が絞り込まれる',[...d.querySelectorAll('#sb_tsug [data-act="sbtown"]')].every(b=>/上島/.test(b.textContent)));
    click(w,'#sb_tsug [data-act="sbtown"][data-t="上島"]');await wait(100);
+   check('年ごとの推移のグラフ',!!d.querySelector('.sbtrend polyline'));
+   for(let i=0;i<20&&!d.querySelector('.sbchika');i++)await wait(100);
+   check('地価公示・地価調査の地点と路線価の案内',!!d.querySelector('.sbchika .ckrow')&&/路線価図/.test(d.querySelector('.sbchika').textContent)&&/国土数値情報/.test(d.querySelector('.sbchika').textContent));
    check('町名を選ぶとその町名で計算し、市区町村全体と比べる',!!d.querySelector('.sbsel')&&/浜松市中央区 上島の中古マンション/.test(d.getElementById('sbresult').textContent)&&/全体の中央値（約[\d,]+万円）より/.test(d.getElementById('sbresult').textContent));}
   console.log('\n■ 数字の入力欄');
   {const w=await open('souba.html');const d=w.document;const a=d.getElementById('sb_age');

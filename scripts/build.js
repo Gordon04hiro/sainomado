@@ -107,6 +107,7 @@ fs.writeFileSync(path.join(out,'assets','app.js'),esb.transformSync(bundle,{mini
 fs.writeFileSync(path.join(out,'assets','site.css'),esb.transformSync(read('src/css/site.css'),{loader:'css',minify:true,charset:'utf8'}).code);
 fs.cpSync(R('static'),path.join(out,'assets'),{recursive:true});
 if(fs.existsSync(R('content/souba')))fs.cpSync(R('content/souba'),path.join(out,'assets','souba'),{recursive:true});
+if(fs.existsSync(R('content/chika')))fs.cpSync(R('content/chika'),path.join(out,'assets','chika'),{recursive:true});
 const ogImg=pg=>pg.art&&fs.existsSync(R('static/ogp/'+pg.art.slug+'.png'))?SITE_URL+'/assets/ogp/'+pg.art.slug+'.png':SITE_URL+'/assets/ogp.png'; // 記事ごとの共有画像（なければ共通の画像）
 fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico'));
 // SNSのプロフィール用の短いリンク（sainomado.jp/ig など）。開くと計測用の印つきのトップへ転送する。検索結果には出さない
