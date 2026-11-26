@@ -263,6 +263,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
      raw.push({Type:'中古マンション等',MunicipalityCode:city,Municipality:city==='22131'?'浜松市中央区':'浜松市東区',TradePrice:String(Math.round(u*area)),Area:String(area),BuildingYear:(y-age)+'年',Period:y+'年第'+(1+Math.floor(rnd()*4))+'四半期',Remarks:''})}
    const A=SB.aggregate('22',raw.map(SB.clean).filter(Boolean));
    check('都道府県・市区町村ごとの単価の幅ができる',A&&A.name==='静岡県'&&A.C['22131'].m.q[1]>A.C['22132'].m.q[1]&&A.C['22131'].m.q[0]<A.C['22131'].m.q[2]);
+   {const raw2=raw.map((r,i)=>Object.assign({},r,{DistrictName:i%2?'元城町':'鴨江'}));const A2=SB.aggregate('22',raw2.map(SB.clean).filter(Boolean));check('町名ごとの集計ができる',A2.D['22131']&&A2.D['22131']['元城町'].m.n>=5);}
    check('築年数が古いほど補正が小さい',A.curve.m[0]>A.curve.m[6]&&A.curve.m.every((v,i,a)=>!i||v<=a[i-1]));
    const est=A.C['22131'].m.q[1]*A.curve.m[SB.band(10)]*70/1e4;check('浜松市中央区・築10年・70㎡のめやすが妥当な範囲',est>1500&&est<3000,Math.round(est)+'万円');}
   {const w=await open('index.html');const html=w.document.querySelector('.exwrap').textContent;
