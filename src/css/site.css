@@ -659,3 +659,4 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .nextbox .tools{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .nextcard h3{font-size:15px}.nextcard p{font-size:12.5px;line-height:1.6}
 .lpnote2{color:var(--brand);font-weight:700}
+.hubbody p{font-size:15px;line-height:1.9;margin:0 0 12px}.subnote{font-size:13.5px;color:var(--muted);margin:8px 0 0}

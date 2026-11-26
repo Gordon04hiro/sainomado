@@ -58,7 +58,7 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
     else{let k=0;body=body.replace(/^## /gm,m=>{k++;return k===3?cta+m:m})}}
   // 参考にした資料
   const refs=(fm['参考']||[]).map(x=>Array.isArray(x)?{t:x[0],u:x[1]}:{t:x['名前'],u:x['URL']}).filter(x=>x.t&&/^https:\/\//.test(x.u||''));
-  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,pr,tool,lead:fm['リード'],stitle:fm['検索タイトル']||'',refs,il:fm['イラスト']||'',...(()=>{let k=0;const toc=[];const html=marked.parse(body).replace(/<h2>([\s\S]*?)<\/h2>/g,(_,t)=>{k++;toc.push(t.replace(/<[^>]+>/g,''));return `<h2 id="s${k}"><span class="hn">${k}</span><span>${t}</span></h2>`});return {body:html,toc,mins:Math.max(1,Math.round(body.replace(/<[^>]+>|[\s#*>|:-]/g,'').length/500))}})()};
+  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,sub:fm['まとめ先']||'',pr,tool,lead:fm['リード'],stitle:fm['検索タイトル']||'',refs,il:fm['イラスト']||'',...(()=>{let k=0;const toc=[];const html=marked.parse(body).replace(/<h2>([\s\S]*?)<\/h2>/g,(_,t)=>{k++;toc.push(t.replace(/<[^>]+>/g,''));return `<h2 id="s${k}"><span class="hn">${k}</span><span>${t}</span></h2>`});return {body:html,toc,mins:Math.max(1,Math.round(body.replace(/<[^>]+>|[\s#*>|:-]/g,'').length/500))}})()};
 }).sort((a,b)=>b.date.localeCompare(a.date));
 // ---- 一次情報リンク集（content/links.yml）
 const LINKS=(fs.existsSync(R('content/links.yml'))?(Y('content/links.yml')||[]):[]).map((l,i)=>{
@@ -78,7 +78,7 @@ const HUBS=Object.entries(HUBS_RAW).map(([slug,h])=>{
     const arts=[].concat(st['記事']||[]);arts.forEach(a=>{if(!ARTS.find(x=>x.slug===a))fail(`hubs.yml の ${slug} の記事「${a}」が見つかりません`)});
     return{h:st['見出し'],d:st['説明']||'',tools,arts}});
   const upd=steps.flatMap(s=>s.arts).map(a=>ARTS.find(x=>x.slug===a)).filter(a=>!a.draft).map(a=>a.updated).sort().pop()||RULES.checked;
-  return{slug,title:h['タイトル'],stitle:h['検索タイトル']||h['タイトル'],cat:h['カテゴリ']||'',il:h['イラスト']||'',lead:h['リード']||'',steps,updated:upd}});
+  return{slug,title:h['タイトル'],stitle:h['検索タイトル']||h['タイトル'],cat:h['カテゴリ']||'',il:h['イラスト']||'',lead:h['リード']||'',body:[].concat(h['本文']||[]),steps,updated:upd}});
 
 
 // ---- ブラウザで動くプログラムをまとめる
@@ -118,7 +118,7 @@ for(const [k,src] of Object.entries(SHORT)){
 const shell=read('src/shell.html'), headLinks=read('src/head-links.html');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const canon=f=>SITE_URL+'/'+f.replace(/index\.html$/,'');
-const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description})),...HUBS.map(h=>({p:'hub',slug:h.slug,f:'guide/'+h.slug+'.html',t:h.stitle+'｜サイのまど',d:h.lead,hub:h})),{p:'notfound',f:'404.html',t:'ページが見つかりません｜サイのまど',d:'お探しのページは見つかりませんでした。',nf:true},...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:(a.stitle||a.title)+'｜サイのまど',d:a.lead,art:a}))];
+const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description,ni:!!v.noindex})),...HUBS.map(h=>({p:'hub',slug:h.slug,f:'guide/'+h.slug+'.html',t:h.stitle+'｜サイのまど',d:h.lead,hub:h})),{p:'notfound',f:'404.html',t:'ページが見つかりません｜サイのまど',d:'お探しのページは見つかりませんでした。',nf:true},...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:(a.stitle||a.title)+'｜サイのまど',d:a.lead,art:a}))];
 const ga=SITE.analytics?`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.analytics)}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.analytics)}',{page_location:location.origin+location.pathname});</script>`:'';
 const ads=SITE.adsense?`<meta name="google-adsense-account" content="${esc(SITE.adsense)}">\n<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(SITE.adsense)}" crossorigin="anonymous"></script>`:'';
 async function prerender(pg,base){
@@ -157,7 +157,7 @@ async function prerender(pg,base){
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(pg.t)}</title>
 <meta name="description" content="${esc(pg.d)}">
-${pg.nf?'':`<link rel="canonical" href="${canon(pg.f)}">`}${(pg.art&&pg.art.draft)||pg.nf?'\n<meta name="robots" content="noindex">':''}
+${pg.nf?'':`<link rel="canonical" href="${canon(pg.f)}">`}${(pg.art&&(pg.art.draft||pg.art.sub))||pg.nf||pg.ni?'\n<meta name="robots" content="noindex,follow">':''}
 <meta property="og:type" content="${pg.art?'article':'website'}">
 <meta property="og:site_name" content="${esc(SITE.name)}">
 <meta property="og:title" content="${esc(pg.t)}">
@@ -184,7 +184,7 @@ ${boot}
 `;
     fs.writeFileSync(path.join(out,pg.f),html);
     const latest=ARTS.filter(x=>!x.draft).map(x=>x.updated).sort().pop()||RULES.checked;
-    if(!(pg.art&&pg.art.draft)&&!pg.nf) urls.push({loc:canon(pg.f),lastmod:pg.art?pg.art.updated:pg.hub?pg.hub.updated:['home','articles','news'].includes(pg.p)?[latest,RULES.checked].sort().pop():RULES.checked});
+    if(!(pg.art&&(pg.art.draft||pg.art.sub))&&!pg.nf&&!pg.ni) urls.push({loc:canon(pg.f),lastmod:pg.art?pg.art.updated:pg.hub?pg.hub.updated:['home','articles','news'].includes(pg.p)?[latest,RULES.checked].sort().pop():RULES.checked});
   }
   const TODAY=new Date(Date.now()+9*3600e3).toISOString().slice(0,10); // 日本時間の今日。未来の日付はサイトマップに出さない
   fs.writeFileSync(path.join(out,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u=>`  <url><loc>${u.loc}</loc><lastmod>${u.lastmod>TODAY?TODAY:u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);

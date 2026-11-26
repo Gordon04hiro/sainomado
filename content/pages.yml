@@ -54,6 +54,7 @@ chuko:
   description: 再建築不可・旧耐震・市街化調整区域・私道・浄化槽・擁壁など、中古住宅を買う前に確かめたいポイントをチェックリストに。まだ確かめていないことが一覧になります。登録不要。
 links:
   file: links.html
+  noindex: true
   title: 住まいとお金の一次情報リンク集｜国・自治体の公式情報｜サイのまど
   description: 住宅ローン控除、補助金、税金、相続、ハザードマップなど、住まいとお金に関する国・自治体の公式情報へのリンク集です。
 glossary:
@@ -82,6 +83,7 @@ articles:
   description: 家を買う・売る・相続する前に知っておきたい、住まいとお金の基本をまとめた記事の一覧です。
 news:
   file: news.html
+  noindex: true
   title: お知らせ｜サイのまど
   description: サイのまどの更新情報です。
 data:

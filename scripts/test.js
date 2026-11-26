@@ -286,6 +286,13 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    w=await open('prepay.html');check('繰上げ返済の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="prepay"]'));w.close();
    w=await open('zoyo.html');check('贈与税の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="zoyo"]'));w.close();
    w=await open('loan.html');check('ライフプラン未入力なら引き継ぎの表示は出ない',w.document.querySelector('.lpnote2').hidden);w.close();}
+  console.log('\n■ 似た記事のまとめ（AdSense対策）');
+  {const fs=require('fs');const sm=fs.readFileSync('dist/sitemap.xml','utf8');const t5=fs.readFileSync('dist/articles/tedori-500.html','utf8');
+   check('年収別の個別ページは noindex・サイトマップに載らない',/noindex,follow/.test(t5)&&!/tedori-500/.test(sm)&&!/loan-hensai-3000/.test(sm)&&/tedori-hayami/.test(sm));
+   check('個別ページから早見表へのリンク',/class="subnote"/.test(t5)&&/tedori-hayami/.test(t5));
+   const ai=fs.readFileSync('dist/articles/index.html','utf8');check('記事一覧に年収別の個別ページを並べない',!/tedori-500/.test(ai)&&/tedori-hayami/.test(ai));
+   check('ガイドに本文がある',/class="hubbody"/.test(fs.readFileSync('dist/guide/buy.html','utf8')));
+   check('お知らせ・リンク集は noindex',/noindex/.test(fs.readFileSync('dist/news.html','utf8'))&&!/news\.html/.test(sm));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
