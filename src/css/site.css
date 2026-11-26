@@ -732,3 +732,10 @@ footer.ft .fcols a{font-size:12.5px}
 /* ライフプラン：不足が出たときの次の一手 */
 .fixbox{margin:0 0 14px;padding:14px 16px;border:2px solid var(--coin);border-radius:var(--r-card);background:var(--surface)}
 .fixbox .ft{margin:0 0 4px;font-weight:700;color:var(--coin)}.fixbox p{margin:0 0 10px;font-size:14px;line-height:1.7}
+.pktabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 8px}
+.pktabs button{border:1px solid var(--line);background:var(--bg);color:var(--muted);font:inherit;font-size:12px;padding:3px 10px;border-radius:999px;cursor:pointer}
+.pktabs button[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.exgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px}
+.excard .exb{margin:0;font-size:13px;color:var(--muted);line-height:1.6}.excard .exb b{color:var(--ink)}
+.exd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}.exd .up{color:var(--accent);font-weight:700}.exd .dn{color:#c0392b;font-weight:700}
+.fixl{margin:0 0 10px;padding-left:18px;font-size:14px;line-height:1.8}.fixl li{margin-bottom:6px}.fixl .btn{margin-left:6px;vertical-align:middle}

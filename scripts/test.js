@@ -266,7 +266,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    {const raw2=raw.map((r,i)=>Object.assign({},r,{DistrictName:i%2?'元城町':'鴨江'}));const A2=SB.aggregate('22',raw2.map(SB.clean).filter(Boolean));check('町名ごとの集計ができる',A2.D['22131']&&A2.D['22131']['元城町'].m.n>=5);}
    check('築年数が古いほど補正が小さい',A.curve.m[0]>A.curve.m[6]&&A.curve.m.every((v,i,a)=>!i||v<=a[i-1]));
    const est=A.C['22131'].m.q[1]*A.curve.m[SB.band(10)]*70/1e4;check('浜松市中央区・築10年・70㎡のめやすが妥当な範囲',est>1500&&est<3000,Math.round(est)+'万円');}
-  {const w=await open('index.html');const html=w.document.querySelector('.exwrap').textContent;
+  {const w=await open('index.html');const html=w.document.querySelector('.exgrid').textContent;
    check('トップの結果の例は、保存した入力ではなく入力例で計算する',/3,000万円の家/.test(html)&&/4,500万円の家/.test(html));}
   console.log('\n■ 住宅ローン診断 × ライフプラン');
   {const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));w0.close();
@@ -334,12 +334,14 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const w2=await open('lifeplan.html');click(w2,'[data-act="mode2"][data-m="detail"]');await wait(300);const h=w2.document.getElementById('f_hdep');check('住宅の価値の下落率はマイナスを入れられる',!h||h.min==='');}
   console.log('\n■ トップの最初の画面・不足のときの次の一手');
   {const w=await open('index.html');const d=w.document;
-   check('最初の画面に家の価格だけ変えた2パターン',d.querySelectorAll('.hero .pkrow').length===2&&/歳で不足/.test(d.querySelector('.hero .peek').textContent)&&/95歳まで不足なし/.test(d.querySelector('.hero .peek').textContent));
+   check('最初の画面に、ひとつだけ変えた2パターン（家・車・保険・生活費・教育費）',d.querySelectorAll('.hero .pktabs button').length===5&&d.querySelectorAll('.hero .pkrow').length===2&&/歳で不足/.test(d.querySelector('.hero .peek').textContent)&&/95歳まで不足なし/.test(d.querySelector('.hero .peek').textContent));
+   click(w,'.hero [data-act="exsc"][data-k="car"]');check('タブで車の例に切り替わる',/500万円の車を5年ごと/.test(d.querySelector('.hero .peek').textContent));
+   check('「診断でわかること」に6つの例',d.querySelectorAll('.exgrid .excard').length===6);
    check('最初の画面に売却相場の入口',!!d.querySelector('.hero a.heroalt[href*="souba"]'));
    const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));w0.close();
    const P=Object.assign({},bp,{price:4500});const m={'sainomado-lifeplan-v1':JSON.stringify({plans:{A:P},names:{A:'今のまま'},example:false})};
    const w2=await open('lifeplan.html','',ww=>{Object.defineProperty(ww,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})});
-   const fb=w2.document.querySelector('.fixbox');check('家を買う計画で不足が出ると、家の価格をいくら下げればよいかを出す',!!fb&&/物件価格を約[\d,]+万円下げて[\d,]+万円にすると/.test(fb.textContent),fb&&fb.textContent);
+   const fb=w2.document.querySelector('.fixbox');check('家を買う計画で不足が出ると、家の価格をいくら下げればよいかを出す',!!fb&&/物件価格を約[\d,]+万円下げて[\d,]+万円にする/.test(fb.textContent)&&/生活費を月[\d.]+万円/.test(fb.textContent),fb&&fb.textContent);
    click(w2,'.fixbox [data-act="lever"]');await wait(300);check('ボタンで比べるパターンを作る',!w2.document.querySelector('.fixbox')||/パターンB/.test(w2.document.getElementById('view').textContent));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};

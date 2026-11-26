@@ -87,12 +87,31 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-ptab]');if
   PURPOSE.forEach(p=>{const el=document.getElementById(p.id);if(el)el.hidden=p.id!==id});
   try{sessionStorage.setItem('sainomado-purpose',id)}catch(x){}});
 /* トップの「診断結果の例」：入力例の家族で、物件価格だけを変えた2つのパターンを実際に計算して並べる */
+/* 入力例の家族で、ひとつだけ条件を変えて比べる例（トップの画面例と「診断でわかること」で使う。数字はその場で計算） */
+const EXSC=[
+ {k:'house',t:'家を買う',a:S=>fmt(n(S.price))+'万円の家',b:'4,500万円の家',m:T=>{T.price=4500}},
+ {k:'car',t:'車',a:S=>fmt(n(S.car))+'万円の車を'+n(S.carEvery)+'年ごと',b:'500万円の車を5年ごと',m:T=>{T.car=500;T.carEvery=5}},
+ {k:'ins',t:'保険',a:()=>'今の保険のまま',b:'保険料を月2万円増やす',m:T=>{T.ins=n(T.ins)+2}},
+ {k:'live',t:'生活費',a:()=>'今の生活費',b:'生活費を月3万円見直す',m:T=>{T.live=Math.max(0,n(T.live)-3)}},
+ {k:'edu',t:'教育費',a:()=>'子ども2人とも公立',b:'2人とも中学から私立',m:T=>{T.kids=T.kids.map(k=>Object.assign({},k,{sch:'pri_jh'}))}},
+ {k:'work',t:'働き方',a:()=>'配偶者の手取り120万円',b:'配偶者の手取りが100万円増える',m:T=>{T.sinc=n(T.sinc)+100}}];
+function exRun(S,sc){const T=clone(S);sc.m(T);const ra=sim(S),rb=sim(T);return{ra,rb,sa:summarize(ra,S),sb:summarize(rb,T)}}
+const exChip=s=>`<span class="chip ${s.st.c}">${s.neg?s.neg.a+'歳で不足':'95歳まで不足なし'}</span>`;
+function exPeekHTML(S,k){const sc=EXSC.find(x=>x.k===k)||EXSC[0],R=exRun(S,sc);
+  const row=(col,l,ss)=>`<div class="pkrow"><span class="dot" style="background:${col}"></span><span class="pl">${l}</span>${exChip(ss)}</div>`;
+  return `<div class="pktabs" role="tablist" aria-label="比べる例">${EXSC.slice(0,5).map(x=>`<button type="button" role="tab" data-act="exsc" data-k="${x.k}" aria-selected="${x.k===sc.k}">${x.t}</button>`).join('')}</div>
+   <div class="t"><span>入力例：同じ家族で、ひとつだけ変えると</span></div>
+   ${row('var(--accent)','A：'+esc(sc.a(S)),R.sa)}${row('var(--coin)','B：'+esc(sc.b),R.sb)}
+   ${chartSVG([{rows:R.ra,color:'var(--accent)'},{rows:R.rb,color:'var(--coin)'}],null,'peekc')}`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="exsc"]');if(!b)return;const p=document.getElementById('heropeek');if(p)p.innerHTML=exPeekHTML(basePlan(),b.dataset.k)});
 function exampleHTML(S0){
-  const P=[[S0.price,'の家を買う'],[Math.round(n(S0.price)*1.5/100)*100,'の家を買う']].map(([price,l],i)=>{const T=clone(S0);T.price=price;const r=sim(T),s=summarize(r,T);return{T,r,s,l:fmt(price)+'万円'+l,col:i?'var(--coin)':'var(--accent)'}});
-  const card=(p,k)=>`<div class="excard"><div class="ext"><span class="dot" style="background:${p.col}"></span>パターン${k}：${p.l}</div><div class="exv"><span>95歳時点の金融資産</span><b>${fmt(p.s.last.bal)}<small> 万円</small></b></div><span class="chip ${p.s.st.c}">${p.s.st.t}</span><span class="unit" style="margin:0">${p.s.neg?`${p.s.neg.a}歳で、預貯金などすぐに使えるお金が底をつきます（iDeCoなど引き出せる年齢が決まっているお金を除く）`:'95歳まで、すぐに使えるお金が足りなくなることはありません'}</span></div>`;
-  return `<section class="wrap sect"><h2>診断でわかること</h2><p class="lead">入力例の家族（35歳・夫婦と子ども2人・手取り年収 夫${fmt(S0.inc)}万円／妻${fmt(S0.sinc)}万円）で、家の価格だけを変えて比べた結果です。同じ収入でも、選び方で老後のお金が大きく変わります。</p>
-   <div class="exwrap"><div class="excards">${card(P[0],'A')}${card(P[1],'B')}</div>
-   <div class="exchart">${chartSVG([{rows:P[0].r,color:P[0].col},{rows:P[1].r,color:P[1].col}],null,'exc')}<p class="unit" style="margin:4px 0 0">金融資産（預貯金・投資など）の推移。万円</p></div></div>
+  const cards=EXSC.map(sc=>{const R=exRun(S0,sc),d=Math.round(R.sb.last.bal-R.sa.last.bal);
+    return `<div class="excard"><div class="ext">${esc(sc.t)}</div><p class="exb">${esc(sc.a(S0))} → <b>${esc(sc.b)}</b></p>
+     <div class="exv"><span>95歳時点の金融資産</span><b>${fmt(R.sb.last.bal)}<small> 万円</small></b></div>
+     <div class="exd"><span class="${d>=0?'up':'dn'}">${d>=0?'+':'▲'}${fmt(Math.abs(d))}万円</span>${exChip(R.sb)}</div></div>`}).join('');
+  return `<section class="wrap sect"><h2>診断でわかること</h2><p class="lead">家を買う、車を買い替える、保険に入る、生活費を見直す。ライフプラン診断は、どんな決断でも「95歳までの家計」で比べられます。入力例の家族（35歳・夫婦と子ども2人・手取り年収 夫${fmt(S0.inc)}万円／妻${fmt(S0.sinc)}万円、今のままなら95歳時点で${fmt(summarize(sim(S0),S0).last.bal)}万円）で、ひとつだけ条件を変えた結果です。</p>
+   <div class="exgrid">${cards}</div>
+   <p class="unit" style="margin:8px 0 0">比べられるパターンは3つまで。働く年数や退職金、親からの援助、繰上げ返済、NISA・iDeCoの積立、不動産投資など、自分の「もしも」を入れて比べられます。</p>
    <div class="acts" style="margin-top:14px"><a class="btn primary" href="#lifeplan" data-lpguide="1">わが家の場合を確かめる</a></div></section>`;
 }
 function vHome(v){
@@ -100,16 +119,12 @@ function vHome(v){
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
    <div><div class="k">住まいとお金の無料シミュレーション</div>
     <h1>大きな決断の前に、<br><em>お金の未来</em>を見てみよう。</h1>
-    <p>その家を買っても、教育費と老後のお金は足りるのか。子育て、住まい、老後の決断の前に、わが家の家計が95歳までどう変わるのかを自分の数字で確かめる、<b>家計のセカンドオピニオン</b>です。</p>
+    <p>家を買う、車を買い替える、保険に入る、生活費を見直す。その決断で、わが家の家計が95歳までどう変わるのかを、自分の数字で確かめる<b>家計のセカンドオピニオン</b>です。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan" data-lpguide="1">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
     <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div>
     <a class="heroalt" href="#souba"><span class="ic">${IC.map}</span><span><b>売るか迷っている方へ：近所の家が実際にいくらで売れたか</b><small>国の取引データから、町名ごとの売却相場の目安と推移を無料で。電話番号もいりません</small></span><span class="go">→</span></a></div>
    <div class="hero-art"><div class="heroicon"><img src="${window.BASE||''}assets/icon.svg" width="220" height="220" alt="サイのまどのロゴ（家の中のサイの貯金箱）"></div>
-   ${(()=>{const T=clone(S);T.price=Math.round(n(S.price)*1.5/100)*100;const r2=sim(T),s2=summarize(r2,T);
-     const row=(col,l,ss)=>`<div class="pkrow"><span class="dot" style="background:${col}"></span><span class="pl">${l}</span><span class="chip ${ss.st.c}">${ss.neg?ss.neg.a+'歳で不足':'95歳まで不足なし'}</span></div>`;
-     return `<div class="peek" aria-label="ライフプラン診断の画面例"><div class="t"><span>入力例：同じ家族・同じ収入で、家の価格だけ変えると</span></div>
-      ${row('var(--accent)','A：'+fmt(n(S.price))+'万円の家',s)}${row('var(--coin)','B：'+fmt(T.price)+'万円の家',s2)}
-      ${chartSVG([{rows:r,color:'var(--accent)'},{rows:r2,color:'var(--coin)'}],null,'peekc')}</div>`})()}</div>
+   <div class="peek" id="heropeek" aria-label="ライフプラン診断の画面例">${exPeekHTML(S,'house')}</div></div>
   </section></div>
   <section class="wrap trust" aria-label="サイのまどの約束">
    <div><span class="ti">${IC.plan}</span><span><b>登録不要・無料</b>名前もメールも要りません</span></div>
