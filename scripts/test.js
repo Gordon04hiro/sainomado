@@ -308,17 +308,22 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const w=await open('souba.html','',stubFetch);await wait(400);const d=w.document;
    check('東京都・中古マンションで目安が出る',/約[\d,]+万円/.test(d.getElementById('sbresult').textContent),d.getElementById('sbresult').textContent.slice(0,80));
    check('国交省のクレジット表示',/不動産情報ライブラリのAPI機能を使用していますが/.test(d.getElementById('sbresult').textContent));
-   const sel=d.getElementById('sb_pref');sel.value='22';sel.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(400);
-   const c=d.getElementById('sb_city');const opt=[...c.options].find(o=>o.textContent==='浜松市中央区');check('静岡県に切り替えると市区町村が並ぶ',!!opt);
-   c.value=opt.value;c.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(100);
+   click(w,'[data-act="sbedit"][data-w="pref"]');const pq=d.getElementById('sb_prefq');pq.value='しずおか';pq.dispatchEvent(new w.Event('input',{bubbles:true}));
+   check('都道府県をよみがなで探せる',d.querySelectorAll('#sb_psug [data-act="sbpref"]').length===1&&!!d.querySelector('#sb_psug [data-c="22"]'));
+   click(w,'#sb_psug [data-c="22"]');await wait(400);
+   const cq=d.getElementById('sb_cityq');check('静岡県に切り替えると市区町村の候補が出る',!!cq&&d.querySelectorAll('#sb_csug [data-act="sbcity"]').length>=5);
+   cq.value='浜松市中央';cq.dispatchEvent(new w.Event('input',{bubbles:true}));const cb=d.querySelector('#sb_csug [data-act="sbcity"]');check('市区町村を入力して探せる',!!cb&&/浜松市中央区/.test(cb.textContent));
+   click(w,'#sb_csug [data-act="sbcity"]');await wait(300);
    const txt=d.getElementById('sbresult').textContent;check('浜松市中央区の結果',/浜松市中央区の中古マンション/.test(txt)&&!/全体の取引で計算/.test(txt));
    const m1=+txt.match(/約([\d,]+)万円/)[1].replace(/,/g,'');const ag=d.getElementById('sb_age');ag.value='35';ag.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(50);
    const m2=+d.getElementById('sbresult').textContent.match(/約([\d,]+)万円/)[1].replace(/,/g,'');check('築年数が古いと目安が下がる',m2<m1,m1+'→'+m2);
    click(w,'[data-act="sbk"][data-k="l"]');await wait(50);check('土地に切り替えると築年数の欄が消える',!d.getElementById('sb_age')&&/土地の相場/.test(d.getElementById('sbresult').textContent));
    check('売却シミュレーターへの案内',!!d.querySelector('[data-act="sb2sell"]'));
-   click(w,'[data-act="sbk"][data-k="m"]');await wait(300);const tw=d.getElementById('sb_town');check('浜松市中央区で町名を選べる',!!tw&&tw.options.length>5,tw&&tw.options.length);
-   const o2=[...tw.options].find(o=>/^上島/.test(o.textContent));tw.value=o2.value;tw.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(100);
-   check('町名を選ぶとその町名で計算し、市区町村全体と比べる',/浜松市中央区 上島の中古マンション/.test(d.getElementById('sbresult').textContent)&&/全体の真ん中（約[\d,]+万円）より/.test(d.getElementById('sbresult').textContent));}
+   click(w,'[data-act="sbk"][data-k="m"]');await wait(300);const tw=d.getElementById('sb_townq');check('浜松市中央区で町名を探せる（最初は取引の多い町名）',!!tw&&d.querySelectorAll('#sb_tsug [data-act="sbtown"]').length>=5);
+   tw.value='かみじま';tw.dispatchEvent(new w.Event('input',{bubbles:true}));tw.value='上島';tw.dispatchEvent(new w.Event('input',{bubbles:true}));
+   check('入力すると候補が絞り込まれる',[...d.querySelectorAll('#sb_tsug [data-act="sbtown"]')].every(b=>/上島/.test(b.textContent)));
+   click(w,'#sb_tsug [data-act="sbtown"][data-t="上島"]');await wait(100);
+   check('町名を選ぶとその町名で計算し、市区町村全体と比べる',!!d.querySelector('.sbsel')&&/浜松市中央区 上島の中古マンション/.test(d.getElementById('sbresult').textContent)&&/全体の中央値（約[\d,]+万円）より/.test(d.getElementById('sbresult').textContent));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));

@@ -21,6 +21,21 @@ function sbTowns(pref,city){const key=pref+'/'+city,A=SBD[pref];
   if(SBT[key])return Promise.resolve(SBT[key]);if(!A||!A.C[city]||!A.C[city].towns||typeof fetch!=='function')return Promise.resolve(null);
   return fetch('assets/souba/'+pref+'/'+city+'.json').then(r=>r.ok?r.json():null).then(j=>(SBT[key]=j)).catch(()=>null)}
 const sbTown=V=>{const T=SBT[V.pref+'/'+V.city];return V.town&&T&&T[V.town]?T[V.town]:null};
+/* 都道府県・市区町村の候補（入力して探す） */
+const SBPREFK=['ほっかいどう','あおもり','いわて','みやぎ','あきた','やまがた','ふくしま','いばらき','とちぎ','ぐんま','さいたま','ちば','とうきょう','かながわ','にいがた','とやま','いしかわ','ふくい','やまなし','ながの','ぎふ','しずおか','あいち','みえ','しが','きょうと','おおさか','ひょうご','なら','わかやま','とっとり','しまね','おかやま','ひろしま','やまぐち','とくしま','かがわ','えひめ','こうち','ふくおか','さが','ながさき','くまもと','おおいた','みやざき','かごしま','おきなわ'];
+const SBED={pref:false};
+function sbPrefSug(q){const Q=sbNorm(q);const all=SBPREF.map((p,i)=>[String(i+1).padStart(2,'0'),p,SBPREFK[i]]);
+  const list=Q?all.filter(([c,p,k])=>sbNorm(p).includes(Q)||k.startsWith(Q)):['13','14','27','23','11','12','40','01'].map(c=>all[+c-1]);
+  return (Q?'':'<p class="sbsl">よく使われる都道府県</p>')+(list.length?list.map(([c,p])=>`<button type="button" data-act="sbpref" data-c="${c}">${p}</button>`).join(''):'<p class="sbsl">見つかりませんでした</p>')+(Q?'':'<p class="sbsl">ほかは名前の一部やよみがなを入れると出てきます</p>')}
+function sbCitySug(A,q){const Q=sbNorm(q);let cs=Object.entries(A.C).filter(([c,v])=>v[SB.k]).sort((a,b)=>b[1][SB.k].n-a[1][SB.k].n);
+  if(Q)cs=cs.filter(([c,v])=>sbNorm(v.name).includes(Q));const list=cs.slice(0,Q?20:10);
+  return (Q?'':'<p class="sbsl">取引の多い市区町村</p>')+(list.length?list.map(([c,v])=>`<button type="button" data-act="sbcity" data-c="${c}">${esc(v.name)}<small>${v[SB.k].n}件</small></button>`).join('')+(cs.length>list.length?`<p class="sbsl">ほか${cs.length-list.length}市区町村。名前の一部を入れると絞り込めます</p>`:''):'<p class="sbsl">見つかりませんでした</p>')}
+/* 町名の候補：入力が空なら取引の多い順、入力があれば名前に含むもの（ひらがな・カタカナ・ヶ/ケの違いはそろえて比べる） */
+const sbNorm=t=>String(t).replace(/[ァ-ン]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)).replace(/[ヶヵケ]/g,'け').replace(/[ヶ]/g,'け').replace(/\s/g,'');
+const sbTop=T=>Object.keys(T).filter(t=>T[t][SB.k]).sort((a,b)=>T[b][SB.k].n-T[a][SB.k].n);
+function sbSugHTML(T,q){const Q=sbNorm(q);let ts=sbTop(T);if(Q)ts=ts.filter(t=>sbNorm(t).includes(Q)).sort((a,b)=>(sbNorm(a).startsWith(Q)?0:1)-(sbNorm(b).startsWith(Q)?0:1)||T[b][SB.k].n-T[a][SB.k].n);
+  const list=ts.slice(0,Q?20:10);
+  return (Q?'':'<p class="sbsl">取引の多い町名</p>')+(list.length?list.map(t=>`<button type="button" data-act="sbtown" data-t="${esc(t)}">${esc(t)}<small>${T[t][SB.k].n}件</small></button>`).join('')+(ts.length>list.length?`<p class="sbsl">ほか${ts.length-list.length}町名。名前の一部を入れると絞り込めます</p>`:''):'<p class="sbsl">見つかりませんでした。取引が少ない町名は選べないので、市区町村全体の目安を見てください</p>')}
 function sbCalc(A,V){
   const k=V.k,c=V.city&&A.C[V.city]&&A.C[V.city][k]?A.C[V.city][k]:null,tw=sbTown(V),t=tw&&tw[k]?tw[k]:null,st=t||c||A.P[k];if(!st)return null;
   const area=Math.max(0,n(V.area)),f=k==='l'?1:A.curve[k][sbBand(Math.max(0,n(V.age)))];
@@ -31,10 +46,13 @@ function sbCalc(A,V){
 function sbFields(A){
   const cities=A?Object.entries(A.C).filter(([c,v])=>v[SB.k]).sort((a,b)=>a[0].localeCompare(b[0])):[];
   return `<div class="fields">
-   <label class="fld"><span class="lab">都道府県</span><select id="sb_pref">${SBPREF.map((p,i)=>{const c=String(i+1).padStart(2,'0');return `<option value="${c}"${c===SB.pref?' selected':''}>${p}</option>`}).join('')}</select></label>
-   <label class="fld"><span class="lab">市区町村</span><select id="sb_city"><option value="">${A?esc(A.name)+'全体':'読み込み中…'}</option>${cities.map(([c,v])=>`<option value="${c}"${c===SB.city?' selected':''}>${esc(v.name)}</option>`).join('')}</select><span class="hint">取引が少ない市区町村は一覧に出ません（都道府県全体で計算します）</span></label>
-   ${(()=>{const T=SB.city?SBT[SB.pref+'/'+SB.city]:null;if(!T)return '';const ts=Object.keys(T).filter(t=>T[t][SB.k]).sort((a,b)=>a.localeCompare(b,'ja'));if(!ts.length)return '';
-     return `<label class="fld"><span class="lab">町名（任意）</span><select id="sb_town"><option value="">選ばない（${esc(A.C[SB.city].name)}全体）</option>${ts.map(t=>`<option value="${esc(t)}"${t===SB.town?' selected':''}>${esc(t)}（${T[t][SB.k].n}件）</option>`).join('')}</select><span class="hint">5年で5件以上の取引がある町名だけ選べます。件数が少ないほど、ふれ幅が大きくなります</span></label>`})()}
+   <div class="fld"><span class="lab">都道府県</span>${SBED.pref?`<input id="sb_prefq" class="sbq" type="search" autocomplete="off" placeholder="都道府県を入力（例：しずおか・静岡）" aria-label="都道府県を入力して探す"><div class="sbsug" id="sb_psug">${sbPrefSug('')}</div>`:`<div class="sbsel"><b>${SBPREF[+SB.pref-1]}</b><button type="button" class="btn small" data-act="sbedit" data-w="pref">変更する</button></div>`}</div>
+   <div class="fld"><span class="lab">市区町村</span>${!A?'<p class="unit">読み込み中…</p>':SB.city&&A.C[SB.city]?`<div class="sbsel"><b>${esc(A.C[SB.city].name)}</b><small>${A.C[SB.city][SB.k]?A.C[SB.city][SB.k].n+'件':''}</small><button type="button" class="btn small" data-act="sbedit" data-w="city">変更する</button></div>`:`<input id="sb_cityq" class="sbq" type="search" autocomplete="off" placeholder="市区町村を入力（例：${esc((cities.slice().sort((a,b)=>b[1][SB.k].n-a[1][SB.k].n)[0]||[0,{name:''}])[1].name)}）" aria-label="市区町村を入力して探す"><div class="sbsug" id="sb_csug">${sbCitySug(A,'')}</div><span class="hint">選ばなければ${esc(A.name)}全体で計算します。取引が少ない市区町村は出てきません</span>`}</div>
+   ${(()=>{const T=SB.city?SBT[SB.pref+'/'+SB.city]:null;if(!T)return '';const ts=Object.keys(T).filter(t=>T[t][SB.k]);if(!ts.length)return '';
+     const cur=SB.town&&T[SB.town]?SB.town:'';
+     return `<div class="fld"><span class="lab">町名（任意）</span>${cur?`<div class="sbsel"><b>${esc(cur)}</b><small>${T[cur][SB.k]?T[cur][SB.k].n+'件':'取引が少ない種類'}</small><button type="button" class="btn small" data-act="sbtownclr">変更する</button></div>`:
+      `<input id="sb_townq" type="search" autocomplete="off" placeholder="町名を入力（例：${esc(sbTop(T)[0]||'')}）" aria-label="町名を入力して探す"><div class="sbsug" id="sb_tsug">${sbSugHTML(T,'')}</div>`}
+      <span class="hint">${esc(A.C[SB.city].name)}で、5年で5件以上の取引がある${ts.length}の町名から選べます。選ばなければ${esc(A.C[SB.city].name)}全体で計算します</span></div>`})()}
    <div class="fld"><span class="lab">種類</span><span class="seg" role="group" aria-label="種類">${Object.entries(SBK).map(([k,v])=>`<button type="button" data-act="sbk" data-k="${k}" aria-pressed="${SB.k===k}">${v.t}</button>`).join('')}</span></div>
    <label class="fld"><span class="lab">${SBK[SB.k].area}</span><span class="inp"><input id="sb_area" type="number" inputmode="decimal" value="${esc(SB.area)}"><span class="u">㎡</span></span><span class="hint">${SBK[SB.k].ah}。1坪＝約3.3㎡（${fmt(n(SB.area)/3.3058)}坪）</span></label>
    ${SB.k==='l'?'':`<label class="fld"><span class="lab">築年数</span><span class="inp"><input id="sb_age" type="number" inputmode="numeric" value="${esc(SB.age)}"><span class="u">年</span></span></label>`}
@@ -54,27 +72,37 @@ function sbRender(){
   if(!R||!(R.area>0)){box.innerHTML='<p class="unit">面積を入れると、相場の目安が出ます。</p>';return}
   const cn=(SB.city&&A.C[SB.city]?A.C[SB.city].name:A.name+'全体')+(R.town?' '+SB.town:''), mid=Math.round(R.price[1]/10)*10;
   box.innerHTML=`<h2>${esc(cn)}の${SBK[SB.k].t}の相場の目安</h2>
-   <div class="sbmain"><p class="sbl">真ん中あたりの価格</p><p class="sbv"><b>約${fmt(mid)}</b><small>万円</small></p>
+   <div class="sbmain"><p class="sbl">中央値（取引を価格順に並べたときの真ん中）</p><p class="sbv"><b>約${fmt(mid)}</b><small>万円</small></p>
     <div class="sbbar" aria-hidden="true"><span class="lo">${fmt(Math.round(R.price[0]/10)*10)}</span><span class="md"></span><span class="hi">${fmt(Math.round(R.price[2]/10)*10)}</span></div>
     <p class="sbr">近い条件の取引の半分が、<b>約${fmt(Math.round(R.price[0]/10)*10)}万〜${fmt(Math.round(R.price[2]/10)*10)}万円</b>の間に入ります</p></div>
-   <div class="panels"><section class="panel"><div class="ph"><span class="nm">1㎡あたり・1坪あたり</span></div><div class="kv">${kvRow('1㎡あたり（真ん中）',(Math.round(R.unit[1]/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}${kvRow('1坪あたり（真ん中）',(Math.round(R.unit[1]*3.3058/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}</div></section>
-    <section class="panel"><div class="ph"><span class="nm">もとにしたデータ</span></div><div class="kv">${kvRow('取引の件数',fmt(R.n)+'<small>件</small>')}${kvRow('期間',`<small>${esc(A.from)}〜${esc(A.to)}</small>`)}</div>${R.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}の取引だけで計算しています。${esc(A.C[SB.city].name)}全体の真ん中（約${fmt(Math.round(R.baseMid/10)*10)}万円）より<b>${R.ratio>=1?'約'+Math.round((R.ratio-1)*100)+'%高め':'約'+Math.round((1-R.ratio)*100)+'%低め'}</b>です。件数が少ないので、ふれ幅が大きくなります。</p>`:SB.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}は${SBK[SB.k].t}の取引が少ないため、${esc(A.C[SB.city].name)}全体で計算しています。</p>`:''}${R.local?'':`<p class="unit" style="margin:6px 0 0">${SB.city?'この市区町村は取引が少ないため、':''}${esc(A.name)}全体の取引で計算しています。</p>`}</section></div>
+   <div class="panels"><section class="panel"><div class="ph"><span class="nm">1㎡あたり・1坪あたり</span></div><div class="kv">${kvRow('1㎡あたり（中央値）',(Math.round(R.unit[1]/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}${kvRow('1坪あたり（中央値）',(Math.round(R.unit[1]*3.3058/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}</div></section>
+    <section class="panel"><div class="ph"><span class="nm">もとにしたデータ</span></div><div class="kv">${kvRow('取引の件数',fmt(R.n)+'<small>件</small>')}${kvRow('期間',`<small>${esc(A.from)}〜${esc(A.to)}</small>`)}</div>${R.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}の取引だけで計算しています。${esc(A.C[SB.city].name)}全体の中央値（約${fmt(Math.round(R.baseMid/10)*10)}万円）より<b>${R.ratio>=1?'約'+Math.round((R.ratio-1)*100)+'%高め':'約'+Math.round((1-R.ratio)*100)+'%低め'}</b>です。件数が少ないので、ふれ幅が大きくなります。</p>`:SB.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}は${SBK[SB.k].t}の取引が少ないため、${esc(A.C[SB.city].name)}全体で計算しています。</p>`:''}${R.local?'':`<p class="unit" style="margin:6px 0 0">${SB.city?'この市区町村は取引が少ないため、':''}${esc(A.name)}全体の取引で計算しています。</p>`}</section></div>
    <section class="advice"><h3>この目安の見方</h3><ul>
     <li>実際の取引価格（不動産取引価格情報）と、不動産会社が登録した成約価格（成約価格情報）をもとにした<b>統計的な目安</b>です。不動産会社の査定ではありません</li>
     <li>${SB.k==='m'?'階数・向き・管理の状態・駅からの距離':SB.k==='h'?'建物の広さや状態・リフォームの有無・道路との関係・駅からの距離':'形・道路との関係・用途地域・駅からの距離'}などで、同じ地域でも価格は大きく変わります。幅の外側になることもめずらしくありません</li>
     ${SB.k!=='l'?`<li>築年数による差は、${esc(A.name)}の取引から計算した補正をかけています（築${fmt(n(SB.age))}年は、平均的な物件の約${Math.round(R.f*100)}%）</li>`:''}
+    <li>平均値ではなく<b>中央値</b>を使っています。平均値は、ごく一部の高い取引（広い土地や高級物件など）に引っぱられて高めに出やすいためです</li>
     <li>年ごとの価格の動きは、いちばん新しい年の水準にそろえています</li></ul></section>
-   <section class="lpbridge"><b>この価格で売ると、手元にいくら残る？</b><p>真ん中の価格（約${fmt(mid)}万円）を売却シミュレーターに入れて、仲介手数料・税金・ローンの残りを引いた手取りを確かめられます。</p><button class="btn small primary" data-act="sb2sell" data-p="${mid}">売却シミュレーターで計算する</button></section>
+   <section class="lpbridge"><b>この価格で売ると、手元にいくら残る？</b><p>中央値（約${fmt(mid)}万円）を売却シミュレーターに入れて、仲介手数料・税金・ローンの残りを引いた手取りを確かめられます。</p><button class="btn small primary" data-act="sb2sell" data-p="${mid}">売却シミュレーターで計算する</button></section>
    <p class="unit sbcredit">このサービスは、国土交通省の不動産情報ライブラリのAPI機能を使用していますが、提供情報の最新性、正確性、完全性等が保証されたものではありません。正確な価格は、物件を見たうえでの不動産会社の査定で確かめてください。</p>`;
-  const d=document.getElementById('dockin');if(d){d.innerHTML=`<div class="v"><span>相場の目安（真ん中）<b>${fmt(mid)} 万円</b></span></div><button class="btn primary" data-act="sbres">結果を見る</button>`}
+  const d=document.getElementById('dockin');if(d){d.innerHTML=`<div class="v"><span>相場の目安（中央値）<b>${fmt(mid)} 万円</b></span></div><button class="btn primary" data-act="sbres">結果を見る</button>`}
 }
 document.addEventListener('input',e=>{const t=e.target;if(!t.id||!/^sb_(area|age)$/.test(t.id))return;SB[t.id.slice(3)]=t.value===''?'':parseFloat(t.value);SB.example=false;sbSave();
   if(t.id==='sb_area'){const h=t.closest('.fld').querySelector('.hint');if(h)h.textContent=SBK[SB.k].ah+'。1坪＝約3.3㎡（'+fmt(n(SB.area)/3.3058)+'坪）'}sbRender()});
 document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='sb_pref'){SB.pref=t.value;SB.city='';SB.town='';sbSave();const f=document.getElementById('sbform');sbLoad(SB.pref).then(()=>{f.innerHTML=sbFields(SBD[SB.pref]);sbRender()}).catch(()=>{})}
   else if(t.id==='sb_city'){SB.city=t.value;SB.town='';sbSave();sbRender();sbTowns(SB.pref,SB.city).then(()=>{const f=document.getElementById('sbform');if(f){f.innerHTML=sbFields(SBD[SB.pref]);sbRender()}})}
-  else if(t.id==='sb_town'){SB.town=t.value;sbSave();sbRender()}});
+  });
+document.addEventListener('input',e=>{const id=e.target.id;if(id==='sb_prefq'){const b=document.getElementById('sb_psug');if(b)b.innerHTML=sbPrefSug(e.target.value);return}if(id==='sb_cityq'){const b=document.getElementById('sb_csug'),A=SBD[SB.pref];if(b&&A)b.innerHTML=sbCitySug(A,e.target.value);return}if(id!=='sb_townq')return;const T=SBT[SB.pref+'/'+SB.city],b=document.getElementById('sb_tsug');if(T&&b)b.innerHTML=sbSugHTML(T,e.target.value)});
 document.addEventListener('click',e=>{if(e.target.closest('[data-act="sbres"]')){const r=document.getElementById('sbresult');if(r)r.scrollIntoView({behavior:'smooth'});return}
+  const pb=e.target.closest('[data-act="sbpref"],[data-act="sbcity"],[data-act="sbedit"]');
+  if(pb){const f=document.getElementById('sbform'),re=()=>{f.innerHTML=sbFields(SBD[SB.pref]);sbRender()},act=pb.dataset.act;
+    if(act==='sbedit'){if(pb.dataset.w==='pref')SBED.pref=true;else{SB.city='';SB.town=''}re();const q=document.getElementById(pb.dataset.w==='pref'?'sb_prefq':'sb_cityq');if(q)q.focus()}
+    else if(act==='sbpref'){SB.pref=pb.dataset.c;SB.city='';SB.town='';SBED.pref=false;sbSave();re();sbLoad(SB.pref).then(re).catch(()=>{})}
+    else{SB.city=pb.dataset.c;SB.town='';sbSave();re();sbTowns(SB.pref,SB.city).then(re)}
+    return}
+  const tb=e.target.closest('[data-act="sbtown"],[data-act="sbtownclr"]');
+  if(tb){SB.town=tb.dataset.act==='sbtown'?tb.dataset.t:'';sbSave();const f=document.getElementById('sbform');f.innerHTML=sbFields(SBD[SB.pref]);sbRender();if(!SB.town){const q=document.getElementById('sb_townq');if(q)q.focus()}return}
   const b=e.target.closest('[data-act="sbk"],[data-act="sb2sell"]');if(!b)return;
   if(b.dataset.act==='sbk'){SB.k=b.dataset.k;if(SB.k==='m'&&n(SB.area)>150)SB.area=65;if(SB.k!=='m'&&n(SB.area)<80)SB.area=165;sbSave();document.getElementById('sbform').innerHTML=sbFields(SBD[SB.pref]);sbRender()}
   else{try{const s=JSON.parse(localStorage.getItem('sainomado-sell-v2')||'null')||sellBase();s.price=+b.dataset.p;s.example=false;localStorage.setItem('sainomado-sell-v2',JSON.stringify(s));if(typeof SV!=='undefined'&&SV)SV.price=+b.dataset.p}catch(x){}
