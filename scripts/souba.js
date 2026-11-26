@@ -27,7 +27,7 @@ function clean(d){
   if(!(price>=1e5)||!(area>=10)||!p)return null;
   let age=null;
   if(k!=='l'){const by=builtYear(d.BuildingYear);if(!isFinite(by))return null;age=Math.max(0,p.y-by);if(age>80)return null}
-  return{k,city:String(d.MunicipalityCode||''),cname:d.Municipality||'',price,area,unit:price/area,age,t:p.t,lab:`${p.y}年第${p.q}四半期`};
+  return{k,city:String(d.MunicipalityCode||''),cname:d.Municipality||'',town:String(d.DistrictName||'').trim(),seiyaku:/成約/.test(d.PriceCategory||''),price,area,unit:price/area,age,t:p.t,lab:`${p.y}年第${p.q}四半期`};
 }
 
 /* 都道府県1つ分の行（clean 済み）から、集計ファイルを作る */
@@ -36,7 +36,7 @@ function aggregate(code,rows){
   let tMax=-Infinity;for(const r of rows)if(r.t>tMax)tMax=r.t;const tMin=tMax-YEARS+0.25;
   rows=rows.filter(r=>r.t>=tMin);
   const labs=rows.map(r=>[r.t,r.lab]).sort((a,b)=>a[0]-b[0]);
-  const out={pref:code,name:PREF[+code-1]||'',from:labs[0][1],to:labs[labs.length-1][1],bands:BANDS,curve:{},idx:{},P:{},C:{}};
+  const out={pref:code,name:PREF[+code-1]||'',from:labs[0][1],to:labs[labs.length-1][1],bands:BANDS,curve:{},idx:{},P:{},C:{},D:{}};
   for(const k of ['m','h','l']){
     const R=rows.filter(r=>r.k===k);if(R.length<20)continue;
     // 1) 時点の補正：年ごとの1㎡単価の中央値を、いちばん新しい年にそろえる
@@ -61,6 +61,9 @@ function aggregate(code,rows){
     out.P[k]=st(R.map(r=>r.x));
     const by={};R.forEach(r=>{if(!r.city)return;(by[r.city]=by[r.city]||{name:r.cname,a:[]}).a.push(r.x)});
     Object.entries(by).forEach(([c,v])=>{if(v.a.length<5)return;out.C[c]=out.C[c]||{name:v.name};out.C[c][k]=st(v.a)});
+    // 町名（地区名）ごと：5件以上ある町名だけ。市区町村ごとの別ファイルにする（D は書き出しのときに分ける）
+    const bt={};R.forEach(r=>{if(!r.city||!r.town)return;const c=(bt[r.city]=bt[r.city]||{});(c[r.town]=c[r.town]||[]).push(r.x)});
+    Object.entries(bt).forEach(([c,T])=>Object.entries(T).forEach(([t,a])=>{if(a.length<5)return;const D=(out.D[c]=out.D[c]||{});(D[t]=D[t]||{})[k]=st(a)}));
   }
   return Object.keys(out.P).length?out:null;
 }
@@ -91,7 +94,12 @@ async function main(){
       await new Promise(s=>setTimeout(s,250));
     }
     const a=aggregate(code,rows);
-    if(a){fs.writeFileSync(path.join(OUT,code+'.json'),JSON.stringify(a));console.log(code,PREF[+code-1],a.from+'〜'+a.to,'市区町村',Object.keys(a.C).length,'件数',['m','h','l'].map(k=>k+':'+(a.P[k]?a.P[k].n:0)).join(' '))}
+    if(a){const D=a.D;delete a.D;Object.keys(a.C).forEach(c=>{a.C[c].towns=D[c]?Object.keys(D[c]).length:0});
+      fs.writeFileSync(path.join(OUT,code+'.json'),JSON.stringify(a));
+      const dir=path.join(OUT,code);fs.rmSync(dir,{recursive:true,force:true});fs.mkdirSync(dir,{recursive:true});
+      Object.entries(D).forEach(([c,T])=>fs.writeFileSync(path.join(dir,c+'.json'),JSON.stringify(T)));
+      const st=rows.reduce((o,r)=>{o[r.seiyaku?'s':'t'][r.town?1:0]++;return o},{s:[0,0],t:[0,0]});
+      console.log('  町名あり：取引価格',st.t[1]+'/'+(st.t[0]+st.t[1]),'成約価格',st.s[1]+'/'+(st.s[0]+st.s[1]),'町名のある市区町村',Object.keys(D).length);console.log(code,PREF[+code-1],a.from+'〜'+a.to,'市区町村',Object.keys(a.C).length,'件数',['m','h','l'].map(k=>k+':'+(a.P[k]?a.P[k].n:0)).join(' '))}
     else console.log(code,PREF[+code-1],'データなし');
   }
 }

@@ -263,6 +263,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
      raw.push({Type:'中古マンション等',MunicipalityCode:city,Municipality:city==='22131'?'浜松市中央区':'浜松市東区',TradePrice:String(Math.round(u*area)),Area:String(area),BuildingYear:(y-age)+'年',Period:y+'年第'+(1+Math.floor(rnd()*4))+'四半期',Remarks:''})}
    const A=SB.aggregate('22',raw.map(SB.clean).filter(Boolean));
    check('都道府県・市区町村ごとの単価の幅ができる',A&&A.name==='静岡県'&&A.C['22131'].m.q[1]>A.C['22132'].m.q[1]&&A.C['22131'].m.q[0]<A.C['22131'].m.q[2]);
+   {const raw2=raw.map((r,i)=>Object.assign({},r,{DistrictName:i%2?'元城町':'鴨江'}));const A2=SB.aggregate('22',raw2.map(SB.clean).filter(Boolean));check('町名ごとの集計ができる',A2.D['22131']&&A2.D['22131']['元城町'].m.n>=5);}
    check('築年数が古いほど補正が小さい',A.curve.m[0]>A.curve.m[6]&&A.curve.m.every((v,i,a)=>!i||v<=a[i-1]));
    const est=A.C['22131'].m.q[1]*A.curve.m[SB.band(10)]*70/1e4;check('浜松市中央区・築10年・70㎡のめやすが妥当な範囲',est>1500&&est<3000,Math.round(est)+'万円');}
   {const w=await open('index.html');const html=w.document.querySelector('.exwrap').textContent;
@@ -303,7 +304,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const h=require('fs').readFileSync('dist/articles/sell-cost.html','utf8');check('記事のパンくずにガイド',/<div class="crumb">[^]*?guide\/sell\.html/.test(h));}
   console.log('\n■ 売却相場の目安');
   {const fs=require('fs');const stubFetch=w=>{w.fetch=u=>{const f='dist/'+String(u).replace(/^\.?\//,'');return Promise.resolve(fs.existsSync(f)?{ok:true,json:()=>Promise.resolve(JSON.parse(fs.readFileSync(f,'utf8')))}:{ok:false,status:404})}};
-   check('都道府県のデータがある',fs.readdirSync('dist/assets/souba').length===47);
+   check('都道府県のデータがある',fs.readdirSync('dist/assets/souba').filter(f=>f.endsWith('.json')).length===47);
    const w=await open('souba.html','',stubFetch);await wait(400);const d=w.document;
    check('東京都・中古マンションで目安が出る',/約[\d,]+万円/.test(d.getElementById('sbresult').textContent),d.getElementById('sbresult').textContent.slice(0,80));
    check('国交省のクレジット表示',/不動産情報ライブラリのAPI機能を使用していますが/.test(d.getElementById('sbresult').textContent));
@@ -314,7 +315,10 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const m1=+txt.match(/約([\d,]+)万円/)[1].replace(/,/g,'');const ag=d.getElementById('sb_age');ag.value='35';ag.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(50);
    const m2=+d.getElementById('sbresult').textContent.match(/約([\d,]+)万円/)[1].replace(/,/g,'');check('築年数が古いと目安が下がる',m2<m1,m1+'→'+m2);
    click(w,'[data-act="sbk"][data-k="l"]');await wait(50);check('土地に切り替えると築年数の欄が消える',!d.getElementById('sb_age')&&/土地の相場/.test(d.getElementById('sbresult').textContent));
-   check('売却シミュレーターへの案内',!!d.querySelector('[data-act="sb2sell"]'));}
+   check('売却シミュレーターへの案内',!!d.querySelector('[data-act="sb2sell"]'));
+   click(w,'[data-act="sbk"][data-k="m"]');await wait(300);const tw=d.getElementById('sb_town');check('浜松市中央区で町名を選べる',!!tw&&tw.options.length>5,tw&&tw.options.length);
+   const o2=[...tw.options].find(o=>/^上島/.test(o.textContent));tw.value=o2.value;tw.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(100);
+   check('町名を選ぶとその町名で計算し、市区町村全体と比べる',/浜松市中央区 上島の中古マンション/.test(d.getElementById('sbresult').textContent)&&/全体の真ん中（約[\d,]+万円）より/.test(d.getElementById('sbresult').textContent));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
