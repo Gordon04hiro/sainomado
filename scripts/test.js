@@ -343,6 +343,8 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const w2=await open('lifeplan.html','',ww=>{Object.defineProperty(ww,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})});
    const fb=w2.document.querySelector('.fixbox');check('家を買う計画で不足が出ると、家の価格をいくら下げればよいかを出す',!!fb&&/物件価格を約[\d,]+万円下げて[\d,]+万円にする/.test(fb.textContent)&&/生活費を月[\d.]+万円/.test(fb.textContent),fb&&fb.textContent);
    click(w2,'.fixbox [data-act="lever"]');await wait(300);check('ボタンで比べるパターンを作る',!w2.document.querySelector('.fixbox')||/パターンB/.test(w2.document.getElementById('view').textContent));}
+  {const fs=require('fs');const h=fs.readFileSync('dist/index.html','utf8'),l=fs.readFileSync('dist/lifeplan.html','utf8');
+   check('トップとライフプランのページに「7つの見方」（画面の写真つき）',(h.match(/class="lvcard"/g)||[]).length===7&&(l.match(/class="lvcard"/g)||[]).length===7&&['overview','bs','goal','scen','month','yj','cf'].every(k=>fs.existsSync('dist/assets/shots/lp-'+k+'.jpg')));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
