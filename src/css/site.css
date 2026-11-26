@@ -660,3 +660,31 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .nextcard h3{font-size:15px}.nextcard p{font-size:12.5px;line-height:1.6}
 .lpnote2{color:var(--brand);font-weight:700}
 .hubbody p{font-size:15px;line-height:1.9;margin:0 0 12px}.subnote{font-size:13.5px;color:var(--muted);margin:8px 0 0}
+
+/* ヘッダーの目的メニュー */
+.gnav{align-items:center}
+.gmenu{white-space:nowrap;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer}
+.gmenu[aria-expanded="true"]{border-color:var(--brand);color:var(--brand)}
+.gmenu[aria-expanded="true"] svg{transform:rotate(180deg)}
+.gmenu .gm-s{display:none}
+.gcta{margin-left:4px;white-space:nowrap}
+header.site{position:relative}
+.mega{position:absolute;left:0;right:0;top:100%;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 12px 24px rgba(58,47,40,.12);z-index:60;max-height:calc(100vh - 70px);overflow:auto}
+.mega .wrap{display:block;padding-block:18px}
+.mcols,.fcols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.fcols{grid-template-columns:repeat(5,minmax(0,1fr))}
+.mcol .mh{font-weight:700;color:var(--ink);font-size:14px;margin:0 0 6px}
+.mcol ul{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:4px}
+.mcol a{color:var(--muted);text-decoration:none;font-size:13.5px}.mcol a:hover{color:var(--brand);text-decoration:underline}
+.mega .mcol a{color:var(--ink)}
+.mcol .mguide{color:var(--brand)!important;font-weight:700;font-size:13px}
+.mfoot{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px}
+.mfoot a{color:var(--muted)}
+footer.ft .fcols a{font-size:12.5px}
+@media (max-width:900px){.hide-md{display:none!important}.fcols{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.mcols{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.gmenu .gm-l{display:none}.gmenu .gm-s{display:inline}.gcta{font-size:12px;padding:6px 10px}.mcols{grid-template-columns:1fr 1fr;gap:14px}}
+/* ツールのページの「あわせて使いたいツール」 */
+.tnext{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.tnext a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:13.5px}
+.tnext a:hover{border-color:var(--brand);color:var(--brand)}
