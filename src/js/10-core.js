@@ -104,6 +104,18 @@ function exPeekHTML(S,k){const sc=EXSC.find(x=>x.k===k)||EXSC[0],R=exRun(S,sc);
    ${row('var(--accent)','A：'+esc(sc.a(S)),R.sa)}${row('var(--coin)','B：'+esc(sc.b),R.sb)}
    ${chartSVG([{rows:R.ra,color:'var(--accent)'},{rows:R.rb,color:'var(--coin)'}],null,'peekc')}`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="exsc"]');if(!b)return;const p=document.getElementById('heropeek');if(p)p.innerHTML=exPeekHTML(basePlan(),b.dataset.k)});
+/* ライフプラン診断の結果の「7つの見方」：実際の画面の写真つきで紹介（トップとライフプランのページの下） */
+const LPVIEWS=[
+ ['overview','概要','95歳までの貯蓄の推移と、お金が足りなくなる年。足りないときは、家の価格や生活費をいくら変えればよいかもすぐに出ます。'],
+ ['bs','家計の決算書（BS・PL）','会社の決算書と同じ考え方で、わが家の財産（資産・負債・純資産）と1年間のもうけを。今・退職時・80歳・95歳で切り替えて見られます。'],
+ ['goal','目標から逆算','「95歳で○万円残したい」といった目標に届くには、積立・働く期間・生活費・運用・家の価格を、それぞれどれだけ変えればいいかを計算します。'],
+ ['scen','シナリオ','運用の利回りや物価、昇給が予想よりよい・わるいときの3通りの結果を並べて、計画のブレ幅を確かめます。'],
+ ['month','月ごとに見る','家を買う、子どもが入学するなど、大きな出費の前後2年の預貯金の動きを月ごとに。底をつきそうな月がわかります。'],
+ ['yj','予算と実績','今の計画を「予算」として保存し、毎年の実績と比べて見直します。会社の予実管理と同じ流れで、計画を引き直せます。'],
+ ['cf','キャッシュフロー表','毎年の収入・支出・貯蓄の残高の一覧。ExcelやPDFで保存して、家族や相談先と共有できます。']];
+function lpViewsHTML(h){return `<section class="wrap sect lpviews"><${h} class="lvh">結果は7つの見方で確かめられます</${h}><p class="lead">ライフプラン診断は、グラフを1枚出して終わりではありません。同じ入力から、家計を7つの角度で見られます（写真は入力例の家族の画面です）。</p>
+  <div class="lvgrid">${LPVIEWS.map(([k,t,d])=>`<a class="lvcard" href="#lifeplan" data-lprtab="${k}"><span class="lvimg"><img src="${window.BASE||''}assets/shots/lp-${k}.jpg" alt="ライフプラン診断の「${esc(t)}」の画面" loading="lazy" width="1080" height="840"></span><b>${esc(t)}</b><span>${esc(d)}</span></a>`).join('')}</div></section>`}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-lprtab]');if(a)try{sessionStorage.setItem('sainomado-lp-rtab',a.dataset.lprtab)}catch(x){}},true);
 function exampleHTML(S0){
   const cards=EXSC.map(sc=>{const R=exRun(S0,sc),d=Math.round(R.sb.last.bal-R.sa.last.bal);
     return `<div class="excard"><div class="ext">${esc(sc.t)}</div><p class="exb">${esc(sc.a(S0))} → <b>${esc(sc.b)}</b></p>
@@ -133,6 +145,7 @@ function vHome(v){
    <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg></span><span><b>データの出典を公開</b><a href="#data">使っているデータ</a>で確認できます</span></div>
   </section>
   ${exampleHTML(S)}
+  ${lpViewsHTML('h2')}
   <section class="wrap sect" id="tools"><h2>ツール</h2><p class="lead">どれも無料・登録不要。計算はお使いの端末の中だけで行います。まず家計全体を見るなら、ライフプラン診断から。</p>
    <div class="tools">
     <a class="tool feat" href="#lifeplan"><span class="ic">${IC.plan}</span><span><h3>ライフプラン診断</h3><p>家族・収入・住まいを入れると、毎年の収支と貯蓄の推移がわかります。住宅購入あり・なしなど、3パターンまで比べられます。</p></span><span class="go">はじめる →</span></a>

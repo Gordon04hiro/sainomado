@@ -739,3 +739,13 @@ footer.ft .fcols a{font-size:12.5px}
 .excard .exb{margin:0;font-size:13px;color:var(--muted);line-height:1.6}.excard .exb b{color:var(--ink)}
 .exd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}.exd .up{color:var(--accent);font-weight:700}.exd .dn{color:#c0392b;font-weight:700}
 .fixl{margin:0 0 10px;padding-left:18px;font-size:14px;line-height:1.8}.fixl li{margin-bottom:6px}.fixl .btn{margin-left:6px;vertical-align:middle}
+
+/* ライフプラン診断の7つの見方 */
+.lvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:12px}
+.lvcard{display:grid;gap:6px;align-content:start;padding:10px 10px 14px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);text-decoration:none;color:var(--ink)}
+.lvcard:hover{border-color:var(--brand)}
+.lvimg{display:block;aspect-ratio:4/3;overflow:hidden;border-radius:12px;border:1px solid var(--line);background:#fff}
+.lvimg img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.lvcard b{font-size:15px;padding:0 4px}.lvcard>span:last-child{font-size:13px;line-height:1.7;color:var(--muted);padding:0 4px}
+.wrap .lpviews{padding-inline:0}
+@media (max-width:560px){.lvgrid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:80%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;-webkit-overflow-scrolling:touch}.lvcard{scroll-snap-align:start}}

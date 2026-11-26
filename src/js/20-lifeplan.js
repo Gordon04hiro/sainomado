@@ -17,6 +17,7 @@ function easyDefaults(S){normPlan(S);const A=S.assets;const sp=S.spouse==='yes';
 function vLife(v){
   try{const o=sessionStorage.getItem('sainomado-lp-open');if(o&&LP.plans[o]){U.plan=o;U.cf=o;sessionStorage.removeItem('sainomado-lp-open')}}catch(e){}
   /* トップの「はじめる」から来たとき：入力例のままなら、質問に答えて入力（空の状態）から始める。自分の入力があるときはそのまま */
+  try{const t=sessionStorage.getItem('sainomado-lp-rtab');if(t){sessionStorage.removeItem('sainomado-lp-rtab');if(RTABS.some(x=>x[0]===t))U.rtab=t}}catch(e){}
   try{if(sessionStorage.getItem('sainomado-lp-guide')){sessionStorage.removeItem('sainomado-lp-guide');if(LP.example){const nx=blankLP();nx.mode='guide';nx.wz=0;LP=nx;U.plan='A';U.cf='A';saveLP()}}}catch(e){}
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
