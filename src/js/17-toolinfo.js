@@ -56,6 +56,7 @@ function toolInfoHTML(r){
   const arts=(I.arts||[]).map(s=>ARTICLES.find(a=>a.slug===s&&!a.draft)).filter(Boolean);
   return `<section class="tinfo"><h2>計算の考え方</h2><ul>${I.how.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
    ${I.faq&&I.faq.length?`<h2>よくある質問</h2><div class="faq">${I.faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`:''}
+   ${(()=>{const sib=[...new Set(PURPOSE.filter(p=>p.tools.includes(r)).flatMap(p=>p.tools))].filter(t=>t!==r&&TITLES[t]).slice(0,6);return sib.length?`<h2>あわせて使いたいツール</h2><div class="tnext">${sib.map(t=>`<a href="#${t}">${esc(TITLES[t])}</a>`).join('')}</div>`:''})()}
    ${arts.length?`<h2>あわせて読みたい</h2><div class="tools">${arts.map(artCard).join('')}</div>`:''}</section>`;
 }
 function toolInfoTail(r){const box=document.getElementById('tinfo');if(!box)return;const h=toolInfoHTML(r);box.innerHTML=h;box.hidden=!h}

@@ -293,6 +293,14 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const ai=fs.readFileSync('dist/articles/index.html','utf8');check('記事一覧に年収別の個別ページを並べない',!/tedori-500/.test(ai)&&/tedori-hayami/.test(ai));
    check('ガイドに本文がある',/class="hubbody"/.test(fs.readFileSync('dist/guide/buy.html','utf8')));
    check('お知らせ・リンク集は noindex',/noindex/.test(fs.readFileSync('dist/news.html','utf8'))&&!/news\.html/.test(sm));}
+  console.log('\n■ メニュー・導線');
+  {const w=await open('sell.html');const d=w.document;
+   check('ヘッダーに「目的から探す」とライフプラン診断のボタン',!!d.querySelector('.gmenu')&&!!d.querySelector('.gnav .gcta'));
+   check('メニューに4つの目的とガイド',d.querySelectorAll('#mega .mcol').length===4&&d.querySelectorAll('#mega .mguide').length===4);
+   click(w,'.gmenu');check('押すとメニューが開く',!d.getElementById('mega').hidden&&d.querySelector('.gmenu').getAttribute('aria-expanded')==='true');
+   check('フッターを目的ごとに整理',d.querySelectorAll('footer .fcols .mcol').length===5);
+   check('ツールのページに「あわせて使いたいツール」',d.querySelectorAll('.tnext a').length>=2);
+   const h=require('fs').readFileSync('dist/articles/sell-cost.html','utf8');check('記事のパンくずにガイド',/<div class="crumb">[^]*?guide\/sell\.html/.test(h));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));

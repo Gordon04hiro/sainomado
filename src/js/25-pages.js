@@ -47,7 +47,7 @@ function vArticle(v,slug){
   if(!a){v.innerHTML=`<div class="wrap doc"><h1>記事が見つかりません</h1><p><a href="#articles">記事の一覧へ</a></p></div>`;return}
   document.title=a.title+'｜サイのまど';
   const rel=pubArticles().filter(x=>x.slug!==a.slug).slice(0,3);
-  v.innerHTML=`<div class="wrap doc art-doc"><div class="crumb"><a href="#home">サイのまど</a> › <a href="#articles">記事</a> › ${esc(a.cat)}</div>
+  v.innerHTML=`<div class="wrap doc art-doc"><div class="crumb"><a href="#home">サイのまど</a> › <a href="#articles">記事</a> › ${(h=>h?`<a href="#g-${h.slug}">${esc(a.cat)}</a>`:esc(a.cat))(HUBS.find(h=>h.cat===a.cat))}</div>
   ${a.sub&&ARTICLES.find(x=>x.slug===a.sub)?`<p class="subnote">一覧で比べたいときは「<a href="#a-${a.sub}">${esc(ARTICLES.find(x=>x.slug===a.sub).title)}</a>」へ。</p>`:''}
   ${a.draft?'<div class="draft">下書きです。内容を確認してから公開してください（articles の draft を false にすると、この表示は消えます）。</div>':''}
   ${illust(a)}
