@@ -233,3 +233,16 @@ function monthTab(cur){
    </tbody></table></div>
    <p class="unit" style="margin-top:8px">毎月の収入・支出は、1年分を12で割った額です。住宅の頭金・諸費用、車の買い替え、退職金、予定に入れた出費などは、選んだ月にまとめて計算しています。運用益と投資の取り崩しは含みません（単位：万円）。</p></section>`;
 }
+
+/* 概要に出す「次の一手」：これから家を買うパターンで手元のお金が足りなくなるとき、物件価格をいくら下げれば95歳まで足りるか（10万円単位で切り上げ） */
+function lpPriceFix(S){
+  if(!(S.house==='buy'&&n(S.buyAge)>=Math.round(n(S.age))))return null;
+  const neg0=summarize(sim(S),S).neg;if(!neg0)return null;
+  const P=n(S.price),ok=x=>{const T=clone(S);T.price=Math.max(0,P-x);T.down=Math.min(n(T.down),T.price);return !summarize(sim(T),T).neg};
+  if(!ok(P))return{none:true,age:neg0.a};
+  let lo=0,hi=P;for(let i=0;i<20;i++){const m=(lo+hi)/2;if(ok(m))hi=m;else lo=m}
+  const x=Math.min(P,Math.ceil(hi/10)*10);return{x,price:P-x,age:neg0.a};
+}
+function lpFixHTML(S){const f=lpPriceFix(S);if(!f)return '';
+  if(f.none)return `<section class="fixbox"><p class="ft">${f.age}歳で手元のお金が足りなくなります</p><p>家の価格を下げるだけでは95歳まで足りない計算です。「目標から逆算」タブで、生活費や働く年数など、ほかの手も一緒に確かめてみてください。</p><button class="btn small" data-act="rtab" data-t="goal">目標から逆算を見る</button></section>`;
+  return `<section class="fixbox"><p class="ft">${f.age}歳で手元のお金が足りなくなります</p><p>物件価格を<b>約${fmt(f.x)}万円下げて${fmt(f.price)}万円</b>にすると、95歳まで足りなくなりません（ほかの条件はそのまま）。</p><button class="btn small primary" data-act="lever" data-k="price" data-x="${f.x}">${fmt(f.price)}万円の家で比べるパターンを作る</button></section>`}

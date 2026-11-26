@@ -332,6 +332,15 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('数字の入力欄はマイナスにならない（min=0）',[...d.querySelectorAll('#view input[type=number]')].every(i=>i.min!==''));
    a.value='-5';a.dispatchEvent(new w.Event('change',{bubbles:true}));check('マイナスを入れても欄を離れると0に戻る',a.value==='0');
    const w2=await open('lifeplan.html');click(w2,'[data-act="mode2"][data-m="detail"]');await wait(300);const h=w2.document.getElementById('f_hdep');check('住宅の価値の下落率はマイナスを入れられる',!h||h.min==='');}
+  console.log('\n■ トップの最初の画面・不足のときの次の一手');
+  {const w=await open('index.html');const d=w.document;
+   check('最初の画面に家の価格だけ変えた2パターン',d.querySelectorAll('.hero .pkrow').length===2&&/歳で不足/.test(d.querySelector('.hero .peek').textContent)&&/95歳まで不足なし/.test(d.querySelector('.hero .peek').textContent));
+   check('最初の画面に売却相場の入口',!!d.querySelector('.hero a.heroalt[href*="souba"]'));
+   const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));w0.close();
+   const P=Object.assign({},bp,{price:4500});const m={'sainomado-lifeplan-v1':JSON.stringify({plans:{A:P},names:{A:'今のまま'},example:false})};
+   const w2=await open('lifeplan.html','',ww=>{Object.defineProperty(ww,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})});
+   const fb=w2.document.querySelector('.fixbox');check('家を買う計画で不足が出ると、家の価格をいくら下げればよいかを出す',!!fb&&/物件価格を約[\d,]+万円下げて[\d,]+万円にすると/.test(fb.textContent),fb&&fb.textContent);
+   click(w2,'.fixbox [data-act="lever"]');await wait(300);check('ボタンで比べるパターンを作る',!w2.document.querySelector('.fixbox')||/パターンB/.test(w2.document.getElementById('view').textContent));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
