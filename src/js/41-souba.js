@@ -54,8 +54,8 @@ function sbFields(A){
       `<input id="sb_townq" type="search" autocomplete="off" placeholder="町名を入力（例：${esc(sbTop(T)[0]||'')}）" aria-label="町名を入力して探す"><div class="sbsug" id="sb_tsug">${sbSugHTML(T,'')}</div>`}
       <span class="hint">${esc(A.C[SB.city].name)}で、5年で5件以上の取引がある${ts.length}の町名から選べます。選ばなければ${esc(A.C[SB.city].name)}全体で計算します</span></div>`})()}
    <div class="fld"><span class="lab">種類</span><span class="seg" role="group" aria-label="種類">${Object.entries(SBK).map(([k,v])=>`<button type="button" data-act="sbk" data-k="${k}" aria-pressed="${SB.k===k}">${v.t}</button>`).join('')}</span></div>
-   <label class="fld"><span class="lab">${SBK[SB.k].area}</span><span class="inp"><input id="sb_area" type="number" inputmode="decimal" value="${esc(SB.area)}"><span class="u">㎡</span></span><span class="hint">${SBK[SB.k].ah}。1坪＝約3.3㎡（${fmt(n(SB.area)/3.3058)}坪）</span></label>
-   ${SB.k==='l'?'':`<label class="fld"><span class="lab">築年数</span><span class="inp"><input id="sb_age" type="number" inputmode="numeric" value="${esc(SB.age)}"><span class="u">年</span></span></label>`}
+   <label class="fld"><span class="lab">${SBK[SB.k].area}</span><span class="inp"><input id="sb_area" type="number" inputmode="decimal" min="0" step="1" value="${esc(SB.area)}"><span class="u">㎡</span></span><span class="hint">${SBK[SB.k].ah}。1坪＝約3.3㎡（${fmt(n(SB.area)/3.3058)}坪）</span></label>
+   ${SB.k==='l'?'':`<label class="fld"><span class="lab">築年数</span><span class="inp"><input id="sb_age" type="number" inputmode="numeric" min="0" max="80" step="1" value="${esc(SB.age)}"><span class="u">年</span></span></label>`}
   </div>`;
 }
 function vSouba(v){

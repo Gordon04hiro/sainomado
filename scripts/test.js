@@ -324,6 +324,11 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('入力すると候補が絞り込まれる',[...d.querySelectorAll('#sb_tsug [data-act="sbtown"]')].every(b=>/上島/.test(b.textContent)));
    click(w,'#sb_tsug [data-act="sbtown"][data-t="上島"]');await wait(100);
    check('町名を選ぶとその町名で計算し、市区町村全体と比べる',!!d.querySelector('.sbsel')&&/浜松市中央区 上島の中古マンション/.test(d.getElementById('sbresult').textContent)&&/全体の中央値（約[\d,]+万円）より/.test(d.getElementById('sbresult').textContent));}
+  console.log('\n■ 数字の入力欄');
+  {const w=await open('souba.html');const d=w.document;const a=d.getElementById('sb_age');
+   check('数字の入力欄はマイナスにならない（min=0）',[...d.querySelectorAll('#view input[type=number]')].every(i=>i.min!==''));
+   a.value='-5';a.dispatchEvent(new w.Event('change',{bubbles:true}));check('マイナスを入れても欄を離れると0に戻る',a.value==='0');
+   const w2=await open('lifeplan.html');click(w2,'[data-act="mode2"][data-m="detail"]');await wait(300);const h=w2.document.getElementById('f_hdep');check('住宅の価値の下落率はマイナスを入れられる',!h||h.min==='');}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
