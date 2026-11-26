@@ -33,7 +33,7 @@ function clean(d){
 /* 都道府県1つ分の行（clean 済み）から、集計ファイルを作る */
 function aggregate(code,rows){
   if(!rows.length)return null;
-  const tMax=Math.max(...rows.map(r=>r.t)),tMin=tMax-YEARS+0.25;
+  let tMax=-Infinity;for(const r of rows)if(r.t>tMax)tMax=r.t;const tMin=tMax-YEARS+0.25;
   rows=rows.filter(r=>r.t>=tMin);
   const labs=rows.map(r=>[r.t,r.lab]).sort((a,b)=>a[0]-b[0]);
   const out={pref:code,name:PREF[+code-1]||'',from:labs[0][1],to:labs[labs.length-1][1],bands:BANDS,curve:{},idx:{},P:{},C:{}};
