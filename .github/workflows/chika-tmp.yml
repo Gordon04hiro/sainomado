@@ -1,0 +1,24 @@
+# 一時的：地価データだけ作って chika-data ブランチへ（マージ前に消す）
+name: 地価データ（試し）
+on:
+  push:
+    branches: [souba-trend]
+    paths: [scripts/chika.js, scripts/chika-fetch.sh, .github/workflows/chika-tmp.yml]
+permissions:
+  contents: write
+jobs:
+  chika:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bash scripts/chika-fetch.sh
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git checkout -B chika-data
+          git add content/chika
+          git commit -m "地価データ" || true
+          git push -f origin chika-data

@@ -25,11 +25,14 @@ jobs:
         env:
           REINFOLIB_KEY: ${{ secrets.REINFOLIB_KEY }}
         run: node scripts/souba.js ${{ github.event.inputs.prefs }}
+      - name: 地価公示・地価調査（国土数値情報）
+        if: github.event.inputs.prefs == '' || github.event_name == 'schedule'
+        run: bash scripts/chika-fetch.sh
       - name: souba-data ブランチに保存
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
           git checkout -B souba-data
-          git add content/souba
+          git add content/souba content/chika || git add content/souba
           git commit -m "相場データの更新（$(date +%Y-%m-%d)）" || echo "変更なし"
           git push -f origin souba-data
