@@ -2,6 +2,9 @@
 name: 地価データの確認
 on:
   workflow_dispatch:
+  push:
+    branches: [souba-trend]
+    paths: [scripts/chika-probe.sh, .github/workflows/chika-probe.yml]
 jobs:
   probe:
     runs-on: ubuntu-latest
