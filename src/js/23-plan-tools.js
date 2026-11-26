@@ -243,6 +243,13 @@ function lpPriceFix(S){
   let lo=0,hi=P;for(let i=0;i<20;i++){const m=(lo+hi)/2;if(ok(m))hi=m;else lo=m}
   const x=Math.min(P,Math.ceil(hi/10)*10);return{x,price:P-x,age:neg0.a};
 }
-function lpFixHTML(S){const f=lpPriceFix(S);if(!f)return '';
+/* 生活費（月額）をいくら見直せば95歳まで足りるか（0.1万円単位で切り上げ）。足りないときだけ */
+function lpLiveFix(S){const neg0=summarize(sim(S),S).neg;if(!neg0)return null;const L=n(S.live),ok=x=>{const T=clone(S);T.live=Math.max(0,L-x);return !summarize(sim(T),T).neg};
+  if(!ok(L*0.5))return{none:true,age:neg0.a};let lo=0,hi=L*0.5;for(let i=0;i<20;i++){const m=(lo+hi)/2;if(ok(m))hi=m;else lo=m}return{x:Math.ceil(hi*10)/10,age:neg0.a}}
+function lpFixHTML(S){const f=lpPriceFix(S),g=lpLiveFix(S);if(!f&&!g)return '';
+  const age=(f||g).age,live=g&&!g.none?`<li>生活費を<b>月${g.x.toLocaleString('ja-JP')}万円</b>見直す <button class="btn small" data-act="lever" data-k="live" data-x="${g.x}">このパターンを作る</button></li>`:'';
+  if(!f||f.none)return `<section class="fixbox"><p class="ft">${age}歳で手元のお金が足りなくなります</p>${live?`<p>たとえば、次のように変えると95歳まで足りなくなりません（ほかの条件はそのまま）。</p><ul class="fixl">${live}</ul>`:'<p>生活費を半分にしても足りない計算です。</p>'}<p>働く年数・積立・保険・車など、ほかの手は「目標から逆算」でまとめて確かめられます。</p><button class="btn small" data-act="rtab" data-t="goal">目標から逆算を見る</button></section>`;
+  return `<section class="fixbox"><p class="ft">${age}歳で手元のお金が足りなくなります</p><p>たとえば、次のどれかで95歳まで足りなくなりません（ほかの条件はそのまま）。</p><ul class="fixl"><li>物件価格を<b>約${fmt(f.x)}万円下げて${fmt(f.price)}万円</b>にする <button class="btn small primary" data-act="lever" data-k="price" data-x="${f.x}">このパターンを作る</button></li>${live}</ul><p class="unit" style="margin:0">ほかの手（働く年数・積立・運用など）は「目標から逆算」で確かめられます。</p></section>`}
+function lpFixHTML_old(S){const f=lpPriceFix(S);if(!f)return '';
   if(f.none)return `<section class="fixbox"><p class="ft">${f.age}歳で手元のお金が足りなくなります</p><p>家の価格を下げるだけでは95歳まで足りない計算です。「目標から逆算」タブで、生活費や働く年数など、ほかの手も一緒に確かめてみてください。</p><button class="btn small" data-act="rtab" data-t="goal">目標から逆算を見る</button></section>`;
   return `<section class="fixbox"><p class="ft">${f.age}歳で手元のお金が足りなくなります</p><p>物件価格を<b>約${fmt(f.x)}万円下げて${fmt(f.price)}万円</b>にすると、95歳まで足りなくなりません（ほかの条件はそのまま）。</p><button class="btn small primary" data-act="lever" data-k="price" data-x="${f.x}">${fmt(f.price)}万円の家で比べるパターンを作る</button></section>`}
