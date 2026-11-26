@@ -749,3 +749,21 @@ footer.ft .fcols a{font-size:12.5px}
 .lvcard b{font-size:15px;padding:0 4px}.lvcard>span:last-child{font-size:13px;line-height:1.7;color:var(--muted);padding:0 4px}
 .wrap .lpviews{padding-inline:0}
 @media (max-width:560px){.lvgrid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:80%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;-webkit-overflow-scrolling:touch}.lvcard{scroll-snap-align:start}}
+
+/* 続けて確かめる */
+.handoff{margin:14px 0;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface)}
+.handoff h3{margin:0 0 6px;font-size:16px}
+.handoff .hrow{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.handoff .hrow:first-of-type{border-top:0}
+.handoff .hrow p{margin:0;font-size:13.5px;line-height:1.7}.handoff .hrow .btn{white-space:nowrap;flex:none}
+@media (max-width:560px){.handoff .hrow{flex-direction:column;align-items:stretch}.handoff .hrow .btn{white-space:normal}}
+/* わが家のまとめ */
+.matome .mtdate{color:var(--muted);font-size:13px;margin:10px 0 0}
+.mtsec{margin:16px 0;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface)}
+.mtsec h2{font-size:17px;margin:0 0 6px}
+.mtrow{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.mtsec h2+.mtrow{border-top:0}
+.mtrow p{margin:0}.mtt{font-size:13px;color:var(--muted)}.mtv{font-size:16px;font-weight:700;margin:2px 0}.mts{font-size:13px;margin-top:4px}
+.mtrow>a{white-space:nowrap;font-size:13px}
+#mt_memo{width:100%;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+@media print{#printArea .mtsec{break-inside:avoid;border:1px solid #ccc;padding:8px 10px;margin:8px 0;border-radius:6px}#printArea .mtrow{display:block;padding:6px 0}#printArea .mtv{font-size:12px}#printArea .mtmemo{white-space:pre-wrap;min-height:60px;font-size:11px}#printArea .thead p{font-size:10px}#printArea .chip{border:1px solid #999;padding:0 6px;border-radius:8px}}
