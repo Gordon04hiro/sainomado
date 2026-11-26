@@ -369,6 +369,20 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    m['sainomado-chuko-v1']=JSON.stringify({road:true});m['sainomado-souzoku2-v1']=JSON.stringify({date:'2026-10-01'});
    w=await open('matome.html','',mk(m));{w.print=()=>{};const v=w.document.getElementById('view').textContent;check('チェックシートの進み具合もまとめに出る',/確認済み 1 \//.test(v)&&/基準日 2026-10-01/.test(v));
     click(w,'[data-act="mtprint"]');const pc=w.document.getElementById('printArea').textContent;check('PDFにチェックシートのまだの項目と期限',/中古住宅チェックシート/.test(pc)&&/まだの手続き/.test(pc)&&/2027年/.test(pc));w.close()}
+   {const m2={};let w2=await open('loan.html','',mk(m2));const sv=w2.document.querySelector('.svbar');check('ツールに「名前を付けて保存」',!!sv&&sv.dataset.svtool==='loan');
+    const setv=(id,v)=>{const el=w2.document.getElementById(id);el.value=v;el.dispatchEvent(new w2.Event('input',{bubbles:true}))};
+    click(w2,'[data-act="svsave"]');check('何も入れていなければ保存しない',!m2['sainomado-saves-v1']&&/まだ入力がありません/.test(w2.document.querySelector('.svmsg').textContent));
+    setv('g_loan_income','600');setv('sv_name','A案');click(w2,'[data-act="svsave"]');setv('g_loan_income','800');setv('sv_name','B案');click(w2,'[data-act="svsave"]');
+    const S2=JSON.parse(m2['sainomado-saves-v1']||'{}');check('名前を付けて2件保存できる',S2.loan&&S2.loan.length===2&&S2.loan[0].name==='A案'&&S2.loan[0].d.income==600&&S2.loan[1].d.income==800);
+    check('保存したものが一覧に出る',w2.document.querySelectorAll('.svbar .svchip').length===2&&!!w2.document.querySelector('[data-act="svover"]'));
+    click(w2,'.svchip [data-act="svload"]');check('呼び出すと入力が書き戻される',JSON.parse(m2['sainomado-loan-v1']).income==600);
+    click(w2,'.svchip:nth-child(2) [data-act="svdel"]');check('削除は2回押しで（1回目は確認）',JSON.parse(m2['sainomado-saves-v1']).loan.length===2);click(w2,'.svchip:nth-child(2) [data-act="svdel"]');check('2回目で削除',JSON.parse(m2['sainomado-saves-v1']).loan.length===1);
+    w2.close();
+    m2['sainomado-saves-v1']=JSON.stringify({loan:S2.loan,sell:[{id:'x1',name:'実家',at:'',d:{price:2000,example:false}}]});m2['sainomado-loan-v1']=JSON.stringify(S2.loan[1].d);
+    w2=await open('matome.html','',mk(m2));const tv=w2.document.getElementById('view').textContent;
+    check('まとめに保存したものが1件ずつ（今の入力は同じ名前で）',/住宅ローン・購入予算診断：A案/.test(tv)&&/住宅ローン・購入予算診断：B案/.test(tv)&&/売却・住み替えシミュレーター：実家/.test(tv));
+    w2.print=()=>{};const ca=w2.document.querySelector('[data-mtsel="loan@'+S2.loan[0].id+'"]');ca.checked=false;ca.dispatchEvent(new w2.Event('change',{bubbles:true}));click(w2,'[data-act="mtprint"]');const pp=w2.document.getElementById('printArea').textContent;
+    check('PDFにも1件ずつ入り、外したものは入らない',/住宅ローン・購入予算診断：B案/.test(pp)&&!/：A案/.test(pp)&&/売却・住み替えシミュレーター：実家/.test(pp));w2.close()}
    check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
    w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}
   console.log('\n■ 計測');
