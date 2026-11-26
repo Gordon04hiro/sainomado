@@ -319,6 +319,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const m2=+d.getElementById('sbresult').textContent.match(/約([\d,]+)万円/)[1].replace(/,/g,'');check('築年数が古いと目安が下がる',m2<m1,m1+'→'+m2);
    click(w,'[data-act="sbk"][data-k="l"]');await wait(50);check('土地に切り替えると築年数の欄が消える',!d.getElementById('sb_age')&&/土地の相場/.test(d.getElementById('sbresult').textContent));
    check('売却シミュレーターへの案内',!!d.querySelector('[data-act="sb2sell"]'));
+   check('売却相場から空き家診断・仲介手数料へ',!!d.querySelector('[data-act="sbhand"][data-to="akiya"]')&&!!d.querySelector('[data-act="sbhand"][data-to="chukai"]'));
    click(w,'[data-act="sbk"][data-k="m"]');await wait(300);const tw=d.getElementById('sb_townq');check('浜松市中央区で町名を探せる（最初は取引の多い町名）',!!tw&&d.querySelectorAll('#sb_tsug [data-act="sbtown"]').length>=5);
    tw.value='かみじま';tw.dispatchEvent(new w.Event('input',{bubbles:true}));tw.value='上島';tw.dispatchEvent(new w.Event('input',{bubbles:true}));
    check('入力すると候補が絞り込まれる',[...d.querySelectorAll('#sb_tsug [data-act="sbtown"]')].every(b=>/上島/.test(b.textContent)));
@@ -345,6 +346,22 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    click(w2,'.fixbox [data-act="lever"]');await wait(300);check('ボタンで比べるパターンを作る',!w2.document.querySelector('.fixbox')||/パターンB/.test(w2.document.getElementById('view').textContent));}
   {const fs=require('fs');const h=fs.readFileSync('dist/index.html','utf8'),l=fs.readFileSync('dist/lifeplan.html','utf8');
    check('トップとライフプランのページに「7つの見方」（画面の写真つき）',(h.match(/class="lvcard"/g)||[]).length===7&&(l.match(/class="lvcard"/g)||[]).length===7&&['overview','bs','goal','scen','month','yj','cf'].every(k=>fs.existsSync('dist/assets/shots/lp-'+k+'.jpg')));}
+  console.log('\n■ ツールからツールへ・わが家のまとめ');
+  {const mk=m=>w=>{Object.defineProperty(w,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})};
+   const m={};let w=await open('loan.html','',mk(m));
+   check('住宅ローン診断の結果に「続けて確かめる」（控除・繰上げ返済）',w.document.querySelectorAll('[data-act="handoff"][data-from="loan"]').length===2);
+   try{click(w,'[data-act="handoff"][data-from="loan"][data-i="0"]')}catch(e){}
+   const k=JSON.parse(m['sainomado-koujo-v1']||'null');check('押すと住宅ローン控除に借入額・金利が入る',k&&k.loan>0&&k.fromTool==='住宅ローン・購入予算診断'&&!k.example,JSON.stringify(k).slice(0,120));w.close();
+   w=await open('koujo.html','',mk(m));check('受け取ったツールに「○○の結果を入れています」',!w.document.querySelector('.lpnote2').hidden&&/住宅ローン・購入予算診断の結果を入れています/.test(w.document.querySelector('.lpnote2').textContent)&&w.document.getElementById('g_koujo_loan').value===String(k.loan));
+   check('控除の結果から、ふるさと納税へ',!!w.document.querySelector('[data-act="handoff"][data-from="koujo"]'));w.close();
+   w=await open('zoyo.html');check('贈与税の結果から、住宅ローン診断へ',!!w.document.querySelector('[data-act="handoff"][data-from="zoyo"]'));w.close();
+   const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));w0.close();
+   const own=Object.assign({},bp,{house:'own',loanPay:9,loanEnd:65,orate:1});m['sainomado-lifeplan-v1']=JSON.stringify({plans:{A:own},names:{A:'今のまま'},example:false});
+   w=await open('lifeplan.html','',mk(m));check('持ち家なら「次に確かめること」に売却相場と売却シミュレーター',!!w.document.querySelector('.nextbox a[href*="souba"]')&&!!w.document.querySelector('.nextbox [data-act="lp2sell"]'));w.close();
+   w=await open('matome.html','',mk(m));const t=w.document.getElementById('view').textContent;
+   check('わが家のまとめに、ライフプランと住宅ローン控除の結果',/ライフプラン診断　パターンA/.test(t)&&/住宅ローン控除/.test(t)&&!!w.document.querySelector('[data-act="mtprint"]')&&!!w.document.getElementById('mt_memo'));
+   check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
+   w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));

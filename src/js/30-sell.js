@@ -124,6 +124,7 @@ function vSell(v){
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › 売却・住み替えシミュレーター</div>
   <div class="thead"><h1>売却・住み替えシミュレーター</h1><p>今の家を売ったら、手元にいくら残るか。ローンを返し切れるか。次の家を買うなら、いくら借りることになるか。売る前に確かめておきたい数字の目安をまとめて出します。</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
+   <p class="unit lpnote2" style="margin-top:8px"${SV.fromTool?'':' hidden'}>✓ ${esc(SV.fromTool||'')}の結果（ローンの残りなど）を入れています。違うところは書き換えてください。</p>
    <p class="unit exnote" style="margin-top:8px"${SV.example?'':' hidden'}>いまは入力例（築12年の木造戸建て・ローン残り1,800万円）が入っています。ご自分の数字に書き換えてください。</p><p class="resetrow" style="margin:8px 0 0"${SV.example?' hidden':''}><button class="btn small ghost" data-act="svreset">入力例に戻す</button></p></div>
   <div class="formgrid">${SF.map(g=>`<details class="grp"${g.closed?'':' open'}><summary>${g.g}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body"><div class="fields">${g.f.map(sField).join('')}</div></div></details>`).join('')}</div>
   <section class="result" id="sresult"></section></div>`;
@@ -226,6 +227,6 @@ function sDock(){
   d.innerHTML=`<div class="v"><span>手元に残るお金<b class="${s.net<0?'neg':''}">${fmt(s.net)} 万円</b></span><span>判定<b style="font-size:13px;margin-top:3px"><span class="chip ${s.net>=0?'good':'bad'}">${s.net>=0?'ローン完済OK':'ローンが残る'}</span></b></span></div><button class="btn primary" data-act="tosresult">結果を見る</button>`;
 }
 let sT=0;
-document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.sk)return;const f=SALL.find(x=>x.id===t.dataset.sk);SV[t.dataset.sk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));SV.example=false;exShown(false);sVis();saveSV();sDock();clearTimeout(sT);sT=setTimeout(sRender,250)});
+document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.sk)return;if(SV.fromTool){SV.fromTool='';const ln=document.querySelector('.lpnote2');if(ln)ln.hidden=true}const f=SALL.find(x=>x.id===t.dataset.sk);SV[t.dataset.sk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));SV.example=false;exShown(false);sVis();saveSV();sDock();clearTimeout(sT);sT=setTimeout(sRender,250)});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="tosresult"]');if(b)document.getElementById('sresult').scrollIntoView({behavior:'smooth'})});
 
