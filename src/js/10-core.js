@@ -117,7 +117,7 @@ function exampleHTML(S0){
 function vHome(v){
   const S=basePlan(),r=sim(S),s=summarize(r,S);
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
-   <div><div class="k">住まいとお金の無料シミュレーション</div>
+   <div><div class="k">サイのまど｜住まいとお金の無料シミュレーション</div>
     <h1>大きな決断の前に、<br><em>お金の未来</em>を見てみよう。</h1>
     <p>家を買う、車を買い替える、保険に入る、生活費を見直す。その決断で、わが家の家計が95歳までどう変わるのかを、自分の数字で確かめる<b>家計のセカンドオピニオン</b>です。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan" data-lpguide="1">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>

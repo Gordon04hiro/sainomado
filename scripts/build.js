@@ -148,7 +148,7 @@ async function prerender(pg,base){
         {'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],['記事',SITE_URL+'/articles/'],[pg.art.title,canon(pg.f)]])}]
       :pg.hub?[{'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],[pg.hub.title,canon(pg.f)]])}]
       :pg.p==='glossary'?[{'@context':'https://schema.org','@type':'DefinedTermSet',name:'住まいとお金の用語集',url:canon(pg.f),hasDefinedTerm:GLOSSARY.map((g,i)=>({'@type':'DefinedTerm',name:g.w,description:g.d,url:canon(pg.f)+'#t'+(i+1)}))}]
-      :pg.p==='home'?[{'@context':'https://schema.org','@type':'WebSite',name:SITE.shortName||SITE.name,alternateName:[].concat(SITE.altNames||[],SITE.shortName?[SITE.name]:[]),url:SITE_URL+'/',inLanguage:'ja'},{'@context':'https://schema.org','@type':'Organization',name:SITE.shortName||SITE.name,alternateName:SITE.altNames||[],url:SITE_URL+'/',logo:SITE_URL+'/assets/icon-192.png'}]
+      :pg.p==='home'?[{'@context':'https://schema.org','@type':'WebSite',name:SITE.shortName||SITE.name,alternateName:[].concat(SITE.altNames||[],SITE.shortName?[SITE.name]:[]),url:SITE_URL+'/',inLanguage:'ja'},{'@context':'https://schema.org','@type':'Organization',name:SITE.shortName||SITE.name,alternateName:SITE.altNames||[],url:SITE_URL+'/',logo:SITE_URL+'/assets/icon-192.png',...([].concat(SITE.sameAs||[]).filter(Boolean).length?{sameAs:[].concat(SITE.sameAs).filter(Boolean)}:{})}]
       :TOOLR.includes(pg.p)?[{'@context':'https://schema.org','@type':'WebApplication',name:pg.t.split('｜')[0],description:pg.d,url:canon(pg.f),applicationCategory:'FinanceApplication',operatingSystem:'Any',inLanguage:'ja',isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'JPY'},author},
         {'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],[pg.t.split('｜')[0],canon(pg.f)]])}]:[];
     const ld=ldList.length?ldList:null;
@@ -161,7 +161,7 @@ async function prerender(pg,base){
 <meta name="description" content="${esc(pg.d)}">
 ${pg.nf?'':`<link rel="canonical" href="${canon(pg.f)}">`}${(pg.art&&(pg.art.draft||pg.art.sub))||pg.nf||pg.ni?'\n<meta name="robots" content="noindex,follow">':''}
 <meta property="og:type" content="${pg.art?'article':'website'}">
-<meta property="og:site_name" content="${esc(SITE.name)}">
+<meta property="og:site_name" content="${esc(SITE.shortName||SITE.name)}">
 <meta property="og:title" content="${esc(pg.t)}">
 <meta property="og:description" content="${esc(pg.d)}">
 <meta property="og:url" content="${canon(pg.f)}">
