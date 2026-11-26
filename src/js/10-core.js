@@ -136,7 +136,12 @@ function vHome(v){
     <p>家を買う、車を買い替える、保険に入る、生活費を見直す。その決断で、わが家の家計が95歳までどう変わるのかを、自分の数字で確かめる<b>家計のセカンドオピニオン</b>です。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan" data-lpguide="1">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
     <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div>
-    <a class="heroalt" href="#souba"><span class="ic">${IC.map}</span><span><b>売るか迷っている方へ：近所の家が実際にいくらで売れたか</b><small>国の取引データから、町名ごとの売却相場の目安と推移を無料で。電話番号もいりません</small></span><span class="go">→</span></a></div>
+    <div class="heroalts" aria-label="目的から始める">
+     <a class="heroalt feat" href="#souba"><span class="ic">${IC.map}</span><span><span class="hbadge">国土交通省のデータを町名ごとに集計</span><b>家の相場を、名前も電話番号も出さずに調べる</b><small>実際に売れた価格から、町名ごとの相場の幅と、2010年からの値動きがわかります。全国対応・無料</small></span><span class="go">→</span></a>
+     <div class="heroalt2">
+      <a class="heroalt" href="#loan"><span class="ic">${IC.loan}</span><span><b>無理なく買える家の予算</b><small>借りられる額ではなく、返していける額から</small></span><span class="go">→</span></a>
+      <a class="heroalt" href="#hoshou"><span class="ic">${IC.shield}</span><span><b>もしものときの保障額</b><small>遺族年金と貯蓄で足りない分だけを計算</small></span><span class="go">→</span></a>
+     </div></div></div>
    <div class="hero-art"><div class="heroicon"><img src="${window.BASE||''}assets/icon.svg" width="220" height="220" alt="サイのまどのロゴ（家の中のサイの貯金箱）"></div>
    <div class="peek" id="heropeek" aria-label="ライフプラン診断の画面例">${exPeekHTML(S,'house')}</div></div>
   </section></div>

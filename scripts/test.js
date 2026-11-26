@@ -338,7 +338,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('最初の画面に、ひとつだけ変えた2パターン（家・車・保険・生活費・教育費）',d.querySelectorAll('.hero .pktabs button').length===5&&d.querySelectorAll('.hero .pkrow').length===2&&/歳で不足/.test(d.querySelector('.hero .peek').textContent)&&/95歳まで不足なし/.test(d.querySelector('.hero .peek').textContent));
    click(w,'.hero [data-act="exsc"][data-k="car"]');check('タブで車の例に切り替わる',/500万円の車を5年ごと/.test(d.querySelector('.hero .peek').textContent));
    check('「診断でわかること」に6つの例',d.querySelectorAll('.exgrid .excard').length===6);
-   check('最初の画面に売却相場の入口',!!d.querySelector('.hero a.heroalt[href*="souba"]'));
+   check('最初の画面に目的別の入口（売却相場を強調・予算・保障額）',!!d.querySelector('.hero a.heroalt.feat[href*="souba"]')&&!!d.querySelector('.hero .heroalt2 a[href*="loan"]')&&!!d.querySelector('.hero .heroalt2 a[href*="hoshou"]'));
    const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));w0.close();
    const P=Object.assign({},bp,{price:4500});const m={'sainomado-lifeplan-v1':JSON.stringify({plans:{A:P},names:{A:'今のまま'},example:false})};
    const w2=await open('lifeplan.html','',ww=>{Object.defineProperty(ww,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}})});
