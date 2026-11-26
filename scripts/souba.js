@@ -8,7 +8,8 @@ const API='https://www.reinfolib.mlit.go.jp/ex-api/external/XIT001';
 const PREF=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
 const TYPES={'中古マンション等':'m','宅地(土地と建物)':'h','宅地(土地)':'l'};
 const BANDS=[0,5,10,15,20,25,30,35,40,50]; // 築年数の区切り（50年以上は最後の区分）
-const YEARS=5; // 直近何年分を使うか
+const YEARS=5; // 相場の幅に使う期間（直近何年分）
+const TREND_FROM=2010; // 年ごとの推移はこの年から（取引価格情報だけで見る。成約価格情報は2021年からなので混ぜると途中で段差ができる）
 const EXCLUDE=/関係者|親族|特殊な事情|調停|競売|隣地/;
 
 const num=s=>{const x=String(s==null?'':s).replace(/[,，\s]/g,'');return /^\d+(\.\d+)?$/.test(x)?+x:NaN};
@@ -34,9 +35,9 @@ function clean(d){
 function aggregate(code,rows){
   if(!rows.length)return null;
   let tMax=-Infinity;for(const r of rows)if(r.t>tMax)tMax=r.t;const tMin=tMax-YEARS+0.25;
-  rows=rows.filter(r=>r.t>=tMin);
+  const all=rows;rows=rows.filter(r=>r.t>=tMin);
   const labs=rows.map(r=>[r.t,r.lab]).sort((a,b)=>a[0]-b[0]);
-  const out={pref:code,name:PREF[+code-1]||'',from:labs[0][1],to:labs[labs.length-1][1],bands:BANDS,curve:{},idx:{},P:{},C:{},D:{}};
+  const out={pref:code,name:PREF[+code-1]||'',from:labs[0][1],to:labs[labs.length-1][1],bands:BANDS,curve:{},idx:{},P:{},C:{},D:{},TR:{P:{},C:{},last:labs[labs.length-1][1]}};
   for(const k of ['m','h','l']){
     const R=rows.filter(r=>r.k===k);if(R.length<20)continue;
     // 1) 時点の補正：年ごとの1㎡単価の中央値を、いちばん新しい年にそろえる
@@ -61,6 +62,12 @@ function aggregate(code,rows){
     out.P[k]=st(R.map(r=>r.x));
     const by={};R.forEach(r=>{if(!r.city)return;(by[r.city]=by[r.city]||{name:r.cname,a:[]}).a.push(r.x)});
     Object.entries(by).forEach(([c,v])=>{if(v.a.length<5)return;out.C[c]=out.C[c]||{name:v.name};out.C[c][k]=st(v.a)});
+    // 年ごとの推移：取引価格情報だけで、築年数の補正をかけた1㎡単価の中央値（都道府県は20件以上、市区町村は10件以上の年だけ）
+    {const T=all.filter(r=>r.k===k&&!r.seiyaku),xo=r=>curve?r.unit/curve[band(r.age)]:r.unit,yr=(arr,min)=>{const g={};arr.forEach(r=>{const y=Math.floor(r.t);(g[y]=g[y]||[]).push(xo(r))});
+       return Object.keys(g).map(Number).sort((a,b)=>a-b).filter(y=>g[y].length>=min).map(y=>[y,r100(quant(g[y],.5)),g[y].length])};
+     const pp=yr(T,20);if(pp.length>=3)out.TR.P[k]=pp;
+     const bc={};T.forEach(r=>{if(r.city)(bc[r.city]=bc[r.city]||[]).push(r)});
+     Object.entries(bc).forEach(([c,a])=>{const v=yr(a,10);if(v.length>=3)(out.TR.C[c]=out.TR.C[c]||{})[k]=v});}
     // 町名（地区名）ごと：5件以上ある町名だけ。市区町村ごとの別ファイルにする（D は書き出しのときに分ける）
     const bt={};R.forEach(r=>{if(!r.city||!r.town)return;const c=(bt[r.city]=bt[r.city]||{});(c[r.town]=c[r.town]||[]).push(r.x)});
     Object.entries(bt).forEach(([c,T])=>Object.entries(T).forEach(([t,a])=>{if(a.length<5)return;const D=(out.D[c]=out.D[c]||{});(D[t]=D[t]||{})[k]=st(a)}));
@@ -87,7 +94,7 @@ async function main(){
   const Y=new Date().getFullYear();let shown=false;
   for(const code of codes){
     let rows=[];
-    for(let y=Y-YEARS-1;y<=Y;y++)for(let q=1;q<=4;q++){
+    for(let y=TREND_FROM;y<=Y;y++)for(let q=1;q<=4;q++){
       const d=await get({year:y,quarter:q,area:code,language:'ja'},key);
       if(!shown&&d.length){console.log('項目の例：',JSON.stringify(d[0]));shown=true}
       rows=rows.concat(d.map(clean).filter(Boolean));
