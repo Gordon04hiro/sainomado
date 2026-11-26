@@ -795,3 +795,9 @@ details.grp > summary{position:relative;padding-right:40px}details.grp > summary
 body:not(:has(.dock:not([hidden]))) .mtnudge{bottom:calc(16px + env(safe-area-inset-bottom))}
 @media (prefers-reduced-motion:reduce){.mtnudge{transition:none}}
 table.cf.hs{width:100%;margin:6px 0 10px}table.cf.hs th,table.cf.hs td{white-space:normal;vertical-align:top}table.cf.hs th:first-child{position:static;min-width:0}.hs3{font-size:14.5px;margin:14px 0 4px}@media (max-width:560px){table.cf.hs{font-size:12px}table.cf.hs th,table.cf.hs td{padding:5px 6px}}
+.heroalts{margin-top:16px;display:grid;gap:8px}.heroalts .heroalt{margin-top:0}
+.heroalt.feat{border:1.5px solid var(--brand);background:linear-gradient(0deg,var(--brand-soft),var(--surface) 70%);padding:14px 16px;box-shadow:0 6px 18px rgba(10,80,75,.08)}
+.heroalt.feat b{font-size:15.5px}.heroalt.feat .ic{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff}
+.hbadge{display:inline-block;font-size:11px;font-weight:700;color:var(--brand-ink);background:var(--surface);border:1px solid var(--brand);border-radius:999px;padding:1px 8px;margin-bottom:4px}
+.heroalt2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.heroalt2 .heroalt{padding:10px 12px;gap:10px}.heroalt2 .heroalt b{font-size:13.5px}.heroalt2 .heroalt small{font-size:12px}
+@media (max-width:560px){.heroalt2{grid-template-columns:1fr}}
