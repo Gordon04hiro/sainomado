@@ -688,3 +688,11 @@ footer.ft .fcols a{font-size:12.5px}
 .tnext{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
 .tnext a{display:inline-block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:13.5px}
 .tnext a:hover{border-color:var(--brand);color:var(--brand)}
+
+/* 売却相場の目安 */
+.sbmain{background:var(--surface);border:2px solid var(--brand);border-radius:var(--r-card);padding:16px 18px;margin:10px 0 14px}
+.sbmain .sbl{margin:0;color:var(--muted);font-size:13px}.sbmain .sbv{margin:2px 0 10px}.sbmain .sbv b{font-size:32px}.sbmain .sbv small{margin-left:4px;color:var(--muted)}
+.sbbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;font-size:13px;font-weight:700}
+.sbbar .md{height:10px;border-radius:999px;background:linear-gradient(90deg,var(--brand-soft),var(--brand),var(--brand-soft))}
+.sbmain .sbr{margin:10px 0 0;font-size:13.5px}
+.sbcredit{margin-top:14px;font-size:12px}

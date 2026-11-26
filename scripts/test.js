@@ -301,6 +301,20 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('フッターを目的ごとに整理',d.querySelectorAll('footer .fcols .mcol').length===5);
    check('ツールのページに「あわせて使いたいツール」',d.querySelectorAll('.tnext a').length>=2);
    const h=require('fs').readFileSync('dist/articles/sell-cost.html','utf8');check('記事のパンくずにガイド',/<div class="crumb">[^]*?guide\/sell\.html/.test(h));}
+  console.log('\n■ 売却相場の目安');
+  {const fs=require('fs');const stubFetch=w=>{w.fetch=u=>{const f='dist/'+String(u).replace(/^\.?\//,'');return Promise.resolve(fs.existsSync(f)?{ok:true,json:()=>Promise.resolve(JSON.parse(fs.readFileSync(f,'utf8')))}:{ok:false,status:404})}};
+   check('都道府県のデータがある',fs.readdirSync('dist/assets/souba').length===47);
+   const w=await open('souba.html','',stubFetch);await wait(400);const d=w.document;
+   check('東京都・中古マンションで目安が出る',/約[\d,]+万円/.test(d.getElementById('sbresult').textContent),d.getElementById('sbresult').textContent.slice(0,80));
+   check('国交省のクレジット表示',/不動産情報ライブラリのAPI機能を使用していますが/.test(d.getElementById('sbresult').textContent));
+   const sel=d.getElementById('sb_pref');sel.value='22';sel.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(400);
+   const c=d.getElementById('sb_city');const opt=[...c.options].find(o=>o.textContent==='浜松市中央区');check('静岡県に切り替えると市区町村が並ぶ',!!opt);
+   c.value=opt.value;c.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(100);
+   const txt=d.getElementById('sbresult').textContent;check('浜松市中央区の結果',/浜松市中央区の中古マンション/.test(txt)&&!/全体の取引で計算/.test(txt));
+   const m1=+txt.match(/約([\d,]+)万円/)[1].replace(/,/g,'');const ag=d.getElementById('sb_age');ag.value='35';ag.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(50);
+   const m2=+d.getElementById('sbresult').textContent.match(/約([\d,]+)万円/)[1].replace(/,/g,'');check('築年数が古いと目安が下がる',m2<m1,m1+'→'+m2);
+   click(w,'[data-act="sbk"][data-k="l"]');await wait(50);check('土地に切り替えると築年数の欄が消える',!d.getElementById('sb_age')&&/土地の相場/.test(d.getElementById('sbresult').textContent));
+   check('売却シミュレーターへの案内',!!d.querySelector('[data-act="sb2sell"]'));}
   console.log('\n■ 計測');
   {const w=await open('articles/sell-cost.html');const ev=[];w.gtag=(t,n,p)=>{if(t==='event')ev.push([n,p])};
    const l=w.document.querySelector('.toolcta a');l.addEventListener('click',e=>e.preventDefault());l.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
