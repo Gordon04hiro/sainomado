@@ -65,6 +65,34 @@ function sbTrendHTML(A,V){
    <p class="sbtrs">${esc(S[0].name)}：${p10&&p10!==last?`${p10[0]}年→${last[0]}年で<b>${chg(p10,last)}</b>`:''}${p5&&p5!==last&&p5!==p10?`、${p5[0]}年→${last[0]}年で<b>${chg(p5,last)}</b>`:''}</p>
    <p class="unit" style="margin:4px 0 0">国の不動産取引価格情報（アンケート調査）の、その年の1㎡あたりの中央値です${k==='l'?'':'（築年数の違いをそろえた値）'}。${partial?`*${lastY}年は${esc(TR.last)}までの途中の値です。`:''}${V.town?'町名ごとは件数が少ないため、推移は市区町村全体で見ています。':''}件数の少ない年は表示していません。</p></section>`;
 }
+/* 地価公示・地価調査の地点（国土数値情報）：市区町村ごとのファイル */
+const SBC={};
+function sbChika(pref,city){const key=pref+'/'+city;if(key in SBC)return Promise.resolve(SBC[key]);if(!city||typeof fetch!=='function')return Promise.resolve(null);
+  return fetch('assets/chika/'+pref+'/'+city+'.json').then(r=>r.ok?r.json():null).catch(()=>null).then(j=>(SBC[key]=j))}
+const yen=v=>Math.round(v).toLocaleString('ja-JP');
+function sbSpark(h){if(!h||h.length<2)return '';const v=h.map(x=>x[1]),mn=Math.min(...v),mx=Math.max(...v),W=90,H=26;
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><polyline fill="none" stroke="var(--brand)" stroke-width="2" points="${h.map((x,i)=>(i/(h.length-1)*(W-4)+2).toFixed(1)+','+(H-2-(mx>mn?(x[1]-mn)/(mx-mn):.5)*(H-4)).toFixed(1)).join(' ')}"/></svg>`}
+function sbChikaHTML(A,V){
+  const P=SBC[V.pref+'/'+V.city];if(!V.city||!P||!P.length)return '';
+  const cname=A.C[V.city]?A.C[V.city].name:'';
+  const inTown=V.town?P.filter(x=>x.addr.replace(cname,'').startsWith(V.town)):[];
+  const res=P.filter(x=>x.use==='住宅'),pool=inTown.length?inTown:res.length?res:P;
+  const med=a=>{const b=a.slice().sort((x,y)=>x-y);return b.length?b[Math.floor((b.length-1)/2)]:NaN};
+  const row=x=>`<div class="ckrow"><div class="ckl"><b>${esc(x.no)}</b><small>${x.t==='公'?'地価公示':'地価調査'}・${esc(x.use)}</small><span>${esc(x.jk||x.addr.replace(cname,''))}</span>${x.st?`<small>${esc(x.st)}駅${x.dist?' '+fmt(x.dist)+'m':''}</small>`:''}</div><div class="ckr"><b>${yen(x.p)}<small>円/㎡</small></b><small>${(x.p*3.3058/1e4).toFixed(1)}万円/坪</small><span class="${x.chg>0?'up':x.chg<0?'dn':''}">前年比 ${x.chg>0?'+':''}${x.chg}%</span>${sbSpark(x.h)}</div></div>`;
+  const list=pool.slice().sort((a,b)=>b.p-a.p);
+  const head=inTown.length?`${esc(V.town)}にある地点（${inTown.length}地点）`:`${esc(cname)}の${res.length?'住宅地の':''}地点（${pool.length}地点${V.town?`。${esc(V.town)}には地点がないため、${esc(cname)}全体`:''}）`;
+  const yrs={};res.forEach(x=>x.h.forEach(([y,v])=>{(yrs[y]=yrs[y]||[]).push(v)}));
+  const tr=Object.keys(yrs).map(Number).sort((a,b)=>a-b).filter(y=>yrs[y].length>=3).map(y=>[y,med(yrs[y])]);
+  const chg=tr.length>=11?Math.round((tr[tr.length-1][1]/tr[tr.length-11][1]-1)*100):null;
+  return `<section class="chartcard sbchika"><h3>国の土地の価格（地価公示・地価調査）</h3>
+   <p class="unit" style="margin:0 0 8px">国や都道府県が毎年、決まった地点の土地の価格（1㎡あたり）を調べて公表しているものです。${esc(cname)}の住宅地の真ん中は<b>約${yen(med(res.map(x=>x.p)))}円/㎡</b>、前年比は<b>${(m=>(m>0?'+':'')+m)(Math.round(med(res.map(x=>x.chg))*10)/10)}%</b>${chg!=null?`（${tr[tr.length-11][0]}年→${tr[tr.length-1][0]}年で${chg>0?'+':''}${chg}%）`:''}です。</p>
+   <p class="sbchh">${head}</p>
+   <div class="cklist">${list.slice(0,6).map(row).join('')}</div>
+   ${list.length>6?`<details class="sbmore"><summary>ほかの${list.length-6}地点を見る</summary><div class="cklist">${list.slice(6).map(row).join('')}</div></details>`:''}
+   <p class="unit" style="margin:8px 0 0"><b>路線価について</b>：相続税や贈与税の計算に使う路線価は、地価公示の価格のおよそ8割を目安に、国税庁が道路ごとに決めています。正確な路線価は、国税庁の<a href="https://www.rosenka.nta.go.jp/" target="_blank" rel="noopener">路線価図・評価倍率表</a>で確かめられます。</p>
+   <p class="unit" style="margin:4px 0 0">地価公示は1月1日時点、地価調査は7月1日時点の価格です。推移は${FROMY}年からの毎年の価格。出典：国土数値情報（地価公示データ・都道府県地価調査データ）（国土交通省）を加工して作成</p></section>`;
+}
+const FROMY=2005;
 function sbFields(A){
   const cities=A?Object.entries(A.C).filter(([c,v])=>v[SB.k]).sort((a,b)=>a[0].localeCompare(b[0])):[];
   return `<div class="fields">
@@ -86,7 +114,7 @@ function vSouba(v){
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません。名前や連絡先も聞きません</div></div>
   <div class="formgrid"><details class="grp" open><summary>物件のこと</summary><div class="body" id="sbform">${sbFields(SBD[SB.pref])}</div></details></div>
   <section class="result" id="sbresult"><p class="unit">データを読み込んでいます…</p></section></div>`;
-  sbLoad(SB.pref).then(()=>sbTowns(SB.pref,SB.city)).then(()=>{if(route()!=='souba')return;document.getElementById('sbform').innerHTML=sbFields(SBD[SB.pref]);sbRender()}).catch(e=>{if(e==='nofetch')return;const r=document.getElementById('sbresult');if(r)r.innerHTML='<p class="unit">データを読み込めませんでした。通信の状態を確かめて、ページを読み込み直してください。</p>'});
+  sbLoad(SB.pref).then(()=>Promise.all([sbTowns(SB.pref,SB.city),sbChika(SB.pref,SB.city)])).then(()=>{if(route()!=='souba')return;document.getElementById('sbform').innerHTML=sbFields(SBD[SB.pref]);sbRender()}).catch(e=>{if(e==='nofetch')return;const r=document.getElementById('sbresult');if(r)r.innerHTML='<p class="unit">データを読み込めませんでした。通信の状態を確かめて、ページを読み込み直してください。</p>'});
 }
 function sbRender(){
   const box=document.getElementById('sbresult'),A=SBD[SB.pref];if(!box||!A)return;
@@ -100,6 +128,7 @@ function sbRender(){
    <div class="panels"><section class="panel"><div class="ph"><span class="nm">1㎡あたり・1坪あたり</span></div><div class="kv">${kvRow('1㎡あたり（中央値）',(Math.round(R.unit[1]/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}${kvRow('1坪あたり（中央値）',(Math.round(R.unit[1]*3.3058/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}</div></section>
     <section class="panel"><div class="ph"><span class="nm">もとにしたデータ</span></div><div class="kv">${kvRow('取引の件数',fmt(R.n)+'<small>件</small>')}${kvRow('期間',`<small>${esc(A.from)}〜${esc(A.to)}</small>`)}</div>${R.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}の取引だけで計算しています。${esc(A.C[SB.city].name)}全体の中央値（約${fmt(Math.round(R.baseMid/10)*10)}万円）より<b>${R.ratio>=1?'約'+Math.round((R.ratio-1)*100)+'%高め':'約'+Math.round((1-R.ratio)*100)+'%低め'}</b>です。件数が少ないので、ふれ幅が大きくなります。</p>`:SB.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}は${SBK[SB.k].t}の取引が少ないため、${esc(A.C[SB.city].name)}全体で計算しています。</p>`:''}${R.local?'':`<p class="unit" style="margin:6px 0 0">${SB.city?'この市区町村は取引が少ないため、':''}${esc(A.name)}全体の取引で計算しています。</p>`}</section></div>
    ${sbTrendHTML(A,SB)}
+   ${sbChikaHTML(A,SB)}
    <section class="advice"><h3>この目安の見方</h3><ul>
     <li>実際の取引価格（不動産取引価格情報）と、不動産会社が登録した成約価格（成約価格情報）をもとにした<b>統計的な目安</b>です。不動産会社の査定ではありません</li>
     <li>${SB.k==='m'?'階数・向き・管理の状態・駅からの距離':SB.k==='h'?'建物の広さや状態・リフォームの有無・道路との関係・駅からの距離':'形・道路との関係・用途地域・駅からの距離'}などで、同じ地域でも価格は大きく変わります。幅の外側になることもめずらしくありません</li>
@@ -122,7 +151,7 @@ document.addEventListener('click',e=>{if(e.target.closest('[data-act="sbres"]'))
   if(pb){const f=document.getElementById('sbform'),re=()=>{f.innerHTML=sbFields(SBD[SB.pref]);sbRender()},act=pb.dataset.act;
     if(act==='sbedit'){if(pb.dataset.w==='pref')SBED.pref=true;else{SB.city='';SB.town=''}re();const q=document.getElementById(pb.dataset.w==='pref'?'sb_prefq':'sb_cityq');if(q)q.focus()}
     else if(act==='sbpref'){SB.pref=pb.dataset.c;SB.city='';SB.town='';SBED.pref=false;sbSave();re();sbLoad(SB.pref).then(re).catch(()=>{})}
-    else{SB.city=pb.dataset.c;SB.town='';sbSave();re();sbTowns(SB.pref,SB.city).then(re)}
+    else{SB.city=pb.dataset.c;SB.town='';sbSave();re();Promise.all([sbTowns(SB.pref,SB.city),sbChika(SB.pref,SB.city)]).then(re)}
     return}
   const tb=e.target.closest('[data-act="sbtown"],[data-act="sbtownclr"]');
   if(tb){SB.town=tb.dataset.act==='sbtown'?tb.dataset.t:'';sbSave();const f=document.getElementById('sbform');f.innerHTML=sbFields(SBD[SB.pref]);sbRender();if(!SB.town){const q=document.getElementById('sb_townq');if(q)q.focus()}return}
