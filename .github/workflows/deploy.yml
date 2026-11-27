@@ -16,6 +16,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      urls: ${{ steps.indexnow.outputs.urls }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,6 +27,10 @@ jobs:
       - run: npm ci
       - name: 自動チェック（計算・表示・リンク・共有）
         run: npm test
+      - name: 更新したページを調べる（IndexNow 用）
+        id: indexnow
+        if: github.event_name != 'pull_request'
+        run: node scripts/indexnow.js diff
       - if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
@@ -39,3 +45,19 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+  indexnow:
+    # 公開が終わったら、増えた・更新したページを Bing などに知らせる（失敗しても公開には影響しない）
+    if: github.event_name != 'pull_request' && needs.build.outputs.urls != '' && needs.build.outputs.urls != '[]'
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: IndexNow に送る
+        env:
+          URLS: ${{ needs.build.outputs.urls }}
+        run: node scripts/indexnow.js send

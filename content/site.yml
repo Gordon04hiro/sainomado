@@ -7,6 +7,7 @@ altNames: [さいのまど, サイノマド, sainomado]     # 「さいのまど
 contactForm: "https://docs.google.com/forms/d/e/1FAIpQLSfJuvud4JCL3M9MJ5PTbYuTm9Rg05zVdsF_b8DD7D5koEXONQ/viewform"               # GoogleフォームのURLを入れると、お問い合わせボタンが有効になります
 analytics: "G-78NZTT9650"                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります
 adsense: "ca-pub-8266994171904800"                   # AdSenseの審査が通ったら、パブリッシャーID（ca-pub-XXXX）を入れます
+indexnow: "0b27e8a80ac4aa4ecabdd54d27646d73"   # IndexNow のキー（公開しても問題ない値）。公開のたびに、更新したページを Bing などに自動で知らせます
 
 # 運営者のプロフィール（「サイトについて」と各記事の執筆者欄に出ます。本名・会社名は出しません）
 運営者:
