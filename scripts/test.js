@@ -418,7 +418,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     check('3,000万円控除の期限（住まなくなってから3年目の年末）を過ぎると特例なしで計算',/2029年の年末までに売らないと使えません/.test(tx)&&/2029年.*3,332＊/.test(tx.replace(/\s/g,''))&&/2030年[^年]*3,020/.test(tx.replace(/\s/g,'')));
     check('貸すと今売るより65万円少ない計算',/65万円少なく/.test(tx));
     check('家賃の水準（国の統計）の選択欄',!!w6.document.getElementById('ksy_pref')||!w6.fetch);
-    check('手残り・売却の比べのグラフ（年後）',w6.document.querySelectorAll('#kschart polyline').length===2&&/年後/.test(w6.document.getElementById('kschart').textContent));w6.close();
+    check('手残り・売却の比べのグラフ（年後）',w6.document.querySelectorAll('#kschart polyline').length===1&&/年後/.test(w6.document.getElementById('kschart').textContent));w6.close();
     w6=await open('matome.html','',mk(m6));check('わが家のまとめに貸す・売る',/貸す・売る 比べる診断/.test(w6.document.getElementById('view').textContent));w6.close()}
    check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
    w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}

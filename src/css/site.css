@@ -802,3 +802,7 @@ table.cf.hs{width:100%;margin:6px 0 10px}table.cf.hs th,table.cf.hs td{white-spa
 .heroalt2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.heroalt2 .heroalt{padding:10px 12px;gap:10px}.heroalt2 .heroalt b{font-size:13.5px}.heroalt2 .heroalt small{font-size:12px}
 @media (max-width:560px){.heroalt2{grid-template-columns:1fr}}
 .ksy{border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 10px;background:var(--surface)}.ksysel{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}.ksysel select{flex:1;min-width:140px}
+.kv b{white-space:nowrap}.kv>span{min-width:0}
+table.cf.hs.ks th,table.cf.hs.ks td{white-space:nowrap}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.cf.hs.ks th:first-child{position:sticky;left:0;z-index:1;background:var(--surface,#fff)}

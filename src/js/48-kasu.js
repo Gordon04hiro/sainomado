@@ -89,11 +89,11 @@ const KSDEF={id:'kasu',title:'貸す・売る 比べる診断',example:'築10年
       <li>1年目の家賃収入（空室を引いた後）は${f1(y1.eff)}万円、管理費・修繕・税金などの費用が${f1(y1.cost)}万円、ローンの返済が${f1(y1.paid)}万円、不動産所得の税金が${y1.tax<0?'▲'+f1(-y1.tax)+'万円（赤字で本業の税金が減る分）':f1(y1.tax)+'万円'}で、手残りは<b>月${sg(y1.cash/12)}万円</b>${y1.cash<0?'（毎月の持ち出し）':''}です。${y1.cash<0&&L.sale>R.now.c.net?'毎月は持ち出しでも、ローンの残りが減る分、売るときの手取りが増えています。':''}</li>
       ${R.now.tok==='3000'&&L.tok!=='3000'?`<li><b>3,000万円特別控除は、${R.ddl}年の年末までに売らないと使えません。</b>${(t=>t>0?`${R.N}年貸してから売ると特例が使えず、今の価格で売るなら税金が${fmt(t)}万円ほどかかる計算です。`:'今の価格なら、特例がなくても売るときの税金はかからない計算です。')(sellCalc(ksSellV(V,{tokurei:'none'})).tax)}</li>`:''}
       <li>住宅ローンを借りたまま貸すのは、原則として借りた銀行の承諾が必要です（転勤などで認められることもあります）。住宅ローン控除も、住まなくなると受けられません。</li></ul></section>
-     <section class="chartcard"><div class="legend"><b style="color:var(--ink);font-size:14px">手元に残るお金の比べ（その年に売った場合）</b><span><span class="dot a"></span>今売る</span><span><span class="dot b"></span>貸してから売る</span></div>
-      ${chartSVG([{rows:R.A,color:PCOL.A},{rows:R.B,color:PCOL.B,dash:PDASH.B}],null,'kschart','年後',5)}
-      <p class="unit" style="margin:6px 0 0">「貸してから売る」は、それまでの手残りの合計に、その年に売ったときの手取りを足した額です。${R.ddl>=Y0?R.ddl+'年の年末を過ぎると3,000万円特別控除が使えなくなるため、その年で線が下がることがあります。':''}</p></section>
+     <section class="chartcard"><div class="legend"><b style="color:var(--ink);font-size:14px">貸してから売ると、今売るのと比べていくら違うか</b></div>
+      ${chartSVG([{rows:R.B.map((r,i)=>({a:r.a,bal:r.bal-R.A[i].bal})),color:PCOL.B}],null,'kschart','年後',5)}
+      <p class="unit" style="margin:6px 0 0">横軸は貸す年数。0より上なら貸してから売る方が多く、下なら今売る方が多く手元に残ります。「貸してから売る」は、それまでの手残りの合計に、その年に売ったときの手取りを足した額です。${R.ddl>=Y0?R.ddl+'年の年末を過ぎると3,000万円特別控除が使えなくなるため、その年で線が下がることがあります。':''}</p></section>
      ${KR}
-     <details class="grp"><summary>年ごとの内訳</summary><div class="body"><div class="tscroll"><table class="cf hs"><tbody><tr class="hd"><th>年</th><td>家賃収入</td><td>費用</td><td>ローン返済</td><td>税金</td><td>手残り</td><td>その年に売ると</td></tr>
+     <details class="grp"><summary>年ごとの内訳</summary><div class="body"><div class="tscroll"><table class="cf hs ks"><tbody><tr class="hd"><th>年</th><td>家賃収入</td><td>費用</td><td>ローン返済</td><td>税金</td><td>手残り</td><td>その年に売ると</td></tr>
       ${R.rows.map(x=>`<tr><th>${x.y}年</th><td>${f1(x.eff)}</td><td>${f1(x.cost)}</td><td>${f1(x.paid)}</td><td>${x.tax<0?'▲':''}${f1(Math.abs(x.tax))}</td><td>${x.cash<0?'▲':''}${f1(Math.abs(x.cash))}</td><td>${fmt(x.sale)}${x.tok==='3000'?'＊':''}</td></tr>`).join('')}</tbody></table></div>
       <p class="unit">＊は3,000万円特別控除を使って計算。税金は、家賃から費用・ローンの利息・減価償却費（${f1(R.T.dep/R.N)}万円/年）を引いた不動産所得に、本業の年収から見た税率（約${Math.round(R.r*100)}%）をかけた目安です。</p></div></details>
      <div class="taxnote">計算は<b>目安</b>です。不動産所得の税金は、本業の所得に足した分にかかる税率の目安で計算しています（赤字の場合の損益通算の制限、事業的規模の判定、青色申告の特典などは省略）。減価償却は、住んでいた期間を非業務用の償却、貸してからを法定耐用年数の定額法で計算しています。売るときの税金は、売却・住み替えシミュレーターと同じ計算です。実際の申告は税務署や税理士に確かめてください。</div>`;
