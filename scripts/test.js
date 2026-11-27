@@ -311,7 +311,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    w=await open('furusato.html','',mem(lp));check('ふるさと納税に額面の年収（手取りから逆算）を引き継ぐ',w.document.getElementById('g_furusato_gross').value==='770');w.close();
    w=await open('prepay.html');check('繰上げ返済の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="prepay"]'));w.close();
    w=await open('zoyo.html');check('贈与税の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="zoyo"]'));w.close();
-      {const w3=await open('loan.html','',mem(lp)),d3=w3.document;check('引き継いだ欄に色と「ライフプラン診断から」が付く',d3.getElementById('g_loan_income').closest('.fld').classList.contains('from')&&/ライフプラン診断から/.test(d3.getElementById('g_loan_income').closest('.fld').textContent)&&!d3.getElementById('g_loan_other').closest('.fld').classList.contains('from'));
+      {const lp3={plans:{A:Object.assign({},bp,{inc:600,age:41})},names:{A:'今のまま'},example:false};const w3=await open('loan.html','',mem(lp3)),d3=w3.document;check('引き継いだ欄に色と「ライフプラン診断から」が付く',d3.getElementById('g_loan_income').closest('.fld').classList.contains('from')&&/ライフプラン診断から/.test(d3.getElementById('g_loan_income').closest('.fld').textContent)&&!d3.getElementById('g_loan_other').closest('.fld').classList.contains('from'));
     set(w3,'g_loan_income','800');await wait(50);check('書き換えた欄は色が消える',!d3.getElementById('g_loan_income').closest('.fld').classList.contains('from')&&d3.getElementById('g_loan_age').closest('.fld').classList.contains('from'));w3.close();}
    w=await open('loan.html');check('ライフプラン未入力なら引き継ぎの表示は出ない',!w.document.querySelector('.instate.from')&&!w.document.querySelector('.fld.from'));w.close();}
   console.log('\n■ 似た記事のまとめ（AdSense対策）');
