@@ -24,7 +24,7 @@ const houseFor=(kind,v,where)=>houseAd(houseTheme(kind,v),where);
 document.addEventListener('click',e=>{const a=e.target.closest('[data-house]');if(a){const [t,p]=a.dataset.house.split(':');track('kj_banner_click',{theme:t,place:p})}});
 /* ツールごとに出すアフィリエイト（affiliates.yml の名前） */
 const TOOL_AFF={
- hoshou:[], iryou:[], souba:[], chuko:['住宅ローン比較'], koujo:['住宅ローン比較','ふるさと納税'], furusato:['ふるさと納税'], chukai:[], zoyo:['住宅ローン比較'], souzokubun:[],
+ hoshou:[], iryou:[], kasu:[], souba:[], chuko:['住宅ローン比較'], koujo:['住宅ローン比較','ふるさと納税'], furusato:['ふるさと納税'], chukai:[], zoyo:['住宅ローン比較'], souzokubun:[],
  lifeplan:['証券口座','子ども口座','住宅ローン比較'], loan:['住宅ローン比較'], vs:['住宅ローン比較'], rent2buy:['住宅ローン比較'], prepay:['住宅ローン比較'],
  sell:[], akiya:[], souzoku:[], souzoku2:[], souzokuzei:[]
 };

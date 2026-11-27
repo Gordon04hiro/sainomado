@@ -801,3 +801,4 @@ table.cf.hs{width:100%;margin:6px 0 10px}table.cf.hs th,table.cf.hs td{white-spa
 .hbadge{display:inline-block;font-size:11px;font-weight:700;color:var(--brand-ink);background:var(--surface);border:1px solid var(--brand);border-radius:999px;padding:1px 8px;margin-bottom:4px}
 .heroalt2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.heroalt2 .heroalt{padding:10px 12px;gap:10px}.heroalt2 .heroalt b{font-size:13.5px}.heroalt2 .heroalt small{font-size:12px}
 @media (max-width:560px){.heroalt2{grid-template-columns:1fr}}
+.ksy{border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 10px;background:var(--surface)}.ksysel{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}.ksysel select{flex:1;min-width:140px}

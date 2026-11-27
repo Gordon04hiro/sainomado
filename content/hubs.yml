@@ -43,8 +43,8 @@ sell:
   手順:
     - 見出し: 手元に残るお金を知る
       説明: 売れた価格から、仲介手数料・税金・ローンの残りなどを差し引いた「手取り」で考えるのが大切です。
-      ツール: [souba, sell, chukai]
-      記事: [souba-shirabekata, chikunen-kakaku, souba-suii-10nen, sell-cost, chukai-tesuryo]
+      ツール: [souba, sell, kasu, chukai]
+      記事: [souba-shirabekata, chikunen-kakaku, souba-suii-10nen, sell-cost, chukai-tesuryo, kasu-uru]
     - 見出し: 進め方を決める
       説明: 売り先行か買い先行か、査定をどこに頼むか。住み替えの進め方で、資金計画が変わります。
       ツール: []

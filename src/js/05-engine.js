@@ -488,7 +488,7 @@ function syncVis(S){ALLF.forEach(f=>{if(f.show){const el=document.querySelector(
 
 /* ---------- chart ---------- */
 function niceTicks(lo,hi,cnt){const span=hi-lo||1;let st=Math.pow(10,Math.floor(Math.log10(span/cnt)));const e=span/cnt/st;st*=e>=7.5?10:e>=3.5?5:e>=1.5?2:1;const a=Math.floor(lo/st)*st,b=Math.ceil(hi/st)*st;const t=[];for(let v=a;v<=b+1e-9;v+=st)t.push(Math.round(v));return t}
-function chartSVG(series,hi,id){
+function chartSVG(series,hi,id,unit,step){
   const W=680,H=270,L=58,R=14,T=14,B=30;
   const rows=series[0].rows, nn=rows.length;
   let lo=0,hv=0; series.forEach(s=>s.rows.forEach(r=>{lo=Math.min(lo,r.bal);hv=Math.max(hv,r.bal)}));
@@ -496,7 +496,7 @@ function chartSVG(series,hi,id){
   const X=i=>L+(nn<=1?0:i*(W-L-R)/(nn-1)), Y=v=>T+(y1-v)*(H-T-B)/((y1-y0)||1);
   let g='';
   tk.forEach(v=>{g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="${v===0?1.6:1}"${v===0?'':' stroke-dasharray="2 3"'}/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v<0?'▲':''}${Math.abs(v).toLocaleString('ja-JP')}</text>`});
-  rows.forEach((r,i)=>{if(r.a%10===0||i===0)g+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle">${r.a}歳</text>`});
+  rows.forEach((r,i)=>{if(r.a%(step||10)===0||i===0)g+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle">${r.a}${unit==null?'歳':unit}</text>`});
   // negative zone
   if(y0<0) g+=`<rect x="${L}" y="${Y(0)}" width="${W-L-R}" height="${Y(y0)-Y(0)}" fill="var(--bad)" fill-opacity=".06"/>`;
   series.slice().reverse().forEach((s,k)=>{

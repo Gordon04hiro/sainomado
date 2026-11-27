@@ -412,6 +412,14 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     w5.close();w5=await open('matome.html','',mk(m5));check('わが家のまとめに病気・けがの備え',/病気・けがの備え診断/.test(w5.document.getElementById('view').textContent));w5.close()}
    {const fsx=require('fs'),h=fsx.readFileSync(require('path').join(__dirname,'..','dist','articles','chukai-tesuryo.html'),'utf8');
     check('プログラムとCSSはファイル名に中身のハッシュ（古いキャッシュで記事が消えない）',/assets\/app\.[0-9a-f]{8}\.js/.test(h)&&/assets\/site\.[0-9a-f]{8}\.css/.test(h));}
+   {const m6={'sainomado-kasu-v1':JSON.stringify({price:4500,loan:1000,rate:0.8,loanYrs:20,buyYear:2012,buyPrice:3000,bldPrice:1500,struct:'rc',moveOut:2026,other:20,rent:14,kanri:5,vacancy:1,mc:2.5,repair:10,ptax:15,fire:1.5,rentDec:0.5,years:10,dec:1,income:700,yield:0,example:false})};
+    let w6=await open('kasu.html','',mk(m6));const tx=w6.document.getElementById('gresult').textContent;
+    check('貸す・売る：今売る（3,000万円控除）と、10年貸してから売るを比べる',/今売る/.test(tx)&&/10年貸してから売る/.test(tx)&&/3,322万円/.test(tx));
+    check('3,000万円控除の期限（住まなくなってから3年目の年末）を過ぎると特例なしで計算',/2029年の年末までに売らないと使えません/.test(tx)&&/2029年.*3,332＊/.test(tx.replace(/\s/g,''))&&/2030年[^年]*3,020/.test(tx.replace(/\s/g,'')));
+    check('貸すと今売るより65万円少ない計算',/65万円少なく/.test(tx));
+    check('家賃の水準（国の統計）の選択欄',!!w6.document.getElementById('ksy_pref')||!w6.fetch);
+    check('手残り・売却の比べのグラフ（年後）',w6.document.querySelectorAll('#kschart polyline').length===2&&/年後/.test(w6.document.getElementById('kschart').textContent));w6.close();
+    w6=await open('matome.html','',mk(m6));check('わが家のまとめに貸す・売る',/貸す・売る 比べる診断/.test(w6.document.getElementById('view').textContent));w6.close()}
    check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
    w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}
   console.log('\n■ 計測');

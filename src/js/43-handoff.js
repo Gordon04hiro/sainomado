@@ -39,13 +39,14 @@ function sbHandHTML(R,mid){
     if(pool.length){const ps=pool.map(x=>x.p).sort((a,b)=>a-b),med=ps[Math.floor((ps.length-1)/2)];ev={unit:med*0.8,val:Math.round(med*0.8*n(SB.area)/1e4/10)*10,town:!!inT.length,n:pool.length}}}
   const rows=[
    [`相続した家・空き家の診断に入れる`,`中央値（約${fmt(mid)}万円）を${SB.k==='l'?'更地の土地の価格':'建物つきで売った場合の価格'}として入れて、売る・貸す・持ち続けるを比べます。`,'sbhand','akiya'],
+   [`貸す場合と比べる`,`中央値（約${fmt(mid)}万円）を今売れそうな価格として、何年か貸してから売る場合と手取りで比べます。`,'sbhand','kasu'],
    [`仲介手数料を計算する`,`中央値（約${fmt(mid)}万円）で売れた場合の、仲介手数料の上限を計算します。`,'sbhand','chukai']];
   if(ev)rows.push([`相続税の目安に入れる`,`相続税の計算に使う土地の評価額は、路線価で決まります。路線価は地価公示のおよそ8割が目安なので、${ev.town?esc(SB.town)+'にある':esc(cname)+'の住宅地の'}地価公示・地価調査の真ん中（${Math.round(ev.unit/0.8).toLocaleString('ja-JP')}円/㎡）×0.8×土地${fmt(n(SB.area))}㎡で、約${fmt(ev.val)}万円が目安です。正確には国税庁の路線価図で確かめてください。`,'sbhand','souzokuzei',ev.val]);
   return `<section class="handoff"><h3>続けて確かめる</h3>${rows.map(([t,d,a,to,x])=>`<div class="hrow"><p>${d}</p><button type="button" class="btn small primary" data-act="${a}" data-to="${to}" data-x="${x!=null?x:mid}">${t} →</button></div>`).join('')}
    <p class="unit" style="margin:6px 0 0">結果は<a href="#matome">わが家のまとめ</a>にも集まります。</p></section>`;
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="sbhand"]');if(!b)return;const to=b.dataset.to,x=+b.dataset.x;
-  const v=to==='akiya'?(SB.k==='l'?{land:x}:{sell:x}):to==='chukai'?{price:x}:(()=>{const Z=gtState(GDEF.souzokuzei);return{land:x,home:Math.max(n(Z.home),x)}})();
+  const v=to==='akiya'?(SB.k==='l'?{land:x}:{sell:x}):to==='chukai'?{price:x}:to==='kasu'?{price:x,struct:SB.k==='m'?'rc':'wood'}:(()=>{const Z=gtState(GDEF.souzokuzei);return{land:x,home:Math.max(n(Z.home),x)}})();
   track('handoff',{tool:'souba',name:to});gtHand(to,v,'売却相場の目安')});
 
 /* ライフプラン（持ち家でローン返済中）→ 売却シミュレーター：ローンの残りを、毎月の返済額・金利・完済年齢から逆算して入れる */
@@ -85,7 +86,7 @@ function mtItemsBase(noLp){
   const sb=mtLoad(SBKEY);if(sb&&!sb.example){const A=SBD[sb.pref];if(A){const R=sbCalc(A,sb);if(R){const nm=(sb.city&&A.C[sb.city]?A.C[sb.city].name:A.name+'全体')+(sb.town?' '+sb.town:'');
     out.push({k:'souba',g:'売る',t:'売却相場の目安（'+nm+'・'+SBK[sb.k].t+'）',v:'中央値 約'+fmt(Math.round(R.price[1]/10)*10)+'万円（約'+fmt(Math.round(R.price[0]/10)*10)+'〜'+fmt(Math.round(R.price[2]/10)*10)+'万円）',s:fmt(n(sb.area))+'㎡'+(sb.k!=='l'?'・築'+fmt(n(sb.age))+'年':''),h:'souba'})}}else out.push({k:'souba',g:'売る',t:'売却相場の目安',v:'読み込み中…',h:'souba',load:sb.pref})}
   // 汎用ツール（下の固定バーに出している値）
-  const G=[['hoshou','家計'],['iryou','家計'],['loan','買う'],['rent2buy','買う'],['vs','買う'],['koujo','買う'],['zoyo','買う'],['prepay','買う'],['chukai','売る'],['akiya','相続'],['souzokuzei','相続'],['souzokubun','相続'],['furusato','家計']];
+  const G=[['hoshou','家計'],['iryou','家計'],['kasu','売る'],['loan','買う'],['rent2buy','買う'],['vs','買う'],['koujo','買う'],['zoyo','買う'],['prepay','買う'],['chukai','売る'],['akiya','相続'],['souzokuzei','相続'],['souzokubun','相続'],['furusato','家計']];
   G.forEach(([k,g])=>{const def=GDEF[k];if(!def||!def.dock)return;const v=mtLoad('sainomado-'+k+'-v1');if(!v||v.example)return;
     try{const V=Object.assign(def.base(),v);if(def.fix)def.fix(V);const R=def.calc(V);const d=def.dock(V,R);out.push({k,g,t:TITLES[k]||def.title,v:d[0]+'：'+String(d[1]).replace(/<[^>]+>/g,''),h:k})}catch(e){}});
   // チェックシート（進み具合）
@@ -128,6 +129,7 @@ const mtFv=(f,V)=>{const v=V[f.id];if(f.u==='年'&&+v>1900)return String(v)+' �
 function mtInputs(groups,V){return groups.flatMap(g=>g.f).filter(f=>f.id&&f.l&&(!f.show||f.show(V))&&f.type!=='note').map(f=>[f.l,mtFv(f,V)])}
 const mman=v=>(v<0?'▲':'')+fmt(Math.abs(Math.round(v)))+' 万円';
 const MTOUT={
+  kasu:(V,R)=>[['今売ったときの手取り',mman(R.now.c.net)],[R.N+'年貸してから売ったときの合計',mman(R.last.cum+R.last.sale)],['　うち貸している間の手残り',mman(R.last.cum)],['　うち'+R.N+'年後に売ったときの手取り',mman(R.last.sale)],['今売るのと比べて',(R.diff>=0?'+':'▲')+fmt(Math.abs(R.diff))+' 万円'],['1年目の手残り（月）',(Math.round(R.first.cash/12*10)/10).toLocaleString('ja-JP')+' 万円']],
   iryou:(V,R)=>R.S.map(r=>[r.sc.t+'（入院'+r.sc.days+'日・働けない'+r.sc.off+'か月）',irMan(r.total)+' 万円'+(r.short>0?'（貯蓄では'+irMan(r.short)+'万円不足）':'（貯蓄で足りる）')]),
   hoshou:(V,R)=>[[R.A.p.label+'が亡くなった場合の必要保障額',mman(R.A.need)],['　今の死亡保険金',mman(R.A.p.d.cover)],['　遺族年金（今年の年額）',(Math.round(R.A.rows[0].izoku*10)/10).toLocaleString('ja-JP')+' 万円'],[R.B.p.label+'が亡くなった場合の必要保障額',mman(R.B.need)],['　今の死亡保険金',mman(R.B.p.d.cover)],['　遺族年金（今年の年額）',(Math.round(R.B.rows[0].izoku*10)/10).toLocaleString('ja-JP')+' 万円']],
   loan:(V,R)=>{const C=loanRec(V,R);return[['無理なく返せる物件価格の目安',mman(R.priceOk)],['審査で借りられる上限の目安',mman(R.priceMax)],...(C.L.has&&C.L.max!=null?[['家計全体で見た上限（ライフプラン）',mman(C.L.max)]]:[]),...(C.L.has?[['おすすめの予算',mman(C.price)+'（'+C.why+'）']]:[]),['返済期間',R.term+' 年']]},
@@ -172,7 +174,7 @@ function mtSoubaSec(){const sb=mtLoad(SBKEY);if(!sb||sb.example)return '';const 
 function mtReportHTML(){
   const dt=new Date(),memo=(document.getElementById('mt_memo')||{}).value||'';
   const off=mtOff(),on=k=>!off[k];
-  const SEC=[['souba',mtSoubaSec],['sell',mtSellSec],...['hoshou','iryou','loan','rent2buy','vs','koujo','zoyo','prepay','chukai','akiya','souzokuzei','souzokubun','furusato'].map(k=>[k,()=>mtToolSec(k)]),['chuko',()=>mtCheckSec('chuko')],['souzoku',()=>mtCheckSec('souzoku')],['souzoku2',()=>mtCheckSec('souzoku2')]];
+  const SEC=[['souba',mtSoubaSec],['sell',mtSellSec],...['hoshou','iryou','kasu','loan','rent2buy','vs','koujo','zoyo','prepay','chukai','akiya','souzokuzei','souzokubun','furusato'].map(k=>[k,()=>mtToolSec(k)]),['chuko',()=>mtCheckSec('chuko')],['souzoku',()=>mtCheckSec('souzoku')],['souzoku2',()=>mtCheckSec('souzoku2')]];
   const sl=mtSlots(),nm=(h,name)=>h.replace('</h2>','：'+esc(name)+'</h2>');
   const secs=[on('lp')?mtLifeSec():'',...SEC.flatMap(([k,f])=>{const own=sl.filter(o=>o.t===k),m=own.find(o=>o.same),a=[];
     if(!m&&on(k)){const h=f();if(h)a.push(h)}
