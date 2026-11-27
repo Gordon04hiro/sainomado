@@ -9,12 +9,39 @@ const wzIns=(who)=>{const S=LP.plans[U.plan];const x=(S.insl||[]).find(i=>(i.who
 /* 退職金（額面→手取り）の入力用 */
 const WZSV={gross:'',yrs:''};
 
+/* 子ども1人ぶん：生まれ年と進路。選ぶと、これからかかる教育費の目安を出す */
+function eduLeft(c){const now=Math.max(0,Y0-n(c.by));let t=0;for(let k=Math.max(3,now);k<=21;k++)t+=eduCost(k,c);return Math.round(t/10)*10}
+function wzKid(c,i){const sl=(k,o)=>`<select id="w_k${i}_${k}" data-kid="${i}" data-kk="${k}" data-wzre="1">${o.map(x=>`<option value="${x[0]}"${c[k]===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select>`;
+  return `<div class="wzkid"><b>第${i+1}子</b><div class="fields">
+   <label class="fld"><span class="lab">生まれ年</span><span class="inp"><input id="w_k${i}_by" data-kid="${i}" data-kk="by" type="number" inputmode="numeric" value="${esc(c.by)}"><span class="u">年</span></span></label>
+   <label class="fld"><span class="lab">小・中・高</span>${sl('sch',[['pub','すべて公立'],['pri_hs','高校から私立'],['pri_jh','中学から私立'],['pri_all','小学校から私立']])}</label>
+   <label class="fld"><span class="lab">大学</span>${sl('uni',[['pub','国公立'],['pri_b','私立文系'],['pri_r','私立理系'],['none','進学しない']])}</label>
+   <label class="chk"${c.uni==='none'?' hidden':''}><input type="checkbox" data-kid="${i}" data-kk="away" data-wzre="1"${c.away?' checked':''}> 大学は一人暮らし</label></div>
+   <p class="unit wzedu" id="w_k${i}_edu">これからかかる教育費の目安：<b>約${fmt(eduLeft(c))}万円</b>（今の物価で。${Y0-n(c.by)>21?'もう卒業の年齢です':'幼稚園〜大学の残りの合計'}）</p></div>`}
+/* この計算の前提（質問に答えて入力では聞いていない数字も、ここで見える化する） */
+const EDUL={sch:{pub:'小中高は公立',pri_hs:'高校から私立',pri_jh:'中学から私立',pri_all:'小学校から私立'},uni:{pub:'大学は国公立',pri_b:'大学は私立文系',pri_r:'大学は私立理系',none:'大学には進学しない'}};
+function lpAssumeHTML(S,open,noBtn){
+  const pct=v=>(Math.round(n(v)*10)/10).toLocaleString('ja-JP')+'%',sp=S.spouse==='yes',A=S.assets||{};
+  const rows=[
+   ['計算する期間','あなたが95歳になる年まで'],
+   ['物価の上がり方',`年${pct(S.infl)}（生活費・教育費が毎年この割合で上がる）`],
+   ['給料の上がり方',`年${pct(S.raise)}${sp?`（配偶者 年${pct(S.sraise)}）`:''}`],
+   ['退職後の生活費',`今の生活費の${fmt(n(S.retRatio))}%`],
+   ['年金',`${fmt(n(S.penAge))}歳から${sp?`（配偶者 ${fmt(n(S.spenAge))}歳から）`:''}・物価に合わせて年${pct(S.penRev)}ずつ増える`],
+   ['教育費',S.kids&&S.kids.length?S.kids.map((c,i)=>`第${i+1}子：${c.kg==='pub'?'幼稚園は公立':'幼稚園は私立'}・${EDUL.sch[c.sch]||''}・${EDUL.uni[c.uni]||''}${c.away&&c.uni!=='none'?'（一人暮らし）':''}`).join('<br>'):'お子さまなし'],
+   ['住まい',S.house==='rent'?`家賃 月${fmt(n(S.rent))}万円を、95歳まで払い続ける`:S.house==='own'?`ローン返済 月${fmt(n(S.loanPay))}万円を${fmt(n(S.loanEnd))}歳まで・固定資産税や修繕 年${fmt(n(S.hcost))}万円`:`${fmt(n(S.buyAge))}歳で${n(S.price)>0?fmt(n(S.price))+'万円の':''}家を買う（金利${pct(S.rate)}・${fmt(n(S.term))}年返済）・買ったあとの固定資産税や修繕 年${fmt(n(S.hcost))}万円・買うまでは家賃 月${fmt(n(S.rent))}万円`],
+   ['車',carOn(S)?`${fmt(n(S.carEvery))}年ごとに${fmt(n(S.car))}万円で買い替え（${fmt(n(S.carLast))}歳まで）`:'車の買い替えは入れていない'],
+   ['お金の増え方',`預貯金 年${pct(A.cash&&A.cash.rate)}・NISA 年${pct(A.nisa&&A.nisa.rate)}・iDeCo 年${pct(A.ideco&&A.ideco.rate)}（残高や積立があるときだけ）`],
+   ['入っていないもの','税金・社会保険料（手取りで計算するため）、住宅ローン控除、介護や大きな病気などの予定外の出費']];
+  return `<details class="assume"${open?' open':''}><summary>この計算の前提</summary><div class="body"><dl>${rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>
+   <p class="unit" style="margin:8px 0 0">どれも「くわしく入力」で変えられます。旅行・リフォーム・車・お子さまの進路などの予定を足すと、より実際に近くなります。</p>${LP.mode!=='detail'&&!noBtn?`<button type="button" class="btn small" data-act="mode2" data-m="detail">くわしく入力で変える</button>`:''}</div></details>`;
+}
 const WZ=[
  {id:'age',t:'あなたの年齢を教えてください',h:'今年の誕生日を迎えた時点の年齢です。',body:S=>`<div class="fields">${wzNum('age','歳','あなたの年齢')}</div>`},
  {id:'spouse',t:'配偶者（夫・妻）はいますか？',h:'結婚の予定がある場合は「いる」にして、お相手の年齢を入れてください。',
   body:S=>wzChoice('spouse',[['yes','いる'],['no','いない']],S.spouse)+(wzSp(S)?`<div class="fields" style="margin-top:12px">${wzNum('sage','歳','配偶者の年齢')}</div>`:'')},
- {id:'kids',t:'お子さまはいますか？',h:'これから生まれる予定のお子さまも入れてください（生まれ年は予定の西暦で）。教育費は、幼稚園は私立・小中高は公立・大学は国公立で計算します。「くわしく入力」で変えられます。',
-  body:S=>wzChoice('wkids',[[0,'いない'],[1,'1人'],[2,'2人'],[3,'3人'],[4,'4人']],S.kids.length)+(S.kids.length?`<div class="fields" style="margin-top:12px">${S.kids.map((c,i)=>`<label class="fld"><span class="lab">第${i+1}子の生まれ年</span><span class="inp"><input id="w_k${i}_by" data-kid="${i}" data-kk="by" type="number" inputmode="numeric" value="${esc(c.by)}"><span class="u">年</span></span></label>`).join('')}</div>`:'')},
+ {id:'kids',t:'お子さまはいますか？',h:'これから生まれる予定のお子さまも入れてください（生まれ年は予定の西暦で）。進路を選ぶと、その教育費で計算します。決まっていなければ、そのまま（小中高は公立・大学は国公立）で大丈夫です。',
+  body:S=>wzChoice('wkids',[[0,'いない'],[1,'1人'],[2,'2人'],[3,'3人'],[4,'4人']],S.kids.length)+(S.kids.length?`<div class="wzkids">${S.kids.map((c,i)=>wzKid(c,i)).join('')}</div><p class="unit" style="margin:8px 0 0">教育費は、文部科学省「子供の学習費調査」などの平均です（幼稚園・保育園は私立で計算。「くわしく入力」で変えられます）。</p>`:'')},
  {id:'work',t:'あなたの働き方は？',body:S=>wzChoice('wwork',[['emp','会社員・公務員'],['self','自営業・フリーランス'],['exec','会社の役員'],['none','働いていない']],S.wwork)},
  {id:'inc',show:S=>S.wwork!=='none',t:'あなたの手取りの年収は？',h:'会社員なら、源泉徴収票の「支払金額」が額面（税金などを引く前）です。手取りはその約8割が目安。自営業・役員なら、売上や報酬から経費・税金・社会保険料を引いて、手元に残る額です。',
   body:S=>`<div class="fields">${wzNum('inc','万円/年','手取りの年収')}<label class="fld"><span class="lab">額面しかわからないとき</span><span class="inp"><input id="w_gross_inc" data-wgross="inc" type="number" inputmode="decimal" placeholder="額面を入力"><span class="u">万円/年</span></span><span class="hint">入れると、その約8割（0.78倍）を「手取りの年収」に入れます</span></label></div>`},
@@ -42,7 +69,7 @@ const WZ=[
   body:S=>{const e=wzPenEst(S);return `<div class="pcres" style="margin-bottom:12px"><span>ここまでの答えから出した目安（手取り）</span><b>あなた 月約${e.self}<small>万円</small>${wzSp(S)?`　配偶者 月約${e.sp}<small>万円</small>`:''}</b><span class="unit">今の働き方を続けた場合の、ざっくりした目安です。</span><div class="macts" style="margin-top:8px"><button class="btn small primary" data-act="wzpen">この目安を入れる</button></div></div>
    <div class="fields">${wzNum('pen','万円/月','あなたの年金（手取り・月）','ねんきん定期便の年額 ÷12 × 0.9 が目安')}${wzSp(S)?wzNum('spen','万円/月','配偶者の年金（手取り・月）'):''}</div>`}},
  {id:'done',t:'おつかれさまでした！',h:'答えた内容で、95歳までのお金の流れを計算しました。下の結果を見てみましょう。数字はあとからいつでも直せます。',
-  body:S=>`<div class="macts"><button class="btn primary" data-act="toresult">結果を見る</button><button class="btn" data-act="mode2" data-m="detail">くわしく入力で見直す</button></div><p class="unit" style="margin:10px 0 0">「くわしく入力」では、車の買い替え、物価上昇率、運用の利回り、旅行やリフォームなどの予定も入れられます。</p>`}
+  body:S=>lpAssumeHTML(S,true,true)+`<div class="macts" style="margin-top:12px"><button class="btn primary" data-act="toresult">結果を見る</button><button class="btn" data-act="mode2" data-m="detail">くわしく入力で見直す</button></div><p class="unit" style="margin:10px 0 0">「くわしく入力」では、車の買い替え、物価上昇率、運用の利回り、旅行やリフォームなどの予定も入れられます。</p>`}
 ];
 const wzSteps=S=>WZ.filter(s=>!s.show||s.show(S));
 function wzSevText(S){const g=n(WZSV.gross);if(!(g>0))return '額面を入れると、税金を引いた手取りの目安を退職金として入れます。';const r=retireTax(g,WZSV.yrs||Math.max(1,Math.round(n(S.ret)-22)));return `手取りの目安：約${fmt(Math.floor(r.net))}万円（税金 約${(Math.round(r.tax*10)/10).toLocaleString('ja-JP')}万円）を退職金として入れました。`}
@@ -102,6 +129,9 @@ document.addEventListener('input',e=>{
     if(t.dataset.k==='workEnd'&&(S.wwork==='self'||S.wwork==='exec')&&v>0)S.ret=v;
     if(t.dataset.k==='sworkEnd'&&S.swwork&&S.swwork!=='emp'&&v>0)S.sret=v}
 });
+/* 進路を変えたら、教育費の目安を出し直す（選んだ値は 90-events.js の入力処理で保存される） */
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.wzre&&t.closest('#wz'))setTimeout(()=>wzRender(),0)});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.kk==='by'&&t.closest&&t.closest('#wz'))setTimeout(()=>{const i=+t.dataset.kid,c=LP.plans[U.plan].kids[i],o=document.getElementById('w_k'+i+'_edu');if(c&&o)o.innerHTML=`これからかかる教育費の目安：<b>約${fmt(eduLeft(c))}万円</b>（今の物価で。${Y0-n(c.by)>21?'もう卒業の年齢です':'幼稚園〜大学の残りの合計'}）`},0)});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest&&e.target.closest('#wz')&&e.target.tagName==='INPUT'){e.preventDefault();const nb=document.querySelector('#wz [data-act="wznext"]');if(nb)nb.click()}});
 
 /* 質問の途中は、結果と下の帯を「答え終わると出ます」にする（入力途中の数字で驚かせないため） */

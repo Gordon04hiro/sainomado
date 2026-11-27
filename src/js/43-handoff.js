@@ -3,9 +3,11 @@
    わが家のまとめ（#matome）：この端末に保存されている各ツールの入力から結果を計算し直して1枚にまとめる。印刷・PDFにできる。どこにも送信しない */
 function gtHand(to,vals,from){const def=GDEF[to];if(!def)return;
   let cur=null;try{const s=localStorage.getItem('sainomado-'+to+'-v1');if(s)cur=JSON.parse(s)}catch(e){}
-  const base=cur&&!cur.example?cur:Object.assign(def.base(),{example:false});
-  if(base.example&&def.fromLP&&typeof lpSrc==='function'){const S=lpSrc();if(S)def.fromLP(base,clone(S))}
-  GT[to]=Object.assign(base,vals,{example:false,fromLp:false,fromTool:from});
+  const own=cur&&!cur.example,base=own?cur:def.base();let src=own&&cur.src?cur.src:{};
+  /* 入力例から始めるときは、ライフプラン診断の入力（年齢・年収など）も入れる */
+  if(!own&&def.fromLP&&typeof lpSrc==='function'){const S=lpSrc();if(S){const b0=clone(base);def.fromLP(base,clone(S));src=srcDiff(b0,base,'ライフプラン診断')}}
+  Object.keys(vals).forEach(k=>{src[k]=from});
+  GT[to]=Object.assign(base,vals,{example:false,fromLp:false,fromTool:from,src,exRest:!own});
   try{localStorage.setItem('sainomado-'+to+'-v1',JSON.stringify(GT[to]))}catch(e){}
   location.href=pageURL(to);
 }
@@ -52,7 +54,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act="sbhan
 /* ライフプラン（持ち家でローン返済中）→ 売却シミュレーター：ローンの残りを、毎月の返済額・金利・完済年齢から逆算して入れる */
 function lpToSell(S){const bal=S.house==='own'&&n(S.loanPay)>0&&n(S.loanEnd)>n(S.age)?Math.round(pvLoan(n(S.loanPay),S.orate,Math.round(n(S.loanEnd)-n(S.age)))/10)*10:0;
   let cur=null;try{cur=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){}
-  const s=Object.assign(cur&&!cur.example?cur:sellBase(),{loan:bal,example:false,fromTool:'ライフプラン診断'});
+  const own=cur&&!cur.example,s=Object.assign(own?cur:sellBase(),{loan:bal,example:false,fromTool:'ライフプラン診断',exRest:!own});s.src=Object.assign(own&&cur.src?cur.src:{},{loan:'ライフプラン診断'});
   try{localStorage.setItem(SKEY,JSON.stringify(s))}catch(e){}location.href=pageURL('sell')}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="lp2sell"]');if(!b)return;e.preventDefault();const S=LP.plans[b.dataset.k]||LP.plans.A;if(S)lpToSell(S)});
 

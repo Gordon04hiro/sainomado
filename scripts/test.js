@@ -175,13 +175,30 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('万円の欄に円のつもりの数字を入れると注意が出る',/単位は「万円」/.test(d.querySelector('.unitwarn')?.textContent||''));
    set(w,'g_loan_income','650');await wait(350);
    check('直すと注意が消える',!d.querySelector('.unitwarn'));
-   check('入力を変えると「入力例に戻す」が出る',d.querySelector('.resetrow')?.hidden===false);
-   click(w,'[data-act="gtreset"]');await wait(100);
-   check('「入力例に戻す」で例の数字に戻る',d.getElementById('g_loan_income').value==='600',d.getElementById('g_loan_income').value);
+   check('入力を変えると「自分の入力」になり、「入力例を見る」「すべてクリア」が出る',d.querySelector('.instate.own')&&d.querySelector('[data-act="gtexample"]')&&d.querySelector('[data-act="gtclear"]'));
+   click(w,'[data-act="gtexample"]');await wait(100);
+   check('「入力例を見る」で例の数字になり、「入力例」と表示',d.getElementById('g_loan_income').value==='600'&&!!d.querySelector('.instate.ex'),d.getElementById('g_loan_income').value);
    click(w,'#toast [data-act="gtundo"]');await wait(100);
    check('「元に戻す」で直前の入力に戻る',d.getElementById('g_loan_income').value==='650',d.getElementById('g_loan_income').value);
+   click(w,'[data-act="gtclear"]');await wait(100);
+   check('「すべてクリア」で自分の数字の欄が空になる（金利などの前提は残す）',d.getElementById('g_loan_income').value===''&&d.getElementById('g_loan_rate').value!==''&&!!d.querySelector('.instate.blank'));
+   check('空のときは「数字を入れると、ここに結果が出ます」',!!d.querySelector('#gresult .rempty'));
+   set(w,'g_loan_income','500');await wait(350);
+   check('入れ始めると結果が出る（数字が壊れない）',!d.querySelector('#gresult .rempty')&&!/NaN|Infinity|undefined/.test(d.getElementById('gresult').textContent)&&!!d.querySelector('.instate.own'));
    w.close();}
+  {let bad=[];for(const id of ['loan','akiya','vs','rent2buy','prepay','souzokuzei','koujo','souzokubun','furusato','chukai','zoyo','hoshou','iryou','kasu']){const w=await open(id+'.html'),d=w.document;
+    click(w,'[data-act="gtclear"]');await wait(80);const i=[...d.querySelectorAll('.formgrid input[type=number]')].find(x=>x.value==='');if(i){set(w,i.id,'300');await wait(300)}
+    if(w.__errs.length||/NaN|Infinity|undefined/.test(d.getElementById('gresult').textContent))bad.push(id);w.close()}
+   check('すべてのツールで「すべてクリア」→1つ入れても計算が壊れない',!bad.length,bad.join(','));}
 
+  {const w=await open('lifeplan.html'),d=w.document;
+   check('ライフプランの結果に「この計算の前提」（物価・教育費・車など）',!!d.querySelector('#result .assume')&&/物価の上がり方/.test(d.querySelector('#result .assume').textContent)&&/第1子/.test(d.querySelector('#result .assume').textContent));
+   click(w,'[data-act="mode2"][data-m="guide"]');await wait(200);click(w,'[data-act="wznext"]');await wait(50);click(w,'[data-act="wznext"]');await wait(50);
+   click(w,'[data-act="wzset"][data-k="wkids"][data-v="1"]');await wait(100);
+   const u=d.getElementById('w_k0_uni'),e0=d.getElementById('w_k0_edu').textContent;
+   check('質問に答えて入力で、子どもの進路（小中高・大学）を選べる',!!u&&!!d.getElementById('w_k0_sch'));
+   u.value='pri_r';u.dispatchEvent(new w.Event('input',{bubbles:true}));u.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(100);
+   check('進路を変えると教育費の目安が変わる',d.getElementById('w_k0_edu').textContent!==e0,e0);w.close();}
   console.log('\n■ 入口ツールの計算');
   {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,417万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,417'),T(w.document,'.panel .kv b')[0]);w.close();}
   {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));
@@ -290,11 +307,13 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const mem=(lp)=>w=>{const m={'sainomado-lifeplan-v1':JSON.stringify(lp)};Object.defineProperty(w,'localStorage',{configurable:true,value:{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}}});Object.defineProperty(w,'sessionStorage',{configurable:true,value:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}}})};
    const P=Object.assign({},bp,{inc:600});const lp={plans:{A:P},names:{A:'今のまま'},example:false};
    let w=await open('loan.html','',mem(lp));const d=w.document;
-   check('住宅ローン診断にライフプランの年収・年齢を引き継ぐ',!d.querySelector('.lpnote2').hidden&&d.getElementById('g_loan_income').value==='770'&&d.getElementById('g_loan_age').value==='35',d.getElementById('g_loan_income').value);w.close();
+   check('住宅ローン診断にライフプランの年収・年齢を引き継ぐ',!!d.querySelector('.instate.from')&&d.getElementById('g_loan_income').value==='770'&&d.getElementById('g_loan_age').value==='35',d.getElementById('g_loan_income').value);w.close();
    w=await open('furusato.html','',mem(lp));check('ふるさと納税に額面の年収（手取りから逆算）を引き継ぐ',w.document.getElementById('g_furusato_gross').value==='770');w.close();
    w=await open('prepay.html');check('繰上げ返済の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="prepay"]'));w.close();
    w=await open('zoyo.html');check('贈与税の結果に「ライフプラン診断で比べる」',!!w.document.querySelector('[data-act="gt2lp"][data-id="zoyo"]'));w.close();
-   w=await open('loan.html');check('ライフプラン未入力なら引き継ぎの表示は出ない',w.document.querySelector('.lpnote2').hidden);w.close();}
+      {const lp3={plans:{A:Object.assign({},bp,{inc:600,age:41})},names:{A:'今のまま'},example:false};const w3=await open('loan.html','',mem(lp3)),d3=w3.document;check('引き継いだ欄に色と「ライフプラン診断から」が付く',d3.getElementById('g_loan_income').closest('.fld').classList.contains('from')&&/ライフプラン診断から/.test(d3.getElementById('g_loan_income').closest('.fld').textContent)&&!d3.getElementById('g_loan_other').closest('.fld').classList.contains('from'));
+    set(w3,'g_loan_income','800');await wait(50);check('書き換えた欄は色が消える',!d3.getElementById('g_loan_income').closest('.fld').classList.contains('from')&&d3.getElementById('g_loan_age').closest('.fld').classList.contains('from'));w3.close();}
+   w=await open('loan.html');check('ライフプラン未入力なら引き継ぎの表示は出ない',!w.document.querySelector('.instate.from')&&!w.document.querySelector('.fld.from'));w.close();}
   console.log('\n■ 似た記事のまとめ（AdSense対策）');
   {const fs=require('fs');const sm=fs.readFileSync('dist/sitemap.xml','utf8');const t5=fs.readFileSync('dist/articles/tedori-500.html','utf8');
    check('年収別の個別ページは noindex・サイトマップに載らない',/noindex,follow/.test(t5)&&!/tedori-500/.test(sm)&&!/loan-hensai-3000/.test(sm)&&/tedori-hayami/.test(sm));
@@ -360,7 +379,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('住宅ローン診断の結果に「続けて確かめる」（控除・繰上げ返済）',w.document.querySelectorAll('[data-act="handoff"][data-from="loan"]').length===3);
    try{click(w,'[data-act="handoff"][data-from="loan"][data-i="0"]')}catch(e){}
    const k=JSON.parse(m['sainomado-koujo-v1']||'null');check('押すと住宅ローン控除に借入額・金利が入る',k&&k.loan>0&&k.fromTool==='住宅ローン・購入予算診断'&&!k.example,JSON.stringify(k).slice(0,120));w.close();
-   w=await open('koujo.html','',mk(m));check('受け取ったツールに「○○の結果を入れています」',!w.document.querySelector('.lpnote2').hidden&&/住宅ローン・購入予算診断の結果を入れています/.test(w.document.querySelector('.lpnote2').textContent)&&w.document.getElementById('g_koujo_loan').value===String(k.loan));
+   w=await open('koujo.html','',mk(m));check('受け取ったツールに「○○から」の色付きの欄',!!w.document.querySelector('.instate.from')&&/住宅ローン・購入予算診断/.test(w.document.querySelector('.instate').textContent)&&w.document.getElementById('g_koujo_loan').closest('.fld').classList.contains('from')&&w.document.getElementById('g_koujo_loan').value===String(k.loan));
    check('控除の結果から、ふるさと納税へ',!!w.document.querySelector('[data-act="handoff"][data-from="koujo"]'));w.close();
    w=await open('zoyo.html');check('贈与税の結果から、住宅ローン診断へ',!!w.document.querySelector('[data-act="handoff"][data-from="zoyo"]'));w.close();
    const w0=await open('lifeplan.html');const bp=JSON.parse(w0.eval('JSON.stringify(basePlan())'));w0.close();

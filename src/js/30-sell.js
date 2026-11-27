@@ -114,9 +114,9 @@ const SF=[
 ];
 const SALL=SF.flatMap(g=>g.f);
 function sField(f){
-  const v=SV[f.id], hint=f.h?`<span class="hint">${esc(f.h)}</span>`:'';
-  if(f.type==='sel') return `<label class="fld" data-sf="${f.id}"><span class="lab">${esc(f.l)}</span><select id="s_${f.id}" data-sk="${f.id}">${f.o.map(o=>`<option value="${o[0]}"${v===o[0]?' selected':''}>${esc(o[1])}</option>`).join('')}</select>${hint}</label>`;
-  return `<label class="fld" data-sf="${f.id}"><span class="lab">${esc(f.l)}</span><span class="inp"><input id="s_${f.id}" data-sk="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(v)}"><span class="u">${f.u}</span></span>${hint}</label>`;
+  const v=SV[f.id], hint=f.h?`<span class="hint">${esc(f.h)}</span>`:'',sr=SV.src&&SV.src[f.id],fc=sr?' from':'';
+  if(f.type==='sel') return `<label class="fld${fc}" data-sf="${f.id}"><span class="lab">${esc(f.l)}${fromTag(sr)}</span><select id="s_${f.id}" data-sk="${f.id}">${f.o.map(o=>`<option value="${o[0]}"${v===o[0]?' selected':''}>${esc(o[1])}</option>`).join('')}</select>${hint}</label>`;
+  return `<label class="fld${fc}" data-sf="${f.id}"><span class="lab">${esc(f.l)}${fromTag(sr)}</span><span class="inp"><input id="s_${f.id}" data-sk="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(v)}"><span class="u">${f.u}</span></span>${hint}</label>`;
 }
 function sVis(){SALL.forEach(f=>{if(f.show){const el=document.querySelector(`[data-sf="${f.id}"]`);if(el)el.hidden=!f.show(SV)}})}
 const TAXNOTE='<div class="taxnote">税金はすべて一般的な計算方法による<b>計算例</b>です。特例が使えるかどうかの判断や実際の税額は、税理士または税務署にご確認ください。当サイトでは個別の税務相談にはお答えしていません。</div>';
@@ -124,8 +124,7 @@ function vSell(v){
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › 売却・住み替えシミュレーター</div>
   <div class="thead"><h1>売却・住み替えシミュレーター</h1><p>今の家を売ったら、手元にいくら残るか。ローンを返し切れるか。次の家を買うなら、いくら借りることになるか。売る前に確かめておきたい数字の目安をまとめて出します。</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
-   <p class="unit lpnote2" style="margin-top:8px"${SV.fromTool?'':' hidden'}>✓ ${esc(SV.fromTool||'')}の結果（ローンの残りなど）を入れています。違うところは書き換えてください。</p>
-   <p class="unit exnote" style="margin-top:8px"${SV.example?'':' hidden'}>いまは入力例（築12年の木造戸建て・ローン残り1,800万円）が入っています。ご自分の数字に書き換えてください。</p><p class="resetrow" style="margin:8px 0 0"${SV.example?' hidden':''}><button class="btn small ghost" data-act="svreset">入力例に戻す</button></p></div>
+   ${stateBar('sv','',SV,'築12年の木造戸建て・ローン残り1,800万円',sEmpty())}</div>
   <div class="formgrid">${SF.map(g=>`<details class="grp"${g.closed?'':' open'}><summary>${g.g}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body"><div class="fields">${g.f.map(sField).join('')}</div></div></details>`).join('')}</div>
   <section class="result" id="sresult"></section></div>`;
   sVis(); sRender(); sDock();
@@ -149,8 +148,10 @@ function sChart(V,s){
   g+=`<text x="${L-8}" y="${T-4}" text-anchor="end" style="font-size:10px">万円</text><text x="${W-R}" y="${H-B-6}" text-anchor="end" style="font-size:10px">売却価格（万円）→</text>`;
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="売却価格と手取り額の関係">${g}</svg>`;
 }
+const sEmpty=()=>SALL.filter(f=>f.type!=='sel'&&!/%/.test(f.u||'')&&f.id!=='term'&&(!f.show||f.show(SV))).every(f=>SV[f.id]===''||SV[f.id]==null);
 function sRender(){
   const box=document.getElementById('sresult'); if(!box) return;
+  if(sEmpty()){box.innerHTML=`<div class="rempty"><b>数字を入れると、ここに結果が出ます</b><span class="unit">まずは「売れそうな価格」と「ローンの残り」から入れてください。</span></div>`;return}
   const s=sellCalc(SV), mv=moveCalc(SV,s), be=breakEven(SV), t=s.t;
   const st=s.net>=0?['good','ローンを返し切れる']:['bad','ローンが残る'];
   const row=(l,v,cls='')=>`<tr class="${cls}"><th>${l}</th><td class="${v<-0.5?'neg':''}">${fmt(v)}</td></tr>`;
@@ -223,10 +224,13 @@ function sAdvice(s,mv,be){
   return out;
 }
 function sDock(){
-  const d=document.getElementById('dockin');if(!d)return;const s=sellCalc(SV);
+  const d=document.getElementById('dockin');if(!d)return;if(sEmpty()){d.innerHTML=`<div class="v"><span>まだ入力がありません</span></div>`;return}const s=sellCalc(SV);
   d.innerHTML=`<div class="v"><span>手元に残るお金<b class="${s.net<0?'neg':''}">${fmt(s.net)} 万円</b></span><span>判定<b style="font-size:13px;margin-top:3px"><span class="chip ${s.net>=0?'good':'bad'}">${s.net>=0?'ローン完済OK':'ローンが残る'}</span></b></span></div><button class="btn primary" data-act="tosresult">結果を見る</button>`;
 }
 let sT=0;
-document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.sk)return;if(SV.fromTool){SV.fromTool='';const ln=document.querySelector('.lpnote2');if(ln)ln.hidden=true}const f=SALL.find(x=>x.id===t.dataset.sk);SV[t.dataset.sk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));SV.example=false;exShown(false);sVis();saveSV();sDock();clearTimeout(sT);sT=setTimeout(sRender,250)});
+function svBar(){const el=document.getElementById('instate');if(el)el.outerHTML=stateBar('sv','',SV,'築12年の木造戸建て・ローン残り1,800万円',sEmpty())}
+/* 「すべてクリア」：金額・年の欄を空にする（割合・選ぶ欄は目安のまま） */
+function sellBlank(){const V=Object.assign(sellBase(),{example:false});SALL.forEach(f=>{if(f.type!=='sel'&&!/%/.test(f.u||'')&&f.id!=='term')V[f.id]=''});return V}
+document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.sk)return;const k=t.dataset.sk,wasEx=SV.example;if(SV.src&&SV.src[k]){delete SV.src[k];const fl=t.closest('.fld');if(fl){fl.classList.remove('from');const g=fl.querySelector('.fromtag');if(g)g.remove()}if(!Object.keys(SV.src).length){SV.fromTool='';SV.exRest=false}}else if(SV.fromTool&&!SV.src){SV.fromTool=''}const f=SALL.find(x=>x.id===k);SV[k]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));SV.example=false;svBar();sVis();saveSV();sDock();clearTimeout(sT);sT=setTimeout(sRender,250)});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="tosresult"]');if(b)document.getElementById('sresult').scrollIntoView({behavior:'smooth'})});
 

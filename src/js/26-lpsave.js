@@ -41,7 +41,7 @@ function lpUndel(){if(!lpDeleted)return;const list=lpSaves();list.splice(Math.mi
 function lpSaveBox(){
   const list=lpSaves(), prev=lsGet(LPREV,null);
   return `<p class="lpnote"><span>✓ 入力はこの端末に自動で保存されます（閉じても続きから。送信はしません）</span>
-   ${LP.example?`<span>いまは入力例が入っています <button class="btn small" data-act="clear">空にして始める</button></span>`:`<button class="btn small ghost" data-act="lpexample">入力例を見る</button>`}</p>
+   ${LP.example?`<span class="lpst"><span class="ischip ex">入力例</span>いまは入力例の家族が入っています <button class="btn small primary" data-act="clear">空にして入力する</button></span>`:`<span class="lpst"><span class="ischip own">自分の入力</span><button class="btn small ghost" data-act="lpexample">入力例を見る</button><button class="btn small ghost" data-act="clear">すべてクリア</button></span>`}</p>
   <details class="lpsaves"><summary>入力を保存・読み込み${list.length?`<span class="chip muted">保存 ${list.length}件</span>`:''}</summary><div class="body">
    <div class="lpsrow"><label class="fld"><span class="lab">今の入力に名前を付けて保存</span><input class="txt" id="lpsname" maxlength="30" placeholder="例：家を買う前の案"></label><button class="btn small primary" data-act="lpsave">保存する</button></div>
    ${list.length?`<ul class="lpslist">${list.map((s,i)=>`<li><span><b>${esc(s.name)}</b><small>${dstr(s.at)}</small></span><span class="macts"><button class="btn small" data-act="lpopen" data-i="${i}">開く</button><button class="btn small ghost danger" data-act="lpdel" data-i="${i}">削除</button></span></li>`).join('')}</ul>`:'<p class="unit" style="margin:10px 0 0">まだ保存した入力はありません。家族と相談するときの案や、入力の途中で区切りたいときに使えます。</p>'}
