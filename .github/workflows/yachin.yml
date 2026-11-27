@@ -1,0 +1,28 @@
+# 家賃の水準：総務省「住宅・土地統計調査」の市区別の平均家賃を e-Stat から取り込む（調査は5年ごと。手動で実行）
+# 結果は yachin-data ブランチに保存し、確認してから main に取り込む
+name: 家賃データの更新
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 取り込み
+        env:
+          ESTAT_APPID: ${{ secrets.ESTAT_APPID }}
+        run: node scripts/yachin.js
+      - name: yachin-data ブランチに保存
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git checkout -B yachin-data
+          git add content/yachin
+          git commit -m "家賃データの更新（$(date +%Y-%m-%d)）" || echo "変更なし"
+          git push -f origin yachin-data

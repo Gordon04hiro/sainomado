@@ -28,8 +28,8 @@ if(!RULES.koujo||!RULES.koujo.types) fail('rules.yml に koujo（住宅ローン
 for(const k of ['checked','next','stampUntil','kaikaeUntil','akiyaUntil','toukiTransition']) if(!/^\d{4}-\d\d-\d\d$/.test(RULES[k]||'')) fail(`rules.yml の ${k} の日付が正しくありません（例：2027-03-31）`);
 
 // ---- 記事（content/articles/*.md）
-const TOOLNAME={iryou:'病気・けがの備え診断',hoshou:'必要保障額の目安',souba:'売却相場の目安',zoyo:'住宅資金の贈与税の目安',chukai:'仲介手数料の計算',furusato:'ふるさと納税の上限の目安',chuko:'中古住宅チェックシート',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート',souzoku2:'相続の手続きチェックシート',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断'};
-const TOOLMAP={iryou:'#iryou',hoshou:'#hoshou',souba:'#souba',zoyo:'#zoyo',chukai:'#chukai',furusato:'#furusato',chuko:'#chuko',koujo:'#koujo',souzokubun:'#souzokubun',rent2buy:'#rent2buy',prepay:'#prepay',souzokuzei:'#souzokuzei',lifeplan:'#lifeplan',sell:'#sell',loan:'#loan',souzoku:'#souzoku',souzoku2:'#souzoku2',akiya:'#akiya',vs:'#vs'};
+const TOOLNAME={kasu:'貸す・売る 比べる診断',iryou:'病気・けがの備え診断',hoshou:'必要保障額の目安',souba:'売却相場の目安',zoyo:'住宅資金の贈与税の目安',chukai:'仲介手数料の計算',furusato:'ふるさと納税の上限の目安',chuko:'中古住宅チェックシート',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート',souzoku2:'相続の手続きチェックシート',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断'};
+const TOOLMAP={kasu:'#kasu',iryou:'#iryou',hoshou:'#hoshou',souba:'#souba',zoyo:'#zoyo',chukai:'#chukai',furusato:'#furusato',chuko:'#chuko',koujo:'#koujo',souzokubun:'#souzokubun',rent2buy:'#rent2buy',prepay:'#prepay',souzokuzei:'#souzokuzei',lifeplan:'#lifeplan',sell:'#sell',loan:'#loan',souzoku:'#souzoku',souzoku2:'#souzoku2',akiya:'#akiya',vs:'#vs'};
 const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f.startsWith('_')).map(f=>{
   const src=read('content/articles/'+f);const m=src.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if(!m) fail(`記事 ${f} の先頭の「---」で囲んだ部分が見つかりません`);
@@ -113,6 +113,7 @@ fs.writeFileSync(path.join(out,'assets','app.js'),appCode);fs.writeFileSync(path
 fs.cpSync(R('static'),path.join(out,'assets'),{recursive:true});
 if(fs.existsSync(R('content/souba')))fs.cpSync(R('content/souba'),path.join(out,'assets','souba'),{recursive:true});
 if(fs.existsSync(R('content/chika')))fs.cpSync(R('content/chika'),path.join(out,'assets','chika'),{recursive:true});
+if(fs.existsSync(R('content/yachin')))fs.cpSync(R('content/yachin'),path.join(out,'assets','yachin'),{recursive:true});
 const ogImg=pg=>pg.art&&fs.existsSync(R('static/ogp/'+pg.art.slug+'.png'))?SITE_URL+'/assets/ogp/'+pg.art.slug+'.png':SITE_URL+'/assets/ogp.png'; // 記事ごとの共有画像（なければ共通の画像）
 fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico'));
 // SNSのプロフィール用の短いリンク（sainomado.jp/ig など）。開くと計測用の印つきのトップへ転送する。検索結果には出さない
@@ -148,7 +149,7 @@ async function prerender(pg,base){
     // 検索エンジン向けの情報（記事・ツール・パンくず）
     const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'サイのまど運営者',jobTitle:[].concat(P['資格']||[])[0]||undefined,hasCredential:[].concat(P['資格']||[]).map(q=>({'@type':'EducationalOccupationalCredential',name:q})),url:SITE_URL+'/about.html#profile'};
     const crumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map(([n,u],k)=>({'@type':'ListItem',position:k+1,name:n,item:u}))});
-    const TOOLR=['iryou','hoshou','souba','zoyo','chukai','furusato','chuko','koujo','souzokubun','lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
+    const TOOLR=['kasu','iryou','hoshou','souba','zoyo','chukai','furusato','chuko','koujo','souzokubun','lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
     const ldList=pg.art?[{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),author,publisher:{'@type':'Organization',name:'サイのまど',logo:{'@type':'ImageObject',url:SITE_URL+'/assets/icon-192.png'}}},
         {'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],['記事',SITE_URL+'/articles/'],[pg.art.title,canon(pg.f)]])}]
       :pg.hub?[{'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],[pg.hub.title,canon(pg.f)]])}]

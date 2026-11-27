@@ -34,7 +34,7 @@ adsense: "ca-pub-8266994171904800"                   # AdSenseの審査が通っ
   テーマ:
     re:
       説明: 不動産の売却・購入・賃貸のご相談
-      ツール: [souba, sell, chukai, zoyo, akiya, loan, rent2buy, vs, chuko]
+      ツール: [souba, sell, kasu, chukai, zoyo, akiya, loan, rent2buy, vs, chuko]
       記事カテゴリ: [家を売る, 家を買う]
       ガイド: [sell, buy]
     souzoku:

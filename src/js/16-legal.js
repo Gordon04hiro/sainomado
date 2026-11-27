@@ -10,6 +10,7 @@ const LEGAL={
  ins:'保険の募集・勧誘は行っていません。'
 };
 const LEGAL_MAP={
+ kasu:['tax','re'],
  hoshou:['pen','ins'],
  iryou:['ins'],
  chuko:['re'],
