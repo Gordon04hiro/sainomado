@@ -806,3 +806,31 @@ table.cf.hs{width:100%;margin:6px 0 10px}table.cf.hs th,table.cf.hs td{white-spa
 table.cf.hs.ks th,table.cf.hs.ks td{white-space:nowrap}
 .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table.cf.hs.ks th:first-child{position:sticky;left:0;z-index:1;background:var(--surface,#fff)}
+/* 入力の状態（入力例／引き継ぎ／自分の入力）と、ほかのツールから入れた欄 */
+.instate{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:start;margin:12px 0 0;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface)}
+.instate p{margin:0;font-size:13.5px;line-height:1.7}
+.instate .isacts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.instate.ex{background:#fff7e6;border-color:#e0a23a}
+.instate.from{background:#eef5fc;border-color:#8db4dc}
+.ischip{display:inline-block;font-size:12px;font-weight:700;line-height:1;padding:6px 9px;border-radius:999px;white-space:nowrap;background:var(--brand-soft);color:var(--brand-ink)}
+.instate.ex .ischip,.ischip.ex{background:#f5d9a6;color:#7a4a05}
+.instate.from .ischip{background:#cfe2f5;color:#1f4f80}
+.fromsw{display:inline-block;width:12px;height:12px;border-radius:3px;background:#e3eefa;border:1.5px solid #4a86c5;vertical-align:-1px;margin-right:4px}
+.fld.from .inp,.fld.from select{background:#e3eefa;border-color:#4a86c5}.fld.from .inp input{background:transparent}
+.fromtag{display:inline-block;font-style:normal;font-size:10.5px;font-weight:700;color:#1f4f80;background:#cfe2f5;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+.rempty{display:grid;gap:4px;padding:22px 18px;border:1.5px dashed var(--line);border-radius:var(--r-card);text-align:center;background:var(--surface)}
+.lpst{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media print{.instate{display:none}.fld.from .inp,.fld.from select{background:none}}
+/* ライフプラン：子どもの進路（質問に答えて入力）と、計算の前提 */
+.wzkids{display:grid;gap:10px;margin-top:12px}
+.wzkid{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--surface);display:grid;gap:8px}
+.wzkid .chk{font-size:13px}
+.wzedu{margin:0}
+.assume{border:1.5px solid var(--line);border-radius:14px;background:var(--surface);margin:14px 0}
+.assume>summary{cursor:pointer;padding:12px 14px;font-weight:700;font-size:14px}
+.assume .body{padding:0 14px 14px}
+.assume dl{display:grid;grid-template-columns:8.5em 1fr;gap:6px 12px;margin:0;font-size:13px;line-height:1.6}
+.assume dt{color:var(--muted);font-weight:700}
+.assume dd{margin:0;min-width:0}
+.assume .btn{margin-top:10px}
+@media (max-width:480px){.assume dl{grid-template-columns:1fr;gap:2px}.assume dd{margin-bottom:6px}}
