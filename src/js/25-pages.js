@@ -44,6 +44,7 @@ function vArticles(v){
 }
 function vArticle(v,slug){
   const a=ARTICLES.find(x=>x.slug===slug);
+  if(!a&&v.querySelector('.art-body'))return; // 前もって書き出した本文があれば、そのまま見せる（古いプログラムで記事の一覧にない場合など）
   if(!a){v.innerHTML=`<div class="wrap doc"><h1>記事が見つかりません</h1><p><a href="#articles">記事の一覧へ</a></p></div>`;return}
   document.title=a.title+'｜サイのまど';
   const rel=pubArticles().filter(x=>x.slug!==a.slug).slice(0,3);

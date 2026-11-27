@@ -410,6 +410,8 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     setv('g_iryou_job','self');await wait(500);
     check('自営業は収入の減少がそのまま（1年で390万円）・足りない分を月あたりで',/収入の減少390万円/.test(tx().replace(/\s/g,''))&&/働けない間の収入を補う/.test(tx()));
     w5.close();w5=await open('matome.html','',mk(m5));check('わが家のまとめに病気・けがの備え',/病気・けがの備え診断/.test(w5.document.getElementById('view').textContent));w5.close()}
+   {const fsx=require('fs'),h=fsx.readFileSync(require('path').join(__dirname,'..','dist','articles','chukai-tesuryo.html'),'utf8');
+    check('プログラムとCSSはファイル名に中身のハッシュ（古いキャッシュで記事が消えない）',/assets\/app\.[0-9a-f]{8}\.js/.test(h)&&/assets\/site\.[0-9a-f]{8}\.css/.test(h));}
    check('わが家のまとめは検索に出さない',/noindex/.test(require('fs').readFileSync('dist/matome.html','utf8')));w.close();
    w=await open('matome.html');check('何も使っていなければ案内を出す',/まだ結果がありません/.test(w.document.getElementById('view').textContent));}
   console.log('\n■ 計測');
