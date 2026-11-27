@@ -3,6 +3,9 @@
 name: 家賃データの更新
 on:
   workflow_dispatch:
+  push:
+    branches: [kasu]
+    paths: ['scripts/yachin.js','.github/workflows/yachin.yml']
 permissions:
   contents: write
 jobs:
