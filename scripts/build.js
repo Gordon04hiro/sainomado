@@ -199,6 +199,8 @@ ${boot}
   fs.writeFileSync(path.join(out,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
   // AdSense：パブリッシャーID（ca-pub-…）が入っていれば ads.txt を作る（審査・広告配信に必要）
   if(SITE.adsense){const pub=String(SITE.adsense).replace(/^ca-/,'');if(!/^pub-\d{10,20}$/.test(pub))fail('site.yml の adsense は ca-pub-（数字）の形で入れてください');fs.writeFileSync(path.join(out,'ads.txt'),`google.com, ${pub}, DIRECT, f08c47fec0942fa0\n`)}
+  // IndexNow：キーのファイル（/キー.txt）を置く。Bing などがこのファイルで、知らせてきたのが本物のサイトか確かめる
+  if(SITE.indexnow){if(!/^[a-zA-Z0-9-]{8,128}$/.test(String(SITE.indexnow)))fail('site.yml の indexnow は英数字8〜128文字で入れてください');fs.writeFileSync(path.join(out,SITE.indexnow+'.txt'),String(SITE.indexnow))}
   fs.writeFileSync(path.join(out,'CNAME'),SITE_URL.replace(/^https?:\/\//,'')+'\n');
   fs.writeFileSync(path.join(out,'.nojekyll'),'');
   console.log(`✔ ${list.length}ページを作りました（記事 ${ARTS.length}本、うち下書き ${ARTS.filter(a=>a.draft).length}本）`);

@@ -22,6 +22,14 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
 (async()=>{
   const pages=[];(function walk(d,p=''){for(const f of fs.readdirSync(d)){const q=path.join(d,f);if(fs.statSync(q).isDirectory())walk(q,p+f+'/');else if(f.endsWith('.html'))pages.push(p+f)}})(DIST);
 
+  console.log('\n■ IndexNow（更新したページを Bing などに知らせる）');
+  {const SY=fs.readFileSync(path.join(__dirname,'..','content','site.yml'),'utf8'),k=(SY.match(/^indexnow:\s*"?([^"#\s]+)/m)||[])[1];
+   check('キーのファイルがある',!k||(fs.existsSync(path.join(DIST,k+'.txt'))&&fs.readFileSync(path.join(DIST,k+'.txt'),'utf8')===k));
+   const {changed}=require('./indexnow.js'),sm=(o)=>Object.entries(o).map(([u,d])=>`<url><loc>${u}</loc><lastmod>${d}</lastmod></url>`).join('');
+   const c=changed(sm({'https://a/1':'2026-01-01','https://a/2':'2026-01-01'}),sm({'https://a/1':'2026-01-01','https://a/2':'2026-02-01','https://a/3':'2026-02-01'}));
+   check('増えたページ・日付が変わったページだけを選ぶ',JSON.stringify(c)==='["https://a/2","https://a/3"]',JSON.stringify(c));
+   check('今のサイトマップが読めないときは何も送らない',changed('',sm({'https://a/1':'2026-01-01'})).length===0);}
+
   console.log('\n■ すべてのページが表示できる');
   for(const f of pages){
     if(['ig/index.html','x/index.html','line/index.html','fb/index.html'].includes(f))continue; // 転送だけのページ（別のテストで確認）
