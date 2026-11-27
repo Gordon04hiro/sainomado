@@ -44,7 +44,7 @@ sell:
     - 見出し: 手元に残るお金を知る
       説明: 売れた価格から、仲介手数料・税金・ローンの残りなどを差し引いた「手取り」で考えるのが大切です。
       ツール: [souba, sell, chukai]
-      記事: [souba-shirabekata, chikunen-kakaku, souba-suii-10nen, sell-cost]
+      記事: [souba-shirabekata, chikunen-kakaku, souba-suii-10nen, sell-cost, chukai-tesuryo]
     - 見出し: 進め方を決める
       説明: 売り先行か買い先行か、査定をどこに頼むか。住み替えの進め方で、資金計画が変わります。
       ツール: []
@@ -90,7 +90,7 @@ money:
     - 見出し: 家計の見通しを立てる
       説明: 収入・支出・住まい・教育費を入れて、95歳までのお金の流れを確かめます。
       ツール: [lifeplan]
-      記事: [lifeplan-tsukaikata, kakei-kessansho, rougo-shikin]
+      記事: [lifeplan-tsukaikata, cashflow-hyou, kakei-kessansho, matome-tsukaikata, rougo-shikin, tomobataraki-rougo, fp-soudan-junbi]
     - 見出し: もしものときに備える
       説明: 家計の柱が亡くなったとき、病気やけがで働けなくなったとき。公的な制度と貯蓄でどこまでまかなえるかを確かめると、保険で備える額の目安がわかります。
       ツール: [hoshou, iryou]
@@ -98,7 +98,7 @@ money:
     - 見出し: 教育費に備える
       説明: 進路によって教育費は大きく変わります。使う時期が決まっているお金なので、早めの準備が安心です。
       ツール: []
-      記事: [kyouikuhi]
+      記事: [kyouikuhi, kodomo-kouza]
     - 見出し: 資産をつくる
       説明: NISAとiDeCoの違いを知って、家計に合った使い方を考えましょう。
       ツール: []
@@ -106,4 +106,4 @@ money:
     - 見出し: 税金の仕組みを使う
       説明: ふるさと納税や住宅ローン控除は、上限や手続きを知っておくと、使い損ねを防げます。
       ツール: [furusato, koujo]
-      記事: [furusato-loan-koujo]
+      記事: [furusato-loan-koujo, furusato-nenmatsu, koujo-kakutei-1nenme]
