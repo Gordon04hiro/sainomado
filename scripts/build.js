@@ -104,8 +104,12 @@ const out=R('dist');
 fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});fs.mkdirSync(path.join(out,'articles'),{recursive:true});fs.mkdirSync(path.join(out,'guide'),{recursive:true});
 // 公開用は圧縮して軽くする（中身は同じ）
 const esb=require('esbuild');
-fs.writeFileSync(path.join(out,'assets','app.js'),esb.transformSync(bundle,{minify:true,target:'es2019',charset:'utf8',legalComments:'none'}).code);
-fs.writeFileSync(path.join(out,'assets','site.css'),esb.transformSync(read('src/css/site.css'),{loader:'css',minify:true,charset:'utf8'}).code);
+// ファイル名に中身のハッシュを入れる（Google などが古い app.js をキャッシュしたまま新しいページを表示して「記事が見つかりません」になるのを防ぐ）
+const appCode=esb.transformSync(bundle,{minify:true,target:'es2019',charset:'utf8',legalComments:'none'}).code, cssCode=esb.transformSync(read('src/css/site.css'),{loader:'css',minify:true,charset:'utf8'}).code;
+const hash8=s=>require('crypto').createHash('sha256').update(s).digest('hex').slice(0,8);
+const APPJS='app.'+hash8(appCode)+'.js', SITECSS='site.'+hash8(cssCode)+'.css';
+fs.writeFileSync(path.join(out,'assets',APPJS),appCode);fs.writeFileSync(path.join(out,'assets',SITECSS),cssCode);
+fs.writeFileSync(path.join(out,'assets','app.js'),appCode);fs.writeFileSync(path.join(out,'assets','site.css'),cssCode); // 古いページからの参照用
 fs.cpSync(R('static'),path.join(out,'assets'),{recursive:true});
 if(fs.existsSync(R('content/souba')))fs.cpSync(R('content/souba'),path.join(out,'assets','souba'),{recursive:true});
 if(fs.existsSync(R('content/chika')))fs.cpSync(R('content/chika'),path.join(out,'assets','chika'),{recursive:true});
@@ -175,13 +179,13 @@ ${pg.nf?'':`<link rel="canonical" href="${canon(pg.f)}">`}${(pg.art&&(pg.art.dra
 <link rel="icon" href="${base}assets/icon-192.png" type="image/png" sizes="192x192">
 <link rel="icon" href="${base}assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="${base}assets/apple-touch-icon.png">
-${headLinks}<link rel="stylesheet" href="${base}assets/site.css">
+${headLinks}<link rel="stylesheet" href="${base}assets/${SITECSS}">
 ${ld?ld.map(x=>`<script type="application/ld+json">${JSON.stringify(x)}</script>\n`).join(''):''}${ga}${ads}
 </head>
 <body>
 ${body}
 ${boot}
-<script src="${base}assets/app.js"></script>
+<script src="${base}assets/${APPJS}"></script>
 </body>
 </html>
 `;
