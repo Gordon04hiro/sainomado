@@ -41,7 +41,7 @@ function ksCalc(V){
   const last=rows[rows.length-1];
   return{N,r,now,rows,A,B,T,last,diff:last.cum+last.sale-aVal,aVal,ddl,m:L.m,first:rows[0]};
 }
-const KSBASE=()=>({price:2800,loan:1500,rate:0.8,loanYrs:25,buyYear:Y0-10,buyPrice:3500,bldPrice:1800,struct:'rc',moveOut:Y0,other:20,
+const KSBASE=()=>({sqm:70,price:2800,loan:1500,rate:0.8,loanYrs:25,buyYear:Y0-10,buyPrice:3500,bldPrice:1800,struct:'rc',moveOut:Y0,other:20,
   rent:11,kanri:5,vacancy:1,mc:2.5,repair:10,ptax:12,fire:1.5,rentDec:0.5,years:10,dec:1.5,income:600,yield:0});
 const KSDEF={id:'kasu',title:'貸す・売る 比べる診断',example:'築10年のマンション・今売ると2,800万円・家賃11万円で10年貸す場合',
   lead:'住み替えや相続で空く家を、<b>今売るか、何年か貸してから売るか</b>を、税金まで引いた手取りで比べます。家賃から管理委託料・空室・修繕・固定資産税・ローンの返済・不動産所得の税金を引き、貸したあとに売る場合の手取りまで計算します。',
@@ -52,6 +52,7 @@ const KSDEF={id:'kasu',title:'貸す・売る 比べる診断',example:'築10年
     {id:'loan',l:'住宅ローンの残り',u:'万円',h:'なければ0'},
     {id:'rate',l:'ローンの金利',u:'%',st:.01,show:V=>n(V.loan)>0},
     {id:'loanYrs',l:'返済の残り年数',u:'年',show:V=>n(V.loan)>0},
+    {id:'sqm',l:'広さ（延べ面積・専有面積）',u:'㎡',h:'家賃の目安（国の統計）を、近い広さの平均で出すのに使います'},
     {id:'moveOut',l:'住まなくなる（なった）年',u:'年',h:'自宅を売るときの3,000万円特別控除は、住まなくなってから3年目の年末までに売る場合だけ使えます'}]},
    {g:'買ったときのこと',s:'売るときの税金と、貸したときの減価償却に使います',f:[
     {id:'buyYear',l:'買った年',u:'年'},{id:'buyPrice',l:'買った価格（土地＋建物）',u:'万円'},
@@ -116,15 +117,17 @@ function ksRentHTML(V){
     const p=V.ypref||((typeof SB!=='undefined'&&SB&&SB.pref)||''),c=V.ycity||((typeof SB!=='undefined'&&SB&&SB.pref===p&&SB.city)||'');
     if(p&&!KSY[p])ksyLoad(p);
     const D=KSY[p]&&typeof KSY[p]==='object'?KSY[p]:null,C=D&&c&&D.C[c]?D.C[c]:null;
-    const opts=D?Object.entries(D.C).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>`<option value="${k}"${k===c?' selected':''}>${esc(v.name)}</option>`).join(''):'';
+    const nm=k=>{const v=D.C[k],par=D.C[k.slice(0,4)+'0'];return par&&par!==v&&/市$/.test(par.name)?par.name+' '+v.name:v.name};
+    const opts=D?Object.keys(D.C).sort().map(k=>`<option value="${k}"${k===c?' selected':''}>${esc(nm(k))}</option>`).join(''):'';
     const yen=v=>(Math.round(v/1000)/10).toLocaleString('ja-JP')+'万円';
-    const kind=C?(V.struct==='rc'||V.struct==='steel'?Object.entries(C.k).find(([k])=>/共同/.test(k)):Object.entries(C.k).find(([k])=>/一戸建/.test(k))):null;
+    const q=n(V.sqm),sz=C?Object.entries(C.a).find(([k])=>{const t=k.replace(/ｍ2|m2|㎡/g,''),nums=(t.match(/\d+/g)||[]).map(Number);if(/以下/.test(t))return q<=nums[0]+0.99;if(/以上/.test(t))return q>=nums[0];return nums.length===2&&q>=nums[0]&&q<nums[1]+1}):null;
+    const kind=sz||(C?(V.struct==='rc'||V.struct==='steel'?Object.entries(C.k).find(([k])=>/非木造/.test(k)):Object.entries(C.k).find(([k])=>/一戸建/.test(k))):null);
     stat=`<div class="ksy"><p style="margin:0 0 6px"><b>地域の家賃の水準（国の統計）</b></p>
       <div class="ksysel"><select id="ksy_pref" aria-label="都道府県"><option value="">都道府県を選ぶ</option>${SBPREF.map((n2,i)=>{const k=String(i+1).padStart(2,'0');return `<option value="${k}"${k===p?' selected':''}>${n2}</option>`}).join('')}</select>
       <select id="ksy_city" aria-label="市区"${D?'':' disabled'}><option value="">${p&&!D?(KSY[p]==='none'?'データがありません':'読み込み中…'):'市区を選ぶ'}</option>${opts}</select></div>
-      ${C?`<table class="cf hs"><tbody><tr><th>民営の借家の平均家賃（${esc(C.name)}）</th><td>月${yen(C.all)}</td></tr>${Object.entries(C.k).map(([k,v])=>`<tr><th>　${esc(k)}</th><td>月${yen(v)}</td></tr>`).join('')}${Object.entries(C.a).map(([k,v])=>`<tr><th>　延べ面積 ${esc(k)}</th><td>月${yen(v)}</td></tr>`).join('')}</tbody></table>
-       ${kind?`<p style="margin:6px 0"><button type="button" class="btn small" data-act="ksyuse" data-v="${Math.round(kind[1]/1000)/10}">${esc(kind[0])}の平均（月${yen(kind[1])}）を家賃に入れる</button></p>`:''}
-       <p class="unit" style="margin:0">今住んでいる人が払っている家賃の平均です（共益費・管理費は含まない）。古くからの契約も含むため、これから募集する家賃は、これより高めになりやすいです。出典：総務省「令和5年住宅・土地統計調査」（e-Stat）を加工して作成。</p>`:''}</div>`;
+      ${C?`<table class="cf hs"><tbody><tr><th>民営の借家の平均家賃（${esc(nm(c))}）</th><td>月${yen(C.all)}</td></tr>${Object.entries(C.k).filter(([k])=>k!=='その他').map(([k,v])=>`<tr><th>　${esc(k)}</th><td>月${yen(v)}</td></tr>`).join('')}${Object.entries(C.a).map(([k,v])=>`<tr><th>　延べ面積 ${esc(k.replace(/ｍ2/g,'㎡'))}</th><td>月${yen(v)}</td></tr>`).join('')}</tbody></table>
+       ${kind?`<p style="margin:6px 0"><button type="button" class="btn small" data-act="ksyuse" data-v="${Math.round(kind[1]/1000)/10}">${sz?'延べ面積 '+esc(kind[0].replace(/ｍ2/g,'㎡')):esc(kind[0])}の平均（月${yen(kind[1])}）を家賃に入れる</button></p>`:''}
+       <p class="unit" style="margin:0">今住んでいる人が払っている家賃の平均です（共益費・管理費は含まない。区は2023年の調査時点の区分）。古くからの契約も含むため、これから募集する家賃は、これより高めになりやすいです。出典：総務省「令和5年住宅・土地統計調査」をもとにサイのまどが加工して作成。このサービスは、政府統計総合窓口(e-Stat)のAPI機能を使用していますが、サービスの内容は国によって保証されたものではありません。</p>`:''}</div>`;
   }
   return `<section class="handoff"><h3>家賃の目安を調べる</h3>${stat}${portal}<p class="unit" style="margin:0">家賃を変えた案は「名前を付けて保存」で残しておくと比べやすくなります。</p></section>`;
 }
