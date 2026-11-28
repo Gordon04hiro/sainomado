@@ -97,7 +97,7 @@ function renderResult(){
   <nav class="rtabs" aria-label="結果の表示">${RTABS.map(([k,l,d,p])=>`<button data-act="rtab" data-t="${k}" aria-pressed="${tab===k}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${p}"/></svg><span><b>${l}</b><small>${d}</small></span></button>`).join('')}</nav>
   <div class="rbody">${body}</div>
   <p class="unit">手取りベースの簡易試算です。税金・社会保険料・住宅ローン控除は含みません。教育費は文部科学省「子供の学習費調査」（令和5年度）・日本政策金融公庫「教育費負担の実態調査」（令和3年度）の平均値、児童手当は2024年10月以降の制度で計算しています。住宅購入時は物件価格の7%を諸費用として計上。▲はマイナス。</p>
-  <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['sell','loan','vs'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
+  ${pageShareHTML('tool')}<div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['sell','loan','vs'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
   if(tab==='bs'){BSR={r:cur.r,S:cur.S,key}; renderBS();}
   if(tab==='month'){const a=document.getElementById('mstart'),b=document.getElementById('mmon');if(a)a.onchange=()=>{U.mstart=+a.value;renderResult()};if(b)b.onchange=()=>{U.mmon=+b.value;renderResult()}}
   if(tab==='overview'){

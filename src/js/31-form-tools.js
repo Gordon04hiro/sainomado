@@ -52,7 +52,7 @@ function gtRender(def){
   const V=gtState(def);
   if(gtEmpty(def,V)){box.innerHTML=`<div class="rempty"><b>数字を入れると、ここに結果が出ます</b><span class="unit">上の欄に、わかるところから入れてください。金利や割合などの前提の欄は、目安を入れたままにしてあります。</span></div>`;const d=document.getElementById('dockin');if(d)d.innerHTML=`<div class="v"><span>まだ入力がありません</span></div>`;return}
   const R=def.calc(V);
-  box.innerHTML=`<div class="exportbar" style="justify-content:flex-end">${shareBtn()}</div>`+def.result(V,R)+(def.toLP?gtBridge(def,V,R):'')+(def.toTools?toToolsHTML(def,V,R):'')+`<div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${def.related.map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
+  box.innerHTML=`<div class="exportbar" style="justify-content:flex-end">${shareBtn()}</div>`+def.result(V,R)+(def.toLP?gtBridge(def,V,R):'')+(def.toTools?toToolsHTML(def,V,R):'')+pageShareHTML('tool')+`<div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${def.related.map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
   const d=document.getElementById('dockin'); if(d&&def.dock){const k=def.dock(V,R);d.innerHTML=`<div class="v"><span>${k[0]}<b class="${k[2]?'neg':''}">${k[1]}</b></span></div><button class="btn primary" data-act="togresult">結果を見る</button>`}
 }
 let gT=0;

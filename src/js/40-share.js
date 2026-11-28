@@ -68,3 +68,22 @@ async function loadShared(){
   catch(e){toast('共有リンクを読み込めませんでした');return false}
 }
 
+
+/* ---------- ページそのものを送る（記事の最後・ツールの結果の下） ----------
+   外部のシェア用スクリプトは読み込まず、リンクだけで開く。押されたら GA4 に share_page を送る */
+try{if(navigator.share)document.documentElement.classList.add('canshare')}catch(e){}
+function pageShareHTML(kind){
+  const h=kind==='article'?'この記事を送る':'このツールを家族に教える',p=kind==='article'?'家族や、同じことで悩んでいる人に。':'夫婦や親子で、同じツールを触りながら相談できます。';
+  const B=(via,l)=>`<button type="button" class="btn small${via==='native'?' primary pnative':''}" data-act="pshare" data-via="${via}" data-kind="${kind}">${l}</button>`;
+  return `<section class="pshare noprint" aria-label="${h}"><div><b>${h}</b><span class="unit">${p}</span></div><div class="pshare-b">${B('native','スマホで送る')}${B('line','LINE')}${B('x','X')}${B('copy','リンクをコピー')}</div></section>`;
+}
+function pageShareURL(){const c=document.querySelector('link[rel="canonical"]');return c&&c.href?c.href:location.href.split('#')[0].split('?')[0]}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act="pshare"]');if(!b)return;
+  const url=pageShareURL(),title=document.title,via=b.dataset.via;track('share_page',{method:via,kind:b.dataset.kind,page:location.pathname});
+  if(via==='native'){try{await navigator.share({title,url})}catch(err){}return}
+  if(via==='line'){window.open('https://social-plugins.line.me/lineit/share?url='+encodeURIComponent(url),'_blank','noopener');return}
+  if(via==='x'){window.open('https://x.com/intent/post?text='+encodeURIComponent(title)+'&url='+encodeURIComponent(url),'_blank','noopener');return}
+  if(via==='copy'){let ok=false;try{await navigator.clipboard.writeText(url);ok=true}catch(err){}
+    if(!ok){const t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();try{ok=document.execCommand('copy')}catch(err){}t.remove()}
+    toast(ok?'リンクをコピーしました':'コピーできませんでした。アドレス欄のURLをコピーしてください')}
+});
