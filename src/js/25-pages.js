@@ -65,7 +65,7 @@ function vArticle(v,slug){
   ${authorBoxHTML()}
   ${legalHTML(LEGAL_MAP[a.cat]||['fin'])}
   ${houseFor('記事カテゴリ',a.cat,'article_'+a.slug)}
-  ${adUnit('記事の下')}
+  ${adUnit('記事の下')||(a.cat==='相続'||/(iryou|hoshou)/.test(a.tool||'')?'':mlAdFor(a.slug,'article_'+a.slug))}
   ${rel.length?`<h2>ほかの記事</h2><div class="tools">${rel.map(artCard).join('')}</div>`:''}</div>`;
 }
 function vNews(v){

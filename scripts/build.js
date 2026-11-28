@@ -84,7 +84,7 @@ const HUBS=Object.entries(HUBS_RAW).map(([slug,h])=>{
 
 // ---- ブラウザで動くプログラムをまとめる
 const content=`/* このファイルは自動で作られます。直接書き換えないでください */
-const SITE_CFG=${JSON.stringify({prof:SITE['運営者']||{},contactForm:SITE.contactForm||'',adsense:SITE.adsense||'',adslots:SITE.adslots||{},houseAd:SITE['自社広告']||null})};
+const SITE_CFG=${JSON.stringify({prof:SITE['運営者']||{},contactForm:SITE.contactForm||'',adsense:SITE.adsense||'',adslots:SITE.adslots||{},houseAd:SITE['自社広告']||null,mlAd:SITE['ウイスキー広告']||null})};
 const AFF_ADS=${JSON.stringify(Object.fromEntries(Object.entries(AFF).filter(([k,v])=>String((v||{})['コード']||'').trim()).map(([k,v])=>[k,{h:v['見出し']||'',d:v['説明']||'',code:String(v['コード']).trim()}])))};
 const CFG=${JSON.stringify(RULES).replace(/"Infinity"/g,'Infinity')};
 const DATA_ITEMS=${JSON.stringify(SOURCES.map(x=>({cat:x['カテゴリ'],name:x['項目'],val:x['値'],src:x['出典'],url:x['リンク']||'',until:x['期限']||'',tool:x['使うツール']||''})))};
@@ -117,9 +117,11 @@ if(fs.existsSync(R('content/yachin')))fs.cpSync(R('content/yachin'),path.join(ou
 const ogImg=pg=>pg.art&&fs.existsSync(R('static/ogp/'+pg.art.slug+'.png'))?SITE_URL+'/assets/ogp/'+pg.art.slug+'.png':SITE_URL+'/assets/ogp.png'; // 記事ごとの共有画像（なければ共通の画像）
 fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico'));
 // SNSのプロフィール用の短いリンク（sainomado.jp/ig など）。開くと計測用の印つきのトップへ転送する。検索結果には出さない
-const SHORT={ig:'instagram',x:'x',line:'line',fb:'facebook'};
-for(const [k,src] of Object.entries(SHORT)){
-  const to=`/?utm_source=${src}&utm_medium=social&utm_campaign=profile`;
+// card は紙のショップカードのQRコード用（オフラインで手渡したカードから来た人を数える）
+const SHORT={ig:'instagram',x:'x',line:'line',fb:'facebook',card:['shopcard','offline','card']};
+for(const [k,v] of Object.entries(SHORT)){
+  const [src,med,camp]=Array.isArray(v)?v:[v,'social','profile'];
+  const to=`/?utm_source=${src}&utm_medium=${med}&utm_campaign=${camp}`;
   fs.mkdirSync(path.join(out,k),{recursive:true});
   fs.writeFileSync(path.join(out,k,'index.html'),`<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${to.replace(/&/g,'&amp;')}"><title>サイのまど</title><script>location.replace(${JSON.stringify(to)})</script></head><body><a href="${to.replace(/&/g,'&amp;')}">サイのまどへ移動します</a></body></html>\n`);
 } // Googleの検索結果・サーチコンソールのアイコン用
