@@ -15,6 +15,7 @@ function navInit(){
   const ft=document.querySelector('footer.ft .wrap');
   if(ft&&!ft.dataset.done){ft.dataset.done='1';
     ft.innerHTML=`<div class="fcols">${navCols()}<div class="mcol"><p class="mh">サイのまど</p><ul><li><a href="#home">トップ</a></li><li><a href="#tools">すべてのツール</a></li><li><a href="#matome">わが家のまとめ</a></li><li><a href="#articles">記事</a></li><li><a href="#glossary">用語集</a></li><li><a href="#data">使っているデータ</a></li><li><a href="#links">一次情報リンク集</a></li><li><a href="#news">お知らせ</a></li><li><a href="#fptool">無料のFPツール</a></li><li><a href="#about">サイトについて・お問い合わせ</a></li><li><a href="#privacy">プライバシーポリシー</a></li></ul></div></div>
+     <p class="pwaft"><button type="button" class="linkbtn" data-act="pwa">サイのまどをホーム画面に追加する（アプリのように使えます）</button></p>
      <span>© サイのまど（さいのまど）｜住まいとお金の無料シミュレーション</span>`}
 }
 function navClose(){const m=document.getElementById('mega'),b=document.querySelector('.gmenu');if(m)m.hidden=true;if(b)b.setAttribute('aria-expanded','false')}
