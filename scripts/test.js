@@ -32,7 +32,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
 
   console.log('\n■ すべてのページが表示できる');
   for(const f of pages){
-    if(['ig/index.html','x/index.html','line/index.html','fb/index.html'].includes(f))continue; // 転送だけのページ（別のテストで確認）
+    if(['ig/index.html','x/index.html','line/index.html','fb/index.html','card/index.html'].includes(f))continue; // 転送だけのページ（別のテストで確認）
     if(f==='404.html'){const h=fs.readFileSync(path.join(DIST,f),'utf8');check(f+'（見つからないページ）',/ページが見つかりません/.test(h)&&/noindex/.test(h)&&/href="\/guide\//.test(h));continue}
     const w=await open(f);const d=w.document;
     check(f,!w.__errs.length&&d.querySelector('#view h1, #view .hero h1'),w.__errs[0]||'見出しがありません');
@@ -267,6 +267,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   {const h=fs.readFileSync(path.join(DIST,'sell.html'),'utf8');check('広告コードが空のあいだは、結果の下の案内も出ない',!/cta-aff/.test(h));}
   {const h=fs.readFileSync(path.join(DIST,'index.html'),'utf8');check('トップに検索用のサイト名（サイのまど・さいのまど）が入っている',/"@type":"WebSite","name":"サイのまど","alternateName":\["さいのまど"/.test(h)&&/"@type":"Organization"/.test(h)&&/サイのまど（さいのまど）/.test(h));}
   {const bad=fs.readdirSync(DIST).filter(f=>f.endsWith(".html")).filter(f=>/href="[^"#:]*index\.html"/.test(fs.readFileSync(path.join(DIST,f),"utf8")));check("サイト内リンクに index.html を使っていない（Googleの「代替ページ」を減らす）",bad.length===0,bad.join(","));}
+  {const cd=fs.readFileSync(path.join(DIST,"card","index.html"),"utf8");check("ショップカード用の /card が計測用の印つきのトップへ転送し、検索には出ない",/utm_source=shopcard&utm_medium=offline/.test(cd)&&/noindex/.test(cd));}
   {const ig=fs.readFileSync(path.join(DIST,"ig","index.html"),"utf8"),x=fs.readFileSync(path.join(DIST,"x","index.html"),"utf8");check("SNS用の短いリンク（/ig・/x）が計測用の印つきのトップへ転送し、検索には出ない",/utm_source=instagram/.test(ig)&&/utm_source=x&/.test(x)&&/noindex/.test(ig+x));}
 
   console.log('\n■ 共有したときの画像');
