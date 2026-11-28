@@ -208,6 +208,11 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   {const n=fs.readdirSync(path.join(DIST,'articles')).filter(f=>f.endsWith('.html')&&fs.readFileSync(path.join(DIST,'articles',f),'utf8').includes('ml-ad')).length;
    check('Malt Lovers のバナーは一部の記事だけ（3本に1本くらい）',n>5&&n<35,n+'本');
    check('相続・病気の記事には Malt Lovers のバナーを出さない',['iryou-hoken','kougaku-2026','izoku-nenkin','hitsuyou-hoshou','jikka-souzoku','souzoku-touki'].every(s=>!fs.readFileSync(path.join(DIST,'articles',s+'.html'),'utf8').includes('ml-ad')));}
+  {const mf=JSON.parse(fs.readFileSync(path.join(DIST,'manifest.webmanifest'),'utf8')),sw=fs.readFileSync(path.join(DIST,'sw.js'),'utf8');
+   check('ホーム画面に追加できる（マニフェスト・512pxのアイコン・サービスワーカー）',mf.display==='standalone'&&mf.icons.some(i=>i.sizes==='512x512')&&mf.icons.every(i=>fs.existsSync(path.join(DIST,i.src.slice(1))))&&/sainomado-[0-9a-f]{8}/.test(sw)&&fs.readFileSync(path.join(DIST,'index.html'),'utf8').includes('rel="manifest"'));
+   check('サービスワーカーはほかのサイト（広告・解析）に触れない',/u\.origin!==location\.origin/.test(sw));
+   const w=await open('loan.html'),d=w.document;click(w,'[data-act="pwa"]');await wait(30);
+   check('フッターの「ホーム画面に追加」で手順が出る',!!d.getElementById('pwasheet')&&/ホーム画面に追加/.test(d.getElementById('pwasheet').textContent));click(w,'[data-act="pwaclose"]');check('閉じられる',!d.getElementById('pwasheet'));w.close();}
   console.log('\n■ 入口ツールの計算');
   {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,417万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,417'),T(w.document,'.panel .kv b')[0]);w.close();}
   {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));

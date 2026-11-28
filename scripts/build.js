@@ -182,6 +182,9 @@ ${pg.nf?'':`<link rel="canonical" href="${canon(pg.f)}">`}${(pg.art&&(pg.art.dra
 <link rel="icon" href="${base}assets/icon-192.png" type="image/png" sizes="192x192">
 <link rel="icon" href="${base}assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="${base}assets/apple-touch-icon.png">
+<link rel="manifest" href="${base}manifest.webmanifest">
+<meta name="theme-color" content="#16706a">
+<meta name="apple-mobile-web-app-title" content="サイのまど">
 ${headLinks}<link rel="stylesheet" href="${base}assets/${SITECSS}">
 ${ld?ld.map(x=>`<script type="application/ld+json">${JSON.stringify(x)}</script>\n`).join(''):''}${ga}${ads}
 </head>
@@ -203,6 +206,10 @@ ${boot}
   if(SITE.adsense){const pub=String(SITE.adsense).replace(/^ca-/,'');if(!/^pub-\d{10,20}$/.test(pub))fail('site.yml の adsense は ca-pub-（数字）の形で入れてください');fs.writeFileSync(path.join(out,'ads.txt'),`google.com, ${pub}, DIRECT, f08c47fec0942fa0\n`)}
   // IndexNow：キーのファイル（/キー.txt）を置く。Bing などがこのファイルで、知らせてきたのが本物のサイトか確かめる
   if(SITE.indexnow){if(!/^[a-zA-Z0-9-]{8,128}$/.test(String(SITE.indexnow)))fail('site.yml の indexnow は英数字8〜128文字で入れてください');fs.writeFileSync(path.join(out,SITE.indexnow+'.txt'),String(SITE.indexnow))}
+  // ホーム画面に追加できるアプリ（PWA）：マニフェストと、ページを手元に残す仕組み（サービスワーカー）
+  fs.writeFileSync(path.join(out,'manifest.webmanifest'),JSON.stringify({name:SITE.name,short_name:SITE.shortName||'サイのまど',description:'登録不要の住まいとお金の無料シミュレーション。入力内容は送信されません。',lang:'ja',start_url:'/?utm_source=pwa&utm_medium=app&utm_campaign=homescreen',scope:'/',display:'standalone',background_color:'#fff8ef',theme_color:'#16706a',
+    icons:[{src:'/assets/icon-192.png',sizes:'192x192',type:'image/png'},{src:'/assets/icon-512.png',sizes:'512x512',type:'image/png'},{src:'/assets/icon-maskable-192.png',sizes:'192x192',type:'image/png',purpose:'maskable'},{src:'/assets/icon-maskable-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]},null,1));
+  fs.writeFileSync(path.join(out,'sw.js'),read('src/sw.js').replace('__VER__',hash8(appCode+cssCode)));
   fs.writeFileSync(path.join(out,'CNAME'),SITE_URL.replace(/^https?:\/\//,'')+'\n');
   fs.writeFileSync(path.join(out,'.nojekyll'),'');
   console.log(`✔ ${list.length}ページを作りました（記事 ${ARTS.length}本、うち下書き ${ARTS.filter(a=>a.draft).length}本）`);
