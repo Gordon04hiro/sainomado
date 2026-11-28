@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@page{size:97mm 61mm;margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans CJK JP";color:#2f2722}
+.pg{width:97mm;height:61mm;position:relative;overflow:hidden;background:#fff;page-break-after:always}
+/* 仕上がり線から3mm内側＝安全エリア（塗り足し3mm＋3mm） */
+.front{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.front .bar{position:absolute;left:0;right:0;bottom:0;height:7mm;background:#e5f1ec}
+.front .bar2{position:absolute;left:0;right:0;bottom:7mm;height:.6mm;background:#16706a}
+.front img{width:17mm;height:17mm}
+.front h1{font-size:20pt;font-weight:700;letter-spacing:.08em;margin-top:2.2mm;color:#16706a}
+.front p{font-size:7.6pt;margin-top:1.4mm;letter-spacing:.06em;color:#5b4d43}
+.front .tag{position:absolute;bottom:1.8mm;width:100%;text-align:center;font-size:6.2pt;color:#0f5c57;letter-spacing:.04em;top:auto;bottom:10.5mm}
+.back{padding:7mm 7mm 6.5mm 7.5mm;display:grid;grid-template-columns:1fr 23mm;gap:4mm}
+.back h2{font-size:9.6pt;line-height:1.45;font-weight:700;color:#2f2722}
+.back h2 em{font-style:normal;color:#16706a}
+.back ul{list-style:none;margin-top:2.4mm;display:grid;gap:1.1mm}
+.back li{font-size:7.3pt;padding-left:3.2mm;position:relative}
+.back li:before{content:"";position:absolute;left:0;top:1.3mm;width:1.6mm;height:1.6mm;border-radius:50%;background:#d9622b}
+.back .note{font-size:6.2pt;color:#5b4d43;margin-top:2.4mm;line-height:1.5}
+.qr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.3mm}
+.qr img{width:21mm;height:21mm}
+.qr b{font-size:7pt;letter-spacing:.02em}
+.qr span{font-size:5.8pt;color:#5b4d43;text-align:center;line-height:1.4}
+.qr .cap{font-size:6pt;color:#16706a;font-weight:700}
+.edge{position:absolute;left:0;top:0;bottom:0;width:4.5mm;background:#e5f1ec}
+</style></head><body>
+<div class="pg front"><img src="logo.svg" alt=""><h1>サイのまど</h1><p>住まいとお金の無料シミュレーション</p><div class="tag">登録不要 ・ 無料 ・ 入力内容は送信されません</div><div class="bar2"></div><div class="bar"></div></div>
+<div class="pg back"><div class="edge"></div><div style="padding-left:1.5mm"><h2>家を買う・売る・相続する前に、<br><em>お金の見通し</em>を。</h2>
+<ul><li>売却相場の目安（町名ごとの国のデータ）</li><li>住宅ローン・購入予算診断</li><li>ライフプラン診断（95歳までの家計）</li><li>相続税・相続の手続きチェック</li></ul>
+<p class="note">不動産の実務経験者がつくった無料サイトです。<br>名前も電話番号もいりません。</p></div>
+<div class="qr"><span class="cap">スマホで読み取り</span><img src="qr.svg" alt=""><b>sainomado.jp</b><span>Instagram<br>@sainomado</span></div></div>
+</body></html>

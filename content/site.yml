@@ -49,6 +49,14 @@ indexnow: "0b27e8a80ac4aa4ecabdd54d27646d73"   # IndexNow のキー（公開し�
       記事カテゴリ: [ライフプラン]
       ガイド: [money]
 
+# 姉妹サイト（Malt Lovers）のバナー。AdSenseが入っていない「記事の下」の枠に、記事のうち何本かに1本だけ出します
+#   割合: 3 なら、およそ3本に1本。出す: false で全部消えます（画像は static/ads/ml-wide/rect.webp）
+ウイスキー広告:
+  出す: true
+  名前: Malt Lovers（ウイスキーの図鑑サイト）
+  リンク: https://malt-lovers.com/
+  割合: 3
+
 # AdSenseの「広告ユニット」の番号（data-ad-slot の数字）。空欄の枠には何も出ません。
 # AdSenseの管理画面 → 広告 → 広告ユニットごと → ディスプレイ広告 で作り、数字だけを貼ります。
 # どの枠もスマホ・PCの両方で、画面の幅に合わせた大きさで表示されます。

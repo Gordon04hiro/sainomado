@@ -21,6 +21,15 @@ function houseAd(theme,where){
   return `<aside class="house-ad"><span class="pr-label">広告</span><a href="${esc(url)}" target="_blank" rel="noopener sponsored" data-house="${esc(theme+':'+where)}"><picture><source media="(max-width:600px)" srcset="${B}assets/ads/kj-${theme}-rect.webp" width="600" height="500"><img src="${B}assets/ads/kj-${theme}-wide.webp" width="1200" height="400" alt="${esc(h['名前']||'')}　${esc(T['説明']||'')}（ホームページへ）" loading="lazy"></picture></a></aside>`;
 }
 const houseFor=(kind,v,where)=>houseAd(houseTheme(kind,v),where);
+/* 姉妹サイト（Malt Lovers）のバナー：AdSenseの入っていない枠に、記事ごとに決まった割合（例：3本に1本）で出す。
+   相続の記事と、病気・もしもの保障の記事には出さない（お酒の広告が場面に合わないため。25-pages.js で判定） */
+function mlAdFor(key,where){
+  const m=SITE_CFG.mlAd;if(!m||!m['出す']||!m['リンク'])return '';
+  const r=Math.max(1,parseInt(m['割合'])||3);let h=0;for(const ch of String(key))h=(h*31+ch.charCodeAt(0))>>>0;if(h%r)return '';
+  const B=window.BASE||'',L=String(m['リンク']),url=L+(L.includes('?')?'&':'?')+'utm_source=sainomado&utm_medium=banner&utm_campaign=ml&utm_content='+encodeURIComponent(where);
+  return `<aside class="house-ad ml-ad"><span class="pr-label">広告</span><a href="${esc(url)}" target="_blank" rel="noopener sponsored" data-mlad="${esc(where)}"><picture><source media="(max-width:600px)" srcset="${B}assets/ads/ml-rect.webp" width="600" height="500"><img src="${B}assets/ads/ml-wide.webp" width="1200" height="400" alt="${esc(m['名前']||'Malt Lovers')}（サイトへ）" loading="lazy"></picture></a></aside>`;
+}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-mlad]');if(a)track('ml_banner_click',{place:a.dataset.mlad})});
 document.addEventListener('click',e=>{const a=e.target.closest('[data-house]');if(a){const [t,p]=a.dataset.house.split(':');track('kj_banner_click',{theme:t,place:p})}});
 /* ツールごとに出すアフィリエイト（affiliates.yml の名前） */
 const TOOL_AFF={

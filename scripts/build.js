@@ -84,7 +84,7 @@ const HUBS=Object.entries(HUBS_RAW).map(([slug,h])=>{
 
 // ---- ブラウザで動くプログラムをまとめる
 const content=`/* このファイルは自動で作られます。直接書き換えないでください */
-const SITE_CFG=${JSON.stringify({prof:SITE['運営者']||{},contactForm:SITE.contactForm||'',adsense:SITE.adsense||'',adslots:SITE.adslots||{},houseAd:SITE['自社広告']||null})};
+const SITE_CFG=${JSON.stringify({prof:SITE['運営者']||{},contactForm:SITE.contactForm||'',adsense:SITE.adsense||'',adslots:SITE.adslots||{},houseAd:SITE['自社広告']||null,mlAd:SITE['ウイスキー広告']||null})};
 const AFF_ADS=${JSON.stringify(Object.fromEntries(Object.entries(AFF).filter(([k,v])=>String((v||{})['コード']||'').trim()).map(([k,v])=>[k,{h:v['見出し']||'',d:v['説明']||'',code:String(v['コード']).trim()}])))};
 const CFG=${JSON.stringify(RULES).replace(/"Infinity"/g,'Infinity')};
 const DATA_ITEMS=${JSON.stringify(SOURCES.map(x=>({cat:x['カテゴリ'],name:x['項目'],val:x['値'],src:x['出典'],url:x['リンク']||'',until:x['期限']||'',tool:x['使うツール']||''})))};

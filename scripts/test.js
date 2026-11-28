@@ -205,6 +205,9 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('LINEは記事のURLで開く',opened.startsWith('https://social-plugins.line.me/lineit/share?url=')&&decodeURIComponent(opened).includes('https://sainomado.jp/articles/kasu-uru.html'),opened);w.close();
    const w2=await open('loan.html');check('ツールの結果の下に「このツールを家族に教える」',!!w2.document.querySelector('#gresult .pshare'));w2.close();
    const w3=await open('sell.html');check('売却シミュレーターにも「このツールを家族に教える」',!!w3.document.querySelector('.pshare'));w3.close();}
+  {const n=fs.readdirSync(path.join(DIST,'articles')).filter(f=>f.endsWith('.html')&&fs.readFileSync(path.join(DIST,'articles',f),'utf8').includes('ml-ad')).length;
+   check('Malt Lovers のバナーは一部の記事だけ（3本に1本くらい）',n>5&&n<35,n+'本');
+   check('相続・病気の記事には Malt Lovers のバナーを出さない',['iryou-hoken','kougaku-2026','izoku-nenkin','hitsuyou-hoshou','jikka-souzoku','souzoku-touki'].every(s=>!fs.readFileSync(path.join(DIST,'articles',s+'.html'),'utf8').includes('ml-ad')));}
   console.log('\n■ 入口ツールの計算');
   {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,417万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,417'),T(w.document,'.panel .kv b')[0]);w.close();}
   {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));
