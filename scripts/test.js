@@ -199,6 +199,12 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('質問に答えて入力で、子どもの進路（小中高・大学）を選べる',!!u&&!!d.getElementById('w_k0_sch'));
    u.value='pri_r';u.dispatchEvent(new w.Event('input',{bubbles:true}));u.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(100);
    check('進路を変えると教育費の目安が変わる',d.getElementById('w_k0_edu').textContent!==e0,e0);w.close();}
+  {const w=await open('articles/kasu-uru.html'),d=w.document;const ps=d.querySelector('.art-doc .pshare');
+   check('記事の最後に「この記事を送る」（LINE・X・リンクをコピー）',!!ps&&['line','x','copy'].every(v=>ps.querySelector(`[data-via="${v}"]`)));
+   let opened='';w.open=u=>{opened=u};click(w,'.pshare [data-via="line"]');await wait(30);
+   check('LINEは記事のURLで開く',opened.startsWith('https://social-plugins.line.me/lineit/share?url=')&&decodeURIComponent(opened).includes('https://sainomado.jp/articles/kasu-uru.html'),opened);w.close();
+   const w2=await open('loan.html');check('ツールの結果の下に「このツールを家族に教える」',!!w2.document.querySelector('#gresult .pshare'));w2.close();
+   const w3=await open('sell.html');check('売却シミュレーターにも「このツールを家族に教える」',!!w3.document.querySelector('.pshare'));w3.close();}
   console.log('\n■ 入口ツールの計算');
   {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,417万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,417'),T(w.document,'.panel .kv b')[0]);w.close();}
   {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));

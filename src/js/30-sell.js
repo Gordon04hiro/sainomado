@@ -204,7 +204,7 @@ function sRender(){
    <p><b>仲介手数料の800万円以下の特例</b>：売買価格が800万円以下の家・土地は、通常の上限を超えて30万円（税込33万円）まで受け取れる特例です。仲介を頼む前に、不動産会社から説明を受けて合意することが前提です。</p>
   </div></details>
   <p class="unit">目安の計算です。仲介手数料は法定の上限額、印紙税は${jd(CFG.stampUntil)}までの軽減税率で計算しています。所有期間は売った年の1月1日時点で判定するため、「売る年−買った年」を目安にしています。住民税・復興特別所得税を含む税率で計算しています。</p>
-  <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">
+  ${pageShareHTML('tool')}<div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">
    ${['lifeplan','loan'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
 }
 function sAdvice(s,mv,be){

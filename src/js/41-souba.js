@@ -127,7 +127,7 @@ function sbRender(){
     <p class="sbr">近い条件の取引の半分が、<b>約${fmt(Math.round(R.price[0]/10)*10)}万〜${fmt(Math.round(R.price[2]/10)*10)}万円</b>の間に入ります</p></div>
    <div class="panels"><section class="panel"><div class="ph"><span class="nm">1㎡あたり・1坪あたり</span></div><div class="kv">${kvRow('1㎡あたり（中央値）',(Math.round(R.unit[1]/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}${kvRow('1坪あたり（中央値）',(Math.round(R.unit[1]*3.3058/1000)/10).toLocaleString('ja-JP')+'<small>万円</small>')}</div></section>
     <section class="panel"><div class="ph"><span class="nm">もとにしたデータ</span></div><div class="kv">${kvRow('取引の件数',fmt(R.n)+'<small>件</small>')}${kvRow('期間',`<small>${esc(A.from)}〜${esc(A.to)}</small>`)}</div>${R.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}の取引だけで計算しています。${esc(A.C[SB.city].name)}全体の中央値（約${fmt(Math.round(R.baseMid/10)*10)}万円）より<b>${R.ratio>=1?'約'+Math.round((R.ratio-1)*100)+'%高め':'約'+Math.round((1-R.ratio)*100)+'%低め'}</b>です。件数が少ないので、ふれ幅が大きくなります。</p>`:SB.town?`<p class="unit" style="margin:6px 0 0">${esc(SB.town)}は${SBK[SB.k].t}の取引が少ないため、${esc(A.C[SB.city].name)}全体で計算しています。</p>`:''}${R.local?'':`<p class="unit" style="margin:6px 0 0">${SB.city?'この市区町村は取引が少ないため、':''}${esc(A.name)}全体の取引で計算しています。</p>`}</section></div>
-   ${sbHandHTML(R,mid)}
+   ${sbHandHTML(R,mid)}${pageShareHTML('tool')}
    ${sbTrendHTML(A,SB)}
    ${sbChikaHTML(A,SB)}
    <section class="advice"><h3>この目安の見方</h3><ul>

@@ -61,6 +61,7 @@ function vArticle(v,slug){
   <div class="art-body">${withMidAds(a.body||(window.ARTB&&window.ARTB[a.slug])||'')}</div>
   ${a.tool?`<div class="consult" style="margin-top:22px"><div><h2>数字で確かめてみる</h2><p>${esc(toolName(a.tool))}で、ご自分の場合を計算できます。登録不要・入力内容は送信されません。</p></div><div class="ways"><a class="btn primary" href="${a.tool}">${esc(toolName(a.tool))}を使う</a></div></div>`:''}
   ${(a.refs||[]).length?`<section class="refs"><h2>参考にした資料</h2><ul>${a.refs.map(r=>`<li><a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.t)}</a></li>`).join('')}</ul></section>`:''}
+  ${pageShareHTML('article')}
   ${authorBoxHTML()}
   ${legalHTML(LEGAL_MAP[a.cat]||['fin'])}
   ${houseFor('記事カテゴリ',a.cat,'article_'+a.slug)}

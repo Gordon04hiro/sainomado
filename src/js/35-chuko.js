@@ -47,7 +47,7 @@ function chRender(){
   document.getElementById('chresult').innerHTML=`<h2>まだ確かめていないこと</h2>${ctaHTML()}
    ${todo.length?todo.map(g=>`<section class="advice"><h3>${esc(g.g)}</h3><ul>${g.items.map(i=>`<li><b>${esc(chukoTodo(i[1]))}</b></li>`).join('')}</ul></section>`).join(''):'<section class="advice"><p style="margin:0">すべての項目を確かめました。気になる点は、契約の前に不動産会社や専門家に確認しましょう。</p></section>'}
    <div class="taxnote">このチェックシートは、一般的な確認の目安です。物件ごとの判断は、重要事項説明書や専門家の調査の内容をもとに行ってください。</div>
-   <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['loan','koujo'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
+   ${pageShareHTML('tool')}<div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['loan','koujo'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
 }
 document.addEventListener('change',e=>{const t=e.target;if(!t.dataset.chk)return;CHK[t.dataset.chk]=t.checked;try{localStorage.setItem(CHUKOKEY,JSON.stringify(CHK))}catch(err){}chRender()});
 document.addEventListener('click',e=>{if(!e.target.closest('[data-act="chukoreset"]'))return;CHK={};try{localStorage.removeItem(CHUKOKEY)}catch(err){}document.querySelectorAll('[data-chk]').forEach(x=>x.checked=false);chRender()});
